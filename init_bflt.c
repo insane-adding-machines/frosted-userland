@@ -28,13 +28,13 @@
 #include <unistd.h>
 #define IDLE() while(1){do{}while(0);}
 #define GREETING "Welcome to frosted!\n"
+extern void *_init;
+
 
 static char fresh_args[2][10] = {"fresh", NULL};
 static char idling_args[2][10] = {"idling", NULL};
 
-
-
-void main(void *arg)
+int main(void *arg)
 {
     volatile int i = (int)arg;
     volatile int pid;
@@ -55,8 +55,6 @@ void main(void *arg)
     sd = socket(AF_UNIX, SOCK_DGRAM, 0);
     close(sd);
 
-
-
     /* Thread create test */
     if (vfork() == 0)
         execve("/bin/idling", (char **)idling_args, NULL);
@@ -67,11 +65,6 @@ void main(void *arg)
     while(1) {
         pid = wait(&status);
     }
-    (void)i;
+    return 0;
 }
 
-
-void _start()
-{
-    main("aaah");
-}
