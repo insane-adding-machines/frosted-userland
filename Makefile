@@ -36,6 +36,7 @@ LDFLAGS:=-L$(FROSTED_PATH)/build/lib
 LDFLAGS+=-fPIC -mlong-calls -fno-common -Wl,-elf2flt
 
 all: apps.img
+	cp apps.img $(FROSTED_PATH)/
 
 
 apps.img: init idling
