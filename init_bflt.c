@@ -31,8 +31,10 @@
 extern void *_init;
 
 
-static char fresh_args[2][10] = {"fresh", NULL};
-static char idling_args[2][10] = {"idling", NULL};
+static const char fresh_args[2][10] = {"fresh", NULL};
+static const char idling_args[2][10] = {"idling", NULL};
+static const char binutils_args[2][10] = {"binutils", NULL};
+
 
 int main(void *arg)
 {
@@ -64,7 +66,7 @@ int main(void *arg)
 
     /* Install binutils */
     if (vfork() == 0)
-        execve("/bin/binutils", (char **)idling_args, NULL);
+        execve("/bin/binutils", (char **)binutils_args, NULL);
       
     while(1) {
         pid = wait(&status);
