@@ -30,10 +30,18 @@
 #define GREETING "Welcome to frosted!\n"
 extern void *_init;
 
+const char idling_txt[10] = "idling";
+const char fresh_txt[10] = "fresh";
+const char binutils_txt[10] = "binutils";
 
-static const char fresh_args[2][10] = {"fresh", NULL};
-static const char idling_args[2][10] = {"idling", NULL};
-static const char binutils_args[2][10] = {"binutils", NULL};
+const char idling_path[30] = "/bin/idling";
+const char fresh_path[30] = "/bin/fresh";
+const char binutils_path[30] = "/bin/binutils";
+
+
+static const char *fresh_args[2] = {fresh_txt, NULL};
+static const char *idling_args[2] = {idling_txt, NULL};
+static const char *binutils_args[2] = {binutils_txt, NULL};
 
 
 int main(void *arg)
@@ -59,14 +67,14 @@ int main(void *arg)
 
     /* Thread create test */
     if (vfork() == 0)
-        execve("/bin/idling", (char **)idling_args, NULL);
+        execve(idling_path, idling_args, NULL);
  
     if (vfork() == 0)
-        execve("/bin/fresh", idling_args, NULL);
+        execve(fresh_path, fresh_args, NULL);
 
     /* Install binutils */
     if (vfork() == 0)
-        execve("/bin/binutils", (char **)binutils_args, NULL);
+        execve(binutils_path, binutils_args, NULL);
       
     while(1) {
         pid = wait(&status);

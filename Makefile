@@ -62,6 +62,7 @@ binutils: binutils.o
 	$(CC) -o $@  $^ -Wl,-Map,apps.map -Telf2flt.ld  $(LDFLAGS) $(CFLAGS) $(EXTRA_CFLAGS) -Wl,--build-id=none
 
 clean:
+	@rm -f $(APPS-y)
 	@rm -f *.img
 	@rm -f *.o
 	@rm -f *.gdb
