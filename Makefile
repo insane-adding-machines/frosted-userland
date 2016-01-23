@@ -8,14 +8,20 @@
 FROSTED_PATH=..
 PREFIX:=$(PWD)/build
 
-# APPLICATION CONFIG
-APPS-y += init_bflt.o fresh.o binutils.o stubs.o
-
 # TOOLCHAIN CONFIG
 CROSS_COMPILE?=arm-frosted-eabi-
 CC:=$(CROSS_COMPILE)gcc
 AS:=$(CROSS_COMPILE)as
 AR:=$(CROSS_COMPILE)ar
+
+
+
+#Applications selection
+APPS-y:=init
+APPS-y+=idling
+APPS-y+=fresh
+APPS-y+=binutils
+
 
 # COMPILER FLAGS -- Includes
 CFLAGS+=-I$(FROSTED_PATH)/include -I$(FROSTED_PATH)/include/libc -I$(FROSTED_PATH)/newlib/build/lib/arm-none-eabi/include
@@ -39,7 +45,7 @@ all: apps.img
 	cp apps.img $(FROSTED_PATH)/
 
 
-apps.img: init idling
+apps.img: $(APPS-y)
 	$(FROSTED_PATH)/tools/xipfstool $@ $^
 
 
@@ -50,6 +56,9 @@ fresh: fresh.o
 	$(CC) -o $@  $^ -Wl,-Map,apps.map -Telf2flt.ld  $(LDFLAGS) $(CFLAGS) $(EXTRA_CFLAGS) -Wl,--build-id=none
 
 idling: idling.o
+	$(CC) -o $@  $^ -Wl,-Map,apps.map -Telf2flt.ld  $(LDFLAGS) $(CFLAGS) $(EXTRA_CFLAGS) -Wl,--build-id=none
+
+binutils: binutils.o
 	$(CC) -o $@  $^ -Wl,-Map,apps.map -Telf2flt.ld  $(LDFLAGS) $(CFLAGS) $(EXTRA_CFLAGS) -Wl,--build-id=none
 
 clean:

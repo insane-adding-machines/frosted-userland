@@ -61,6 +61,10 @@ int main(void *arg)
  
     if (vfork() == 0)
         execve("/bin/fresh", idling_args, NULL);
+
+    /* Install binutils */
+    if (vfork() == 0)
+        execve("/bin/binutils", (char **)idling_args, NULL);
       
     while(1) {
         pid = wait(&status);

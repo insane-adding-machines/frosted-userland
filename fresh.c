@@ -32,85 +32,12 @@
 #include <unistd.h>
 #include <sys/stat.h>
 #include "simple-c-shell.h"
-#include "binutils.h"
 
 #define LIMIT 16 // max number of tokens for a command
 #define MAXLINE 256 // max number of characters from user input
 #define SERIAL_DEV "/dev/ttyS0"
 static char currentDirectory[128];
 static char lastcmd[128] = "";
-
-struct binutils {
-    char name[32];
-    int (*exe)(void **args);
-};
-
-const struct binutils bin_table[] = {
-    {"ls", bin_ls},
-    {"ln", bin_ln},
-    {"rm", bin_rm},
-    {"mkdir", bin_mkdir},
-    {"touch", bin_touch},
-    {"echo", bin_echo},
-    {"cat", bin_cat},
-    {"dice", bin_dice},
-    {"random", bin_random},
-    {"dirname", bin_dirname},
-    {"tee", bin_tee},
-    {"true", bin_true},
-    {"false", bin_false},
-    {"arch", bin_arch},
-    {"wc", bin_wc},
-    {"gyro", bin_gyro},
-    {"acc", bin_acc},
-    {"mag", bin_mag},
-    {"cut", bin_cut},
-    {"morse", bin_morse},
-    {"catch", bin_catch_me},
-    {"fault", bin_mem_fault},
-    {"kfault", bin_kmem_fault},
-    {"kill", bin_kill },
-    {"realloc",bin_test_realloc},
-    {"doublefree",bin_test_doublefree},
-    {"", NULL}
-};
-
-static void exec_binutils(const struct binutils *b, char **args)
-{
-    //int ret;
-    //ret = b->exe((void **)args);
-    execb(b->exe, args);
-}
-
-static const struct binutils * find_binutils(char *name)
-{
-    const struct binutils *b = bin_table;
-    while(b->exe) {
-        if (strcmp(name, b->name) == 0) {
-            return b;
-        }
-        b++;
-    }
-    return NULL;
-}
-
-static int try_binutils(char **args, int background)
-{
-    char *cmd = args[0];
-    int status;
-    const struct binutils *b = find_binutils(cmd);
-
-    if (!b)
-        return -1;
-
-    if (vfork() == 0)
-        exec_binutils(b, args);
-
-    if (!background)
-        while (wait(&status) < 0);
-
-    return 0;
-}
 
 
 /**
@@ -137,44 +64,7 @@ void shell_init(void){
         // The shell is interactive if STDIN is the terminal
         GBSH_IS_INTERACTIVE = isatty(STDIN_FILENO);
 
-        if (GBSH_IS_INTERACTIVE) {
-        	// Loop until we are in the foreground
-        	while (tcgetpgrp(STDIN_FILENO) != (GBSH_PGID = getpgrp()))
-        			kill(GBSH_PID, SIGTTIN);
-
-
-            // Set the signal handlers for SIGCHILD and SIGINT
-        	act_child.sa_handler = signalHandler_child;
-        	act_int.sa_handler = signalHandler_int;
-
-        	/**The sigaction structure is defined as something like
-
-        	struct sigaction {
-        		void (*sa_handler)(int);
-        		void (*sa_sigaction)(int, siginfo_t *, void *);
-        		sigset_t sa_mask;
-        		int sa_flags;
-        		void (*sa_restorer)(void);
-
-        	}*/
-
-        	//sigaction(SIGCHLD, &act_child, 0);
-        	//sigaction(SIGINT, &act_int, 0);
-
-        	// Put ourselves in our own process group
-        	setpgid(GBSH_PID, GBSH_PID); // we make the shell process the new process group leader
-        	GBSH_PGID = getpgrp();
-        	if (GBSH_PID != GBSH_PGID) {
-        			printf("Error, the shell is not process group leader");
-        			exit(EXIT_FAILURE);
-        	}
-        	// Grab control of the terminal
-        	tcsetpgrp(STDIN_FILENO, GBSH_PGID);
-
-        	// Save default terminal attributes for shell
-        	tcgetattr(STDIN_FILENO, &GBSH_TMODES);
-
-        } else {
+        if (!GBSH_IS_INTERACTIVE) {
                 printf("Could not make the shell interactive.\r\n");
                 exit(EXIT_FAILURE);
         }
@@ -315,9 +205,6 @@ void launchProg(char **args, int background){
      int err = -1;
      struct stat st;
 
-     if (try_binutils(args, background) == 0)
-         return;
-
      /* Find executable command */
      if ((stat(args[0], &st) < 0) || ((st.st_mode & P_EXEC) == 0)) {
          printf("Command not found.\r\n");
@@ -368,7 +255,6 @@ void fileIO(char * args[], char* inputFile, char* outputFile, int option)
     atoi("22");
     int err = -1;
     int fileDescriptor; // between 0 and 19, describing the output or input file
-    const struct binutils *b;
 
     if((pid=vfork())==-1){
         printf("Child process could not be created\r\n");
@@ -400,11 +286,7 @@ void fileIO(char * args[], char* inputFile, char* outputFile, int option)
 
         //setenv("parent",getcwd(currentDirectory, 128),1);
 
-        b = find_binutils(args[0]);
-        if (b) {
-            exec_binutils(b, args);
-        }
-        else if (execvp(args[0],args)==err){
+        if (execvp(args[0],args)==err){
         	printf("err");
         	kill(getpid(),SIGTERM);
         }
@@ -424,7 +306,6 @@ void pipeHandler(char * args[]){
 
     char *command[LIMIT];
 
-    const struct binutils *b;
 
     pid_t pid;
 
@@ -525,10 +406,6 @@ void pipeHandler(char * args[]){
         		}
         	}
 
-            b = find_binutils(command[0]);
-            if (b) {
-                exec_binutils(b, command);
-            }
         	if (execvp(command[0],command)==err){
         		kill(getpid(),SIGTERM);
         	}
@@ -815,15 +692,10 @@ char *readline(char *input, int size)
 
             /* tab */
             if ((got[0] == 0x09)) {
-                struct binutils *b = bin_table;
                 input[len] = 0;
                 printf("\r\n");
                 printf("Built-in commands: \r\n");
                 printf("\t pwd cd ");
-                while (b->exe) {
-                    printf("%s ", b->name);
-                    b++;
-                }
                 printf("\r\n");
                 shellPrompt();
                 printf("%s", input);
@@ -871,7 +743,7 @@ char *readline(char *input, int size)
 /**
 * Main method of our shell
 */
-int fresh(void *args) {
+int main(void *args) {
     char line[MAXLINE]; // buffer for the user input
     char * tokens[LIMIT]; // array for the different tokens in the command
     int numTokens;
