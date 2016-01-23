@@ -33,7 +33,7 @@ CFLAGS+=-ggdb
 #LDFLAGS:=-L$(FROSTED_PATH)/build/lib -L$(FROSTED_PATH)/newlib/build/lib/arm-none-eabi/lib -gc-sections
 LDFLAGS:=-L$(FROSTED_PATH)/build/lib 
 #--specs=nano.specs
-LDFLAGS+=-fPIC -mlong-calls -fno-common -Wl,-elf2flt
+LDFLAGS+=-fPIC -mlong-calls -fno-common -Wl,-elf2flt -lgloss -lg -lgloss
 
 all: apps.img
 	cp apps.img $(FROSTED_PATH)/
@@ -43,14 +43,14 @@ apps.img: init idling
 	$(FROSTED_PATH)/tools/xipfstool $@ $^
 
 
-init: init_bflt.o newlib_syscalls.o
-	$(CC) -o $@  $^ -Wl,-Map,apps.map -lgloss -Telf2flt.ld  $(LDFLAGS) $(CFLAGS) $(EXTRA_CFLAGS) -Wl,--build-id=none
+init: init_bflt.o
+	$(CC) -o $@  $^ -Wl,-Map,apps.map -Telf2flt.ld  $(LDFLAGS) $(CFLAGS) $(EXTRA_CFLAGS) -Wl,--build-id=none
 
-fresh: fresh.o newlib_syscalls.o
-	$(CC) -o $@  $^ -Wl,-Map,apps.map -lgloss -Telf2flt.ld  $(LDFLAGS) $(CFLAGS) $(EXTRA_CFLAGS) -Wl,--build-id=none
+fresh: fresh.o
+	$(CC) -o $@  $^ -Wl,-Map,apps.map -Telf2flt.ld  $(LDFLAGS) $(CFLAGS) $(EXTRA_CFLAGS) -Wl,--build-id=none
 
-idling: idling.o newlib_syscalls.o
-	$(CC) -o $@  $^ -Wl,-Map,apps.map -lgloss -Telf2flt.ld  $(LDFLAGS) $(CFLAGS) $(EXTRA_CFLAGS) -Wl,--build-id=none
+idling: idling.o
+	$(CC) -o $@  $^ -Wl,-Map,apps.map -Telf2flt.ld  $(LDFLAGS) $(CFLAGS) $(EXTRA_CFLAGS) -Wl,--build-id=none
 
 clean:
 	@rm -f *.img
