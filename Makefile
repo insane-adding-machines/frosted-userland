@@ -20,7 +20,8 @@ AR:=$(CROSS_COMPILE)ar
 APPS-y:=init
 APPS-y+=idling
 APPS-y+=fresh
-#APPS-y+=binutils
+
+DIR-y+=binutils
 
 
 # COMPILER FLAGS -- Includes
@@ -42,23 +43,28 @@ all: apps.img
 	cp apps.img $(FROSTED_PATH)/
 
 
-apps.img: $(APPS-y)
-	$(FROSTED_PATH)/tools/xipfstool $@ $^
+apps.img: $(APPS-y) $(DIR-y)
+	@rm -f $(PWD)/binutils/out/*.gdb
+	$(FROSTED_PATH)/tools/xipfstool $@ $(APPS-y) binutils/out/*
 
 
 init: init_bflt.o
-	$(CC) -o $@  $^ -Wl,-Map,apps.map $(LDFLAGS) $(CFLAGS) $(EXTRA_CFLAGS)
+	$(CC) -o $@  $^ -Wl,-Map,apps.map $(LDFLAGS) $(CFLAGS)
 
 fresh: fresh.o
-	$(CC) -o $@  $^ -Wl,-Map,apps.map $(LDFLAGS) $(CFLAGS) $(EXTRA_CFLAGS)
+	$(CC) -o $@  $^ -Wl,-Map,apps.map $(LDFLAGS) $(CFLAGS)
 
 idling: idling.o
-	$(CC) -o $@  $^ -Wl,-Map,apps.map $(LDFLAGS) $(CFLAGS) $(EXTRA_CFLAGS)
+	$(CC) -o $@  $^ -Wl,-Map,apps.map $(LDFLAGS) $(CFLAGS)
 
-binutils: binutils.o
-	$(CC) -o $@  $^ -Wl,-Map,apps.map $(LDFLAGS) $(CFLAGS) $(EXTRA_CFLAGS)
+binutils: FORCE
+	make -C binutils LDFLAGS="$(LDFLAGS)" CFLAGS="$(CFLAGS)" CC=$(CC)
+
+FORCE:
+
 
 clean:
+	make -C binutils clean
 	@rm -f $(APPS-y)
 	@rm -f *.img
 	@rm -f *.o

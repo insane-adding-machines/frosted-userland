@@ -209,9 +209,11 @@ int manageEnviron(char * args[], int option){
 void launchProg(char **args, int background){
      int err = -1;
      struct stat st;
+     char bin_arg0[60] = "/bin/";
+     strcpy(bin_arg0 + 5, args[0]);
 
      /* Find executable command */
-     if ((stat(args[0], &st) < 0) || ((st.st_mode & P_EXEC) == 0)) {
+     if ((stat(bin_arg0, &st) < 0) || ((st.st_mode & P_EXEC) == 0)) {
          printf("Command not found.\r\n");
          return;
      }
@@ -231,7 +233,7 @@ void launchProg(char **args, int background){
         //setenv("parent",getcwd(currentDirectory, 128),1);
 
         // If we launch non-existing commands we end the process
-        if (execvp(args[0],args)==err){
+        if (execvp(bin_arg0,args)==err){
         	printf("Command not found");
         	kill(getpid(),SIGTERM);
         }
