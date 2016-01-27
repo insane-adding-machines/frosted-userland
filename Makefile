@@ -20,7 +20,7 @@ AR:=$(CROSS_COMPILE)ar
 APPS-y:=init
 APPS-y+=idling
 APPS-y+=fresh
-APPS-y+=binutils
+#APPS-y+=binutils
 
 
 # COMPILER FLAGS -- Includes
@@ -36,10 +36,7 @@ CFLAGS+=-fPIC -mlong-calls -fno-common -msingle-pic-base -mno-pic-data-is-text-r
 CFLAGS+=-ggdb
 
 # LINKER FLAGS
-#LDFLAGS:=-L$(FROSTED_PATH)/build/lib -L$(FROSTED_PATH)/newlib/build/lib/arm-none-eabi/lib -gc-sections
-LDFLAGS:=-L$(FROSTED_PATH)/build/lib 
-#--specs=nano.specs
-LDFLAGS+=-fPIC -mlong-calls -fno-common -Wl,-elf2flt -lgloss -lg -lgloss
+LDFLAGS+=-fPIC -mlong-calls -fno-common -Wl,-elf2flt -lgloss
 
 all: apps.img
 	cp apps.img $(FROSTED_PATH)/
@@ -50,16 +47,16 @@ apps.img: $(APPS-y)
 
 
 init: init_bflt.o
-	$(CC) -o $@  $^ -Wl,-Map,apps.map -Telf2flt.ld  $(LDFLAGS) $(CFLAGS) $(EXTRA_CFLAGS) -Wl,--build-id=none
+	$(CC) -o $@  $^ -Wl,-Map,apps.map $(LDFLAGS) $(CFLAGS) $(EXTRA_CFLAGS)
 
 fresh: fresh.o
-	$(CC) -o $@  $^ -Wl,-Map,apps.map -Telf2flt.ld  $(LDFLAGS) $(CFLAGS) $(EXTRA_CFLAGS) -Wl,--build-id=none
+	$(CC) -o $@  $^ -Wl,-Map,apps.map $(LDFLAGS) $(CFLAGS) $(EXTRA_CFLAGS)
 
 idling: idling.o
-	$(CC) -o $@  $^ -Wl,-Map,apps.map -Telf2flt.ld  $(LDFLAGS) $(CFLAGS) $(EXTRA_CFLAGS) -Wl,--build-id=none
+	$(CC) -o $@  $^ -Wl,-Map,apps.map $(LDFLAGS) $(CFLAGS) $(EXTRA_CFLAGS)
 
 binutils: binutils.o
-	$(CC) -o $@  $^ -Wl,-Map,apps.map -Telf2flt.ld  $(LDFLAGS) $(CFLAGS) $(EXTRA_CFLAGS) -Wl,--build-id=none
+	$(CC) -o $@  $^ -Wl,-Map,apps.map $(LDFLAGS) $(CFLAGS) $(EXTRA_CFLAGS)
 
 clean:
 	@rm -f $(APPS-y)

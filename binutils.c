@@ -1273,7 +1273,7 @@ static void install_binutils(void)
     while(b->exe) {
         filename[5] = 0;
         strcpy(filename + 5, b->name);
-        link("/bin/utils","filename");
+        link("/bin/binutils", filename);
         b++;
     }
     return NULL;

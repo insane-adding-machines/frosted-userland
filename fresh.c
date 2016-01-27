@@ -39,6 +39,11 @@
 static char currentDirectory[128];
 static char lastcmd[128] = "";
 
+int puts_r(struct _reent *r, const char *s)
+{
+    return strlen(s);
+}
+
 
 /**
  * Function used to initialize our shell. We used the approach explained in
@@ -743,7 +748,7 @@ char *readline(char *input, int size)
 /**
 * Main method of our shell
 */
-int main(void *args) {
+int main(int argc, char *argv[]) {
     char line[MAXLINE]; // buffer for the user input
     char * tokens[LIMIT]; // array for the different tokens in the command
     int numTokens;

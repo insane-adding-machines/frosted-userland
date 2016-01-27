@@ -3,7 +3,7 @@
 #include <sys/stat.h>
 #include <fcntl.h>
 
-int main(void)
+int main(int argc, char *argv[])
 {
     int pid;
     int led[4];

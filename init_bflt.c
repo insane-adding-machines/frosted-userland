@@ -58,7 +58,6 @@ int main(void *arg)
 
     /* open/close test */
     fd = open("/dev/null", 0, 0);
-    printf("/dev/null %s a tty.\r\n",isatty(fd)?"is":"is not");
     close(fd);
     
     /* socket/close test */
