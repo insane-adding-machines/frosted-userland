@@ -5,7 +5,7 @@
 -include ../config.mk
 
 # PATH CONFIG
-FROSTED_PATH=..
+FROSTED?=..
 PREFIX:=$(PWD)/build
 
 # TOOLCHAIN CONFIG
@@ -17,15 +17,11 @@ AR:=$(CROSS_COMPILE)ar
 
 
 #Applications selection
-APPS-y:=init
-APPS-y+=idling
-APPS-y+=fresh
-
-DIR-y+=binutils
+DIR-y+=binutils hw-utils
 
 
 # COMPILER FLAGS -- Includes
-CFLAGS+=-I$(FROSTED_PATH)/include -I$(FROSTED_PATH)/include/libc -I$(FROSTED_PATH)/newlib/build/lib/arm-none-eabi/include
+CFLAGS+=-I$(FROSTED)/include -I$(FROSTED)/include/libc
 # COMPILER FLAGS -- Target CPU
 CFLAGS+=-mthumb -mlittle-endian -mthumb-interwork -ffunction-sections -mcpu=cortex-m3 
 CFLAGS+=-DCORE_M3 -D__frosted__
@@ -40,31 +36,26 @@ CFLAGS+=-ggdb
 LDFLAGS+=-fPIC -mlong-calls -fno-common -Wl,-elf2flt -lgloss
 
 all: apps.img
-	cp apps.img $(FROSTED_PATH)/
+	cp apps.img $(FROSTED)/
 
 
 apps.img: $(APPS-y) $(DIR-y)
 	@rm -f $(PWD)/binutils/out/*.gdb
-	$(FROSTED_PATH)/tools/xipfstool $@ $(APPS-y) binutils/out/*
-
-
-init: init_bflt.o
-	$(CC) -o $@  $^ -Wl,-Map,apps.map $(LDFLAGS) $(CFLAGS)
-
-fresh: fresh.o
-	$(CC) -o $@  $^ -Wl,-Map,apps.map $(LDFLAGS) $(CFLAGS)
-
-idling: idling.o
-	$(CC) -o $@  $^ -Wl,-Map,apps.map $(LDFLAGS) $(CFLAGS)
+	@rm -f $(PWD)/hw-utils/out/*.gdb
+	$(FROSTED)/tools/xipfstool $@ $(APPS-y) binutils/out/* hw-utils/out/*
 
 binutils: FORCE
-	make -C binutils LDFLAGS="$(LDFLAGS)" CFLAGS="$(CFLAGS)" CC=$(CC)
+	make -C $@ LDFLAGS="$(LDFLAGS)" CFLAGS="$(CFLAGS)" CC=$(CC)
+
+hw-utils: FORCE
+	make -C $@ LDFLAGS="$(LDFLAGS)" CFLAGS="$(CFLAGS)" CC=$(CC)
 
 FORCE:
 
 
 clean:
 	make -C binutils clean
+	make -C hw-utils clean
 	@rm -f $(APPS-y)
 	@rm -f *.img
 	@rm -f *.o

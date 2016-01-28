@@ -1,7 +1,7 @@
 
 #include "frosted_binutils.h"
 
-int main(int argc, char *args)
+int main(int argc, char *args[])
 {
     extern int opterr, optind, optopt;
     int c, i, argc = 0, written, j = 0,  b = 0;

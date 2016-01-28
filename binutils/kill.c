@@ -1,10 +1,10 @@
 
 #include "frosted_binutils.h"
 
-int main(int argc, char *args)
+int main(int argc, char *args[])
 {
     int pid;
-    if ((args[1] == NULL) || (args[2] != NULL)) {
+    if (argc != 2) {
         printf("Usage: %s pid\r\n", args[0]);
         exit(1);
     }

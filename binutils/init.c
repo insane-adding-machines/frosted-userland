@@ -18,10 +18,9 @@
  *
  */  
 #include "frosted_api.h"
-#include "fresh.h"
 #include "syscalls.h"
 #include "ioctl.h"
-#include "sys/socket.h"
+#include <sys/socket.h>
 #include <string.h>
 #include <stdio.h>
 #include <signal.h>

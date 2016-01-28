@@ -1,7 +1,6 @@
 CFLAGS?=
 CC?=arm-frosted-eabi-cc
-APPS-y:=init idling fresh cat echo ls touch rm kill true false ln mkdir
-APPS-later:=cut dirname wc tee 
+APPS-y:=random sensor
 BIN:=$(patsubst %,out/%,$(APPS-y))
 OBJ:=$(patsubst %,%.o,$(APPS-y))
 

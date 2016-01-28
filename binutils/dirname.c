@@ -1,7 +1,7 @@
 
 #include "frosted_binutils.h"
 
-int main(int argc, char *args)
+int main(int argc, char *args[])
     int argc = 0, i, c;
     extern int optind;
     char delim = '\n';

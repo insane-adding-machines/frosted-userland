@@ -1,7 +1,7 @@
 
 #include "frosted_binutils.h"
 
-int main(int argc, char *args)
+int main(int argc, char *args[])
 {
     int i = 1;
     while (args[i]) {

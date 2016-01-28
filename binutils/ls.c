@@ -1,6 +1,6 @@
 #include "frosted_binutils.h"
 
-int main(int argc, char *args)
+int main(int argc, char *args[])
 {
     char *fname;
     char *fname_start;

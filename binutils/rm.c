@@ -1,7 +1,7 @@
 #include "frosted_binutils.h"
 
 
-int main(int argc, char *args)
+int main(int argc, char *args[])
 {
     char *file = args[1];
 

@@ -31,7 +31,29 @@
 #include <termios.h>
 #include <unistd.h>
 #include <sys/stat.h>
-#include "simple-c-shell.h"
+// Shell pid, pgid, terminal modes
+static pid_t GBSH_PID;
+static pid_t GBSH_PGID;
+static int GBSH_IS_INTERACTIVE;
+static struct termios GBSH_TMODES;
+
+
+struct sigaction act_child;
+struct sigaction act_int;
+
+int no_reprint_prmpt;
+
+pid_t pid;
+
+
+/**
+ * SIGNAL HANDLERS
+ */
+// signal handler for SIGCHLD */
+void signalHandler_child(int p);
+// signal handler for SIGINT
+void signalHandler_int(int p);
+int changeDirectory(char * args[]);
 
 #define LIMIT 16 // max number of tokens for a command
 #define MAXLINE 256 // max number of characters from user input
@@ -773,7 +795,7 @@ int main(int argc, char *argv[]) {
 
     // Main loop, where the user input will be read and the prompt
     // will be printed
-    while(TRUE){
+    while(1){
         // We print the shell prompt if necessary
         if (no_reprint_prmpt == 0) shellPrompt();
         no_reprint_prmpt = 0;
