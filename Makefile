@@ -52,6 +52,8 @@ hw-utils: FORCE
 
 FORCE:
 
+menuconfig:
+	@$(MAKE) -C kconfig/ menuconfig -f Makefile.frosted
 
 clean:
 	make -C binutils clean

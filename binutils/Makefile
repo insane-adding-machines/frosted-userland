@@ -1,6 +1,20 @@
+-include ../kconfig/.config
 CFLAGS?=
 CC?=arm-frosted-eabi-cc
-APPS-y:=init idling fresh cat echo ls touch rm kill true false ln mkdir
+APPS-y:=
+APPS-$(APP_INIT)+=init
+APPS-$(APP_IDLING)+=idling
+APPS-$(APP_FRESH)+=fresh
+APPS-$(APP_CAT)+=cat
+APPS-$(APP_ECHO)+=echo
+APPS-$(APP_LS)+=ls
+APPS-$(APP_TOUCH)+=touch
+APPS-$(APP_RM)+=rm
+APPS-$(APP_KILL)+=kill
+APPS-$(APP_TRUE)+=true
+APPS-$(APP_FALSE)+=false
+APPS-$(APP_LN)+=ln
+APPS-$(APP_MKDIR)+=mkdir
 APPS-later:=cut dirname wc tee 
 BIN:=$(patsubst %,out/%,$(APPS-y))
 OBJ:=$(patsubst %,%.o,$(APPS-y))

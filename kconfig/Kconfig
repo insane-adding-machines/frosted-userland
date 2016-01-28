@@ -1,0 +1,45 @@
+mainmenu "FROSTED Userspace content selection"
+menu "Libraries"
+endmenu
+
+menu "Applications"
+
+menu "Base binary utils"
+config APP_INIT
+bool "init: main task"
+default y
+
+config APP_IDLING
+bool "idling: flashing leds"
+default y
+
+config APP_FRESH
+bool "fresh: Frosted shell"
+default y
+
+config APP_CAT
+    bool "cat"
+
+config APP_ECHO
+    bool "echo"
+config APP_LS
+    bool "ls"
+config APP_TOUCH
+    bool "touch"
+config APP_RM
+    bool "rm"
+config APP_KILL
+    bool "kill"
+config APP_TRUE
+    bool "true"
+config APP_FALSE
+    bool "false"
+config APP_LN
+    bool "ln"
+config APP_MKDIR
+    bool "mkdir"
+
+endmenu 
+
+
+endmenu
