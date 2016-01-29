@@ -14,6 +14,11 @@ CC:=$(CROSS_COMPILE)gcc
 AS:=$(CROSS_COMPILE)as
 AR:=$(CROSS_COMPILE)ar
 
+ifneq ($(V),1)
+   Q:=@
+   #Do not print "Entering directory ...".
+   MAKEFLAGS += --no-print-directory
+endif
 
 
 #Applications selection
@@ -56,8 +61,8 @@ menuconfig:
 	@$(MAKE) -C kconfig/ menuconfig -f Makefile.frosted
 
 clean:
-	make -C binutils clean
-	make -C hw-utils clean
+	@make -C binutils clean
+	@make -C hw-utils clean
 	@rm -f $(APPS-y)
 	@rm -f *.img
 	@rm -f *.o
