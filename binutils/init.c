@@ -31,16 +31,13 @@ extern void *_init;
 
 const char idling_txt[10] = "idling";
 const char fresh_txt[10] = "fresh";
-const char binutils_txt[10] = "binutils";
 
 const char idling_path[30] = "/bin/idling";
 const char fresh_path[30] = "/bin/fresh";
-const char binutils_path[30] = "/bin/binutils";
 
 
 static const char *fresh_args[2] = {fresh_txt, NULL};
 static const char *idling_args[2] = {idling_txt, NULL};
-static const char *binutils_args[2] = {binutils_txt, NULL};
 
 
 int main(void *arg)
@@ -64,16 +61,16 @@ int main(void *arg)
     close(sd);
 
     /* Thread create test */
-    if (vfork() == 0)
+    if (vfork() == 0) {
         execve(idling_path, idling_args, NULL);
+        exit(1);
+    }
  
-    if (vfork() == 0)
+    if (vfork() == 0) {
         execve(fresh_path, fresh_args, NULL);
+        exit(1);
+    }
 
-    /* Install binutils */
-    if (vfork() == 0)
-        execve(binutils_path, binutils_args, NULL);
-      
     while(1) {
         pid = wait(&status);
     }

@@ -9,36 +9,10 @@ int main(int argc, char *argv[])
     int led[4];
     int i, j;
 
-#ifdef PYBOARD
-# define LED0 "/dev/gpio_1_13"
-# define LED1 "/dev/gpio_1_14"
-# define LED2 "/dev/gpio_1_15"
-# define LED3 "/dev/gpio_1_4"
-#elif defined (STM32F4)
-# define LED0 "/dev/gpio_3_12"
-# define LED1 "/dev/gpio_3_13"
-# define LED2 "/dev/gpio_3_14"
-# define LED3 "/dev/gpio_3_15"
-#elif defined (LPC17XX)
-#if 0
-/*LPCXpresso 1769 */
-# define LED0 "/dev/gpio_0_22"
-# define LED1 "/dev/null"
-# define LED2 "/dev/null"
-# define LED3 "/dev/null"
-#else
-/* mbed 1768 */
-# define LED0 "/dev/gpio_1_18"
-# define LED1 "/dev/gpio_1_20"
-# define LED2 "/dev/gpio_1_21"
-# define LED3 "/dev/gpio_1_23"
-#endif
-#else
-# define LED0 "/dev/null"
-# define LED1 "/dev/null"
-# define LED2 "/dev/null"
-# define LED3 "/dev/null"
-#endif
+# define LED0 "/dev/led0"
+# define LED1 "/dev/led1"
+# define LED2 "/dev/led2"
+# define LED3 "/dev/led3"
 
     led[0] = open(LED0, O_RDWR, 0);
     led[1] = open(LED1, O_RDWR, 0);
