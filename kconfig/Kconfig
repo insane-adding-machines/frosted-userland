@@ -41,5 +41,10 @@ config APP_MKDIR
 
 endmenu 
 
+menu "Networking utils"
+config APP_IFCONFIG
+    bool "ifconfig"
+endmenu
+
 
 endmenu

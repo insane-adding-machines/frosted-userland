@@ -13,7 +13,7 @@
 #include <getopt.h>
 #include <ctype.h>
 #include <signal.h>
-#include <ioctl.h>
+#include <sys/ioctl.h>
 
 struct lsm303dlhc_ctrl_reg
 {

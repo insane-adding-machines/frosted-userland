@@ -1,4 +1,9 @@
 #include "frosted_binutils.h"
+DIR *opendir(const char *name);
+int readdir(DIR *dirp, struct dirent *entry);
+int closedir(DIR *dirp);
+
+
 
 int main(int argc, char *args[])
 {

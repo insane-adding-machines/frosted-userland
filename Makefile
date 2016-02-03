@@ -22,7 +22,7 @@ endif
 
 
 #Applications selection
-DIR-y+=binutils hw-utils
+DIR-y+=binutils hw-utils netutils
 
 
 # COMPILER FLAGS -- Includes
@@ -47,12 +47,16 @@ all: apps.img
 apps.img: $(APPS-y) $(DIR-y)
 	@rm -f $(PWD)/binutils/out/*.gdb
 	@rm -f $(PWD)/hw-utils/out/*.gdb
-	$(FROSTED)/tools/xipfstool $@ $(APPS-y) binutils/out/* hw-utils/out/*
+	@rm -f $(PWD)/netutils/out/*.gdb
+	$(FROSTED)/tools/xipfstool $@ $(APPS-y) binutils/out/* hw-utils/out/* netutils/out/*
 
 binutils: FORCE
 	make -C $@ LDFLAGS="$(LDFLAGS)" CFLAGS="$(CFLAGS)" CC=$(CC)
 
 hw-utils: FORCE
+	make -C $@ LDFLAGS="$(LDFLAGS)" CFLAGS="$(CFLAGS)" CC=$(CC)
+
+netutils: FORCE
 	make -C $@ LDFLAGS="$(LDFLAGS)" CFLAGS="$(CFLAGS)" CC=$(CC)
 
 FORCE:
