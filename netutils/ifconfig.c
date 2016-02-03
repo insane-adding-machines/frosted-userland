@@ -15,6 +15,13 @@
 #include <stdio.h>      /* for fprintf etc */
 #include <fcntl.h>
 
+#ifndef htonl
+#define htonl(x) __builtin_bswap32(x)
+#define ntohl(x) __builtin_bswap32(x)
+#define htons(x) __builtin_bswap16(x)
+#define ntohs(x) __builtin_bswap16(x)
+#endif
+
 static int is_digit(char a)
 {
     if (a < '0' || a > '9')
@@ -26,7 +33,7 @@ int inet_aton(const char *cp, struct in_addr *inp)
 {
     int cnt = 0;
     char p;
-    uint8_t buf[4];
+    uint8_t buf[4] = {};
     while((p = *cp++) != 0 && cnt < 4)
     {
         if (is_digit(p)) {
@@ -51,6 +58,7 @@ int inet_aton(const char *cp, struct in_addr *inp)
     }
 
     inp->s_addr = (buf[0] << 24) + (buf[1] << 16) + (buf[2] << 8) + buf[3];
+    inp->s_addr = htonl(inp->s_addr);
     return 0;
 }
 
@@ -320,18 +328,23 @@ void ifconf_show(char *name)
 {
     struct sockaddr_in a,n,b;
     int ret;
-
     ret = ifconf_getproperties(name, NULL, &a, &n, &b);
     if (ret < 0) {
         perror("Cannot get interface properties");
+        printf("Cannot find interface %s\r\n", name);
         exit(1);
     }
-
-    printf("%s: flags:%s mtu 1500\r\n", (ret > 0)?"<UP,BROADCAST,MULTICAST,RUNNING>":"<DOWN>", name);
+    printf("%s: flags:%s mtu 1500\r\n", name, (ret > 0)?"<UP,BROADCAST,MULTICAST,RUNNING>":"<DOWN>");
     printf("        inet %s ", inet_ntoa(a.sin_addr));
     printf("netmask %s ", inet_ntoa(n.sin_addr));
     printf("broadcast %s\r\n", inet_ntoa(b.sin_addr));
     printf("\r\n");
+}
+
+static void usage(char *name)
+{
+    printf("Usage: %s [DEV [ADDR [netmask NMASK]]]\r\n", name);
+    exit(1);
 }
 
 int main(int argc, char *argv[])
@@ -372,13 +385,23 @@ int main(int argc, char *argv[])
     memset(&ifr, 0, sizeof(struct ifreq));
 
     if (argc == 2) {
-        ifconf_show(argv[0]);
+        ifconf_show(argv[1]);
         exit(0);
     }
 
     if (argc == 3) {
+        ifconfig(argv[1], argv[2], "255.255.255.0");
+        exit(0);
     }
-    exit(0);
+    if (argc == 5) {
+        if (strcmp(argv[3], "netmask") != 0) {
+            usage(argv[0]);
+        }
+        ifconfig(argv[1], argv[2], argv[4]);
+        exit(0);
+    }
+
+    usage(argv[0]);
 }
 
 
