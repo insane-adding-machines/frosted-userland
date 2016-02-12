@@ -44,6 +44,8 @@ endmenu
 menu "Networking utils"
 config APP_IFCONFIG
     bool "ifconfig"
+config APP_TELNETD
+    bool "telnetd"
 endmenu
 
 

@@ -57,7 +57,6 @@ int changeDirectory(char * args[]);
 
 #define LIMIT 16 // max number of tokens for a command
 #define MAXLINE 256 // max number of characters from user input
-#define SERIAL_DEV "/dev/ttyS0"
 static char currentDirectory[128];
 static char lastcmd[128] = "";
 
@@ -71,30 +70,31 @@ int puts_r(struct _reent *r, const char *s)
  * Function used to initialize our shell. We used the approach explained in
  * http://www.gnu.org/software/libc/manual/html_node/Initializing-the-Shell.html
  */
-void shell_init(void){
+void shell_init(char *file){
     int stdin_fileno, stdout_fileno, stderr_fileno;
 
-    do {
-        stdin_fileno = open(SERIAL_DEV, O_RDONLY, 0);
-    } while (stdin_fileno < 0);
+    if (file) {
+        do {
+            stdin_fileno = open(file, O_RDONLY, 0);
+        } while (stdin_fileno < 0);
 
-    do {
-        stdout_fileno = open(SERIAL_DEV, O_WRONLY, 0);
-    } while (stdout_fileno < 0);
+        do {
+            stdout_fileno = open(file, O_WRONLY, 0);
+        } while (stdout_fileno < 0);
 
-    do {
-        stderr_fileno = open(SERIAL_DEV, O_WRONLY, 0);
-    } while (stderr_fileno < 0);
+        do {
+            stderr_fileno = open(file, O_WRONLY, 0);
+        } while (stderr_fileno < 0);
+    }
 
-        // See if we are running interactively
-        GBSH_PID = getpid();
-        // The shell is interactive if STDIN is the terminal
-        GBSH_IS_INTERACTIVE = isatty(STDIN_FILENO);
+    // See if we are running interactively
+    GBSH_PID = getpid();
+    // The shell is interactive if STDIN is the terminal
+    GBSH_IS_INTERACTIVE = isatty(STDIN_FILENO);
 
-        if (!GBSH_IS_INTERACTIVE) {
-                printf("Could not make the shell interactive.\r\n");
-                exit(EXIT_FAILURE);
-        }
+    if (!GBSH_IS_INTERACTIVE) {
+        printf("Warning: this shell is not a TTY.\r\n");
+    }
 }
 
 /**
@@ -782,7 +782,11 @@ int main(int argc, char *argv[]) {
     pid = -10; // we initialize pid to an pid that is not possible
 
     // We call the method of initialization and the welcome screen
-    shell_init();
+    if (argc > 1)
+        shell_init(argv[1]);
+    else
+        shell_init(NULL);
+
     welcomeScreen();
 
     // We set our extern char** environ to the environment, so that

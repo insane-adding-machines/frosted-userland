@@ -31,12 +31,13 @@ extern void *_init;
 
 const char idling_txt[10] = "idling";
 const char fresh_txt[10] = "fresh";
+const char serial_dev[12] = "/dev/ttyS0";
 
 const char idling_path[30] = "/bin/idling";
 const char fresh_path[30] = "/bin/fresh";
 
 
-static const char *fresh_args[2] = {fresh_txt, NULL};
+static const char *fresh_args[3] = {fresh_txt, serial_dev, NULL};
 static const char *idling_args[2] = {idling_txt, NULL};
 
 
