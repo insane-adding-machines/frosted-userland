@@ -61,7 +61,7 @@ int main(int argc, char *argv[])
                 dup(asd); dup(asd); dup(asd);
                 execv(FRESH_BIN, fresh_args);
             } else {
-                close(asd);
+                // close(asd);
             }
         }
     }

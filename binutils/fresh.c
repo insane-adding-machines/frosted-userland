@@ -596,7 +596,7 @@ void pointer_shift(int *a, int s, int n) {
    }
 }
 
-char *readline(char *input, int size)
+char *readline_tty(char *input, int size)
 {
 
     while (2>1)
@@ -766,6 +766,25 @@ char *readline(char *input, int size)
         input[len + 1] = '\0';
     }
     return input;
+}
+
+char *readline_notty(char *input, int len)
+{
+    int ret = read(STDIN_FILENO, input, len - 1);
+    if (ret > 0) {
+        input[ret - 1] = 0x0D;
+        input[ret] = 0x00;
+        return input;
+    }
+    return NULL;
+}
+
+static char *readline(char *input, int len)
+{
+    if (GBSH_IS_INTERACTIVE)
+        return readline_tty(input, len);
+    else
+        return readline_notty(input, len);
 }
 
 
