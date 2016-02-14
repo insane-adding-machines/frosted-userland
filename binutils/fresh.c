@@ -143,8 +143,10 @@ void signalHandler_int(int p){
  */
 void shellPrompt(){
     // We print the prompt in the form "<user>@<host> <cwd> >"
+    char prompt[256];
     char hostn[] = "frosted";
-    printf("%s@%s %s # ", "root", hostn, getcwd(currentDirectory, 20));
+    snprintf(prompt, 255, "root@%s %s # ", hostn, getcwd(currentDirectory, 128));
+    write(STDOUT_FILENO, prompt, strlen(prompt));
 }
 
 /**
@@ -240,7 +242,9 @@ void launchProg(char **args, int background){
          return;
      }
 
-     if((pid=vfork())==-1){
+     pid = vfork();
+
+     if(pid == -1) {
          printf("Child process could not be created\r\n");
          return;
      }
@@ -807,6 +811,7 @@ int main(int argc, char *argv[]) {
         shell_init(NULL);
 
     welcomeScreen();
+    fprintf(stdout, "Current pid = %d\r\n", getpid());
 
     // We set our extern char** environ to the environment, so that
     // we can treat it later in other methods
