@@ -26,7 +26,8 @@ all: $(BIN)
 out/%: %.o
 	@mkdir -p out
 	@arm-frosted-eabi-gcc -o $@ $^ $(CFLAGS) $(LDFLAGS)
-	@rm -f out/*.gdb
+	@mkdir -p out/gdb
+	@mv out/*.gdb out/gdb
 
 clean:
 	@rm -rf out
