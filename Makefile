@@ -45,9 +45,10 @@ all: apps.img
 
 
 apps.img: $(APPS-y) $(DIR-y)
-	@rm -f $(PWD)/binutils/out/*.gdb
-	@rm -f $(PWD)/hw-utils/out/*.gdb
-	@rm -f $(PWD)/netutils/out/*.gdb
+	@mkdir $(PWD)/gdb
+	@mv $(PWD)/binutils/out/*.gdb $(PWD)/gdb
+	@mv $(PWD)/hw-utils/out/*.gdb $(PWD)/gdb
+	@mv $(PWD)/netutils/out/*.gdb $(PWD)/gdb
 	$(FROSTED)/tools/xipfstool $@ $(APPS-y) binutils/out/* hw-utils/out/* netutils/out/*
 
 binutils: FORCE
