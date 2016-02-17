@@ -45,6 +45,14 @@ int no_reprint_prmpt;
 
 pid_t pid;
 
+struct env {
+    char *key;
+    char *value;
+    struct env *next;
+};
+
+
+struct env *Environment = NULL;
 
 /**
  * SIGNAL HANDLERS
@@ -147,6 +155,55 @@ void shellPrompt(){
     char hostn[] = "frosted";
     snprintf(prompt, 255, "root@%s %s # ", hostn, getcwd(currentDirectory, 128));
     write(STDOUT_FILENO, prompt, strlen(prompt));
+}
+
+/**
+ * Method to set an environment variable
+ */
+static int _setenv(const char *key, const char *value)
+{
+    struct env *ee = Environment;
+
+    while (ee) {
+        if (strcmp(ee->key, key) == 0) {
+            strcpy(ee->value, value);
+            return 0;
+        }
+        ee = ee->next;
+    }
+
+
+    struct env *e = malloc(sizeof(struct env));
+    if (!e)
+        return -1;
+
+    e->key = malloc(strlen(key) + 1);
+    e->value = malloc(strlen(value) + 1);
+    /* TODO: check each failing malloc... */
+
+    strcpy(e->key, key);
+    strcpy(e->value, value);
+    e->next = Environment;
+    Environment = e;
+
+    return 0;
+}
+
+/**
+ * Method to get an environment variable
+ */
+char *_getenv(const char *key)
+{
+    struct env *e = Environment;
+
+    while (e) {
+        if (strcmp(e->key, key) == 0) {
+            return e->value;
+        }
+        e = e->next;
+    }
+
+    return NULL;
 }
 
 /**
@@ -270,7 +327,11 @@ void launchProg(char **args, int background){
      // If the process is not requested to be in background, we wait for
      // the child to finish.
      if (background == 0){
-         waitpid(pid,NULL,0);
+        int status;
+        waitpid(pid,&status,0);
+        char *stat = malloc(sizeof(char) * 16);
+        sprintf(stat, "%i", status);
+        _setenv("?", stat);
      }else{
          // In order to create a background process, the current process
          // should just skip the call to wait. The SIGCHILD handler
@@ -537,7 +598,14 @@ int commandHandler(char * args[]){
         }
     }
     // 'setenv' command to set environment variables
-    else if (strcmp(args[0],"setenv") == 0) manageEnviron(args,1);
+    else if (strcmp(args[0],"setenv") == 0) {
+        _setenv(args[1], args[2]);
+    }
+    else if (strcmp(args[0],"getenv") == 0) {
+        char *value;
+        value = _getenv(args[1]);
+        printf("%s\r\n", *value);
+    }
     // 'unsetenv' command to undefine environment variables
     else if (strcmp(args[0],"unsetenv") == 0) manageEnviron(args,2);
     else{
