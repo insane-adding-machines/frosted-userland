@@ -346,7 +346,6 @@ void launchProg(char **args, int background){
 */
 void fileIO(char * args[], char* inputFile, char* outputFile, int option)
 {
-    atoi("22");
     int err = -1;
     int fileDescriptor; // between 0 and 19, describing the output or input file
 
