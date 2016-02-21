@@ -49,15 +49,21 @@ apps.img: $(APPS-y) $(DIR-y)
 	@mv binutils/out/*.gdb $(PWD)/gdb || true
 	@mv hw-utils/out/*.gdb $(PWD)/gdb || true
 	@mv netutils/out/*.gdb $(PWD)/gdb || true
-	$(FROSTED)/tools/xipfstool $@ $(APPS-y) binutils/out/* hw-utils/out/* netutils/out/*
+	$(FROSTED)/tools/xipfstool $@ $(APPS-y) $(addsuffix /out/*,$(DIR-y))
 
 binutils: FORCE
+	mkdir -p $@/out
+	touch $@/out/dummy
 	make -C $@ LDFLAGS="$(LDFLAGS)" CFLAGS="$(CFLAGS)" CC=$(CC)
 
 hw-utils: FORCE
+	mkdir -p $@/out
+	touch $@/out/dummy
 	make -C $@ LDFLAGS="$(LDFLAGS)" CFLAGS="$(CFLAGS)" CC=$(CC)
 
 netutils: FORCE
+	mkdir -p $@/out
+	touch $@/out/dummy
 	make -C $@ LDFLAGS="$(LDFLAGS)" CFLAGS="$(CFLAGS)" CC=$(CC)
 
 FORCE:
