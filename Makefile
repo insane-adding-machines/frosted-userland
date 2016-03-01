@@ -22,7 +22,7 @@ endif
 
 
 #Applications selection
-DIR-y+=binutils hw-utils netutils
+DIR-y+=binutils hw-utils netutils extra
 
 
 # COMPILER FLAGS -- Includes

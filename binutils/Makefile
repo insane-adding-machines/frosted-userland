@@ -15,6 +15,7 @@ APPS-$(APP_TRUE)+=true
 APPS-$(APP_FALSE)+=false
 APPS-$(APP_LN)+=ln
 APPS-$(APP_MKDIR)+=mkdir
+APPS-$(APP_MOUNT)+=mount
 APPS-later:=cut dirname wc tee 
 BIN:=$(patsubst %,out/%,$(APPS-y))
 OBJ:=$(patsubst %,%.o,$(APPS-y))
