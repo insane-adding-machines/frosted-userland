@@ -48,6 +48,8 @@ config APP_IFCONFIG
     bool "ifconfig"
 config APP_TELNETD
     bool "telnetd"
+config APP_NETCAT
+    bool "netcat"
 endmenu
 
 

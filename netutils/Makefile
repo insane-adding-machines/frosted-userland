@@ -3,6 +3,7 @@ CFLAGS?=
 CC?=arm-frosted-eabi-gcc
 APPS-$(APP_IFCONFIG)=ifconfig
 APPS-$(APP_TELNETD)=telnetd
+APPS-$(APP_NETCAT)=nc
 
 BIN:=$(patsubst %,out/%,$(APPS-y))
 OBJ:=$(patsubst %,%.o,$(APPS-y))
