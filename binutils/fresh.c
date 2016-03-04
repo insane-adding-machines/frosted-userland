@@ -328,10 +328,10 @@ void launchProg(char **args, int background){
      // the child to finish.
      if (background == 0){
         int status;
+        char exit_status_str[16];
         waitpid(pid,&status,0);
-        char *stat = malloc(sizeof(char) * 16);
-        sprintf(stat, "%i", status);
-        _setenv("?", stat);
+        sprintf(exit_status_str, "%i", status);
+        _setenv("?", exit_status_str);
      }else{
          // In order to create a background process, the current process
          // should just skip the call to wait. The SIGCHILD handler
