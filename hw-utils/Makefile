@@ -1,6 +1,6 @@
 CFLAGS?=
 CC?=arm-frosted-eabi-cc
-APPS-y:=random sensor
+APPS-y:=random sensor morse
 BIN:=$(patsubst %,out/%,$(APPS-y))
 OBJ:=$(patsubst %,%.o,$(APPS-y))
 
@@ -16,7 +16,3 @@ out/%: %.o
 clean:
 	@rm -rf out
 	@rm -f $(OBJ)
-
-
-
-
