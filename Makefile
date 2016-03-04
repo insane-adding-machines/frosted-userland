@@ -73,6 +73,7 @@ menuconfig:
 
 clean:
 	@make -C binutils clean
+	@make -C netutils clean
 	@make -C hw-utils clean
 	@rm -f $(APPS-y)
 	@rm -f *.img

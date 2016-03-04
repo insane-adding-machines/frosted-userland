@@ -52,5 +52,14 @@ config APP_NETCAT
     bool "netcat"
 endmenu
 
+menu "Hardware utils"
+config APP_MORSE
+    bool "Morse led blinker"
+config APP_RANDOM
+    bool "Random number generator"
+config APP_SENSOR
+    bool "Test for sensors"
+endmenu
+
 
 endmenu

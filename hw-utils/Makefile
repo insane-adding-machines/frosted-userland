@@ -1,6 +1,11 @@
+-include ../kconfig/.config
 CFLAGS?=
 CC?=arm-frosted-eabi-cc
-APPS-y:=random sensor morse
+APPS-y:=
+
+APPS-$(APP_RANDOM)+=random
+APPS-$(APP_SENSOR)+=sensor
+APPS-$(APP_MORSE)+=morse
 BIN:=$(patsubst %,out/%,$(APPS-y))
 OBJ:=$(patsubst %,%.o,$(APPS-y))
 
