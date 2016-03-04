@@ -91,8 +91,7 @@ int __inet_aton(const char *ipstr, struct in_addr *ia)
         return -1;
     }
 
-    *ip = long_from(buf);
-
+    *ip = htonl(long_from(buf));
     return 0;
 }
 
@@ -208,12 +207,13 @@ int main(int argc, char *argv[])
         }
     } else {
         tgt.sin_family = AF_INET;
-        tgt.sin_port = htons(conf.lport);
+        tgt.sin_port = htons(conf.port);
         inet_aton(conf.host, &tgt.sin_addr); /* TODO: getaddrinfo */
         if (connect(sd, (struct sockaddr *)&tgt, sizeof(struct sockaddr_in)) < 0) {
             perror("connect");
             exit(3);
         }
+        fprintf(stderr, "Connected to server.\r\n");
     }
 
     while(1) {
