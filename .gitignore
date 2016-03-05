@@ -32,5 +32,3 @@
 *.dSYM/
 .depend
 kconfig/.depend
-kconfig/.config
-.config
