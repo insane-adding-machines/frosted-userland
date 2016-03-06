@@ -17,7 +17,6 @@
  *      Authors: Daniele Lacamera, Maxime Vincent
  *
  */
-#include "frosted_api.h"
 #include "binutils.h"
 #include <string.h>
 #include <strings.h>

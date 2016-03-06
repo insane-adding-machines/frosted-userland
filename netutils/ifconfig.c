@@ -1,6 +1,7 @@
 #define _BSD_SOURCE
 #include <stdlib.h>
 #include <stddef.h>
+#include <sys/time.h>
 #include <sys/socket.h>
 #include <netinet/in.h>
 #include <arpa/inet.h>

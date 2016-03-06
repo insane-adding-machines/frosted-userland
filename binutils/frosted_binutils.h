@@ -20,7 +20,6 @@
  */
 #ifndef INCLUDED_FROSTED_BINUTILS
 #define INCLUDED_FROSTED_BINUTILS
-#include "frosted_api.h"
 #include <string.h>
 #include <strings.h>
 #include <stdio.h>

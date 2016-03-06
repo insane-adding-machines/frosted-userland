@@ -17,7 +17,6 @@
  *      Authors: Daniele Lacamera, Maxime Vincent
  *
  */  
-#include "frosted_api.h"
 #include "syscalls.h"
 #include "ioctl.h"
 #include <sys/socket.h>
@@ -25,6 +24,7 @@
 #include <stdio.h>
 #include <signal.h>
 #include <unistd.h>
+#include <stdlib.h>
 #define IDLE() while(1){do{}while(0);}
 #define GREETING "Welcome to frosted!\n"
 extern void *_init;

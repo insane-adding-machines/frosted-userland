@@ -26,7 +26,6 @@
 #include <sys/types.h>
 #include <signal.h>
 #include <sys/wait.h>
-#include <frosted_api.h>
 #include <fcntl.h>
 #include <termios.h>
 #include <unistd.h>
@@ -294,7 +293,7 @@ void launchProg(char **args, int background){
      strcpy(bin_arg0 + 5, args[0]);
 
      /* Find executable command */
-     if ((stat(bin_arg0, &st) < 0) || ((st.st_mode & P_EXEC) == 0)) {
+     if (stat(bin_arg0, &st) < 0) {
          printf("Command not found.\r\n");
          return;
      }

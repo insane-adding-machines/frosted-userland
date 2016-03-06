@@ -1,15 +1,11 @@
 #include "frosted_binutils.h"
-DIR *opendir(const char *name);
-int readdir(DIR *dirp, struct dirent *entry);
-int closedir(DIR *dirp);
-
-
+#include <dirent.h>
 
 int main(int argc, char *args[])
 {
     char *fname;
     char *fname_start;
-    struct dirent *ep;
+    struct dirent *ep, *result;
     DIR *d;
     struct stat st;
     char type;
@@ -19,12 +15,16 @@ int main(int argc, char *args[])
     fname_start = malloc(MAX_FILE);
     ep = malloc(sizeof(struct dirent));
     if (!ep || !fname_start)
-        while(1);;
+        exit(1);;
 
     getcwd(fname_start, MAX_FILE);
 
     d = opendir(fname_start);
-    while(readdir(d, ep) == 0) {
+    if (!d) {
+        fprintf(stderr, "Error opening %s\r\n", fname_start);
+        exit(2);
+    }
+    while(readdir_r(d, ep, &result) == 0) {
         fname = fname_start;
         fname[0] = '\0';
         strncat(fname, fname_start, MAX_FILE);
@@ -50,6 +50,8 @@ int main(int argc, char *args[])
             printf( "    ");
             printf( ch_size);
             printf( "\r\n");
+        } else {
+            fprintf(stderr, "stat error on %s: %s.\r\n", fname, strerror(errno));
         }
     }
     closedir(d);

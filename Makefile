@@ -25,8 +25,6 @@ endif
 DIR-y+=binutils hw-utils netutils extra
 
 
-# COMPILER FLAGS -- Includes
-CFLAGS+=-I$(FROSTED)/include -I$(FROSTED)/include/libc
 # COMPILER FLAGS -- Target CPU
 CFLAGS+=-mthumb -mlittle-endian -mthumb-interwork -ffunction-sections -mcpu=cortex-m3 
 CFLAGS+=-DCORE_M3 -D__frosted__

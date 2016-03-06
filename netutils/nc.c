@@ -1,3 +1,4 @@
+#include <errno.h>
 #include <sys/socket.h>
 #include <netinet/in.h>
 #include <arpa/inet.h>
@@ -25,6 +26,8 @@
 
 #define NC_CONNECT 0
 #define NC_LISTEN 1
+
+//extern int errno;
 
 
 struct netcat_conf
@@ -59,7 +62,7 @@ static inline uint32_t long_from(void *_p)
 }
 
 
-int __inet_aton(const char *ipstr, struct in_addr *ia)
+int inet_aton(const char *ipstr, struct in_addr *ia)
 {
     unsigned char buf[22] = {
         0
@@ -182,11 +185,13 @@ int main(int argc, char *argv[])
     }
 
     if (conf.mode) {
+        int ret;
         all.sin_family = AF_INET;
         all.sin_port = htons(conf.lport);
 
-        if (bind(sd, (struct sockaddr *)&all, sizeof(struct sockaddr_in)) < 0) {
-            perror("bind");
+        ret = bind(sd, (struct sockaddr *)&all, sizeof(struct sockaddr_in));
+        if (ret < 0) {
+            fprintf(stderr, "Bind failed with %d - errno: %d (%s)\r\n", ret, errno, strerror(errno));
             exit(3);
         }
     
