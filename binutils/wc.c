@@ -74,15 +74,14 @@ int main(int argc, char *args[])
 			words++;
 			newlines++;
 		}
-		if (flags &  0x01) {
-			printf("%d %s\r\n", bytes, args[i]);
-		} else if (flags & 0x02) {
-			printf("%d %s\r\n", words, args[i]);
-		} else if (flags & 0x04) {
-			printf("%d %s\r\n", newlines, args[i]);
-		} else {
-			printf("%d %d %d %s\r\n", newlines, words, bytes, args[i]);
+		if ((flags & 0x04) || !flags) {
+			printf("%4d ", newlines);
+		} if ((flags & 0x02)  || !flags) {
+			printf("%4d ", words);
+		} if ((flags &  0x01) || !flags) {
+			printf("%4d ", bytes);
 		}
+		printf(" %s\r\n", args[i]);
 		i++;
 	}
 	exit(0);
