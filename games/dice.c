@@ -1,5 +1,9 @@
 
-#include "frosted_binutils.h"
+#include <stdio.h>
+#include <stdlib.h>
+#include <ctype.h>
+#include <unistd.h>
+#include <fcntl.h>
 
 static uint32_t read_rand(void)
 {
@@ -30,7 +34,7 @@ int roll(void)
 	return 0;
 }
 
-int bin_dice(void **args)
+int main(int argc, char *args[])
 {
  	char c;
  	int noes = 2;
@@ -41,7 +45,6 @@ int bin_dice(void **args)
  	while (1) {
  		if (!yes) {
  			printf("Roll?  (Y/n) ");
- 			//c = getchar();
  			read(0, &c, 1);
  		} else {
  			yes = 0;
@@ -72,9 +75,6 @@ int bin_dice(void **args)
 				break;
 			}
 		}
-		//if ( c != '\n') {
-		//	read(0, &c, 1);
-		//}
  	}
 
  	printf("\r\n\r\nRoll the dice is finished! Final score:\r\n\r\n User: \t%d\r\n Mcu: \t%d\r\n\r\nVICTORY FOR ", user, mcu);

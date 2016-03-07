@@ -22,11 +22,11 @@ endif
 
 
 #Applications selection
-DIR-y+=binutils hw-utils netutils extra
+DIR-y+=binutils hw-utils netutils extra games
 
 
 # COMPILER FLAGS -- Target CPU
-CFLAGS+=-mthumb -mlittle-endian -mthumb-interwork -ffunction-sections -mcpu=cortex-m3 
+CFLAGS+=-mthumb -mlittle-endian -mthumb-interwork -ffunction-sections -mcpu=cortex-m3
 CFLAGS+=-DCORE_M3 -D__frosted__
 # COMPILER FLAGS -- No gcc libraries
 CFLAGS+=-nostartfiles
@@ -64,6 +64,11 @@ netutils: FORCE
 	touch $@/out/dummy
 	make -C $@ LDFLAGS="$(LDFLAGS)" CFLAGS="$(CFLAGS)" CC=$(CC)
 
+games: FORCE
+	mkdir -p $@/out
+	touch $@/out/dummy
+	make -C $@ LDFLAGS="$(LDFLAGS)" CFLAGS="$(CFLAGS)" CC=$(CC)
+
 FORCE:
 
 menuconfig:
@@ -73,6 +78,7 @@ clean:
 	@make -C binutils clean
 	@make -C netutils clean
 	@make -C hw-utils clean
+	@make -C games clean
 	@rm -f $(APPS-y)
 	@rm -f *.img
 	@rm -f *.o

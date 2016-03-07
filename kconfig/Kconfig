@@ -63,5 +63,10 @@ config APP_SENSOR
     bool "Test for sensors"
 endmenu
 
+menu "Games"
+config APP_DICE
+    bool "Roll the dice"
+endmenu
+
 
 endmenu
