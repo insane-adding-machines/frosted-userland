@@ -40,8 +40,10 @@ config APP_MKDIR
     bool "mkdir"
 config APP_MOUNT
     bool "mount"
+config APP_WC
+    bool "wc"
 
-endmenu 
+endmenu
 
 menu "Networking utils"
 config APP_IFCONFIG

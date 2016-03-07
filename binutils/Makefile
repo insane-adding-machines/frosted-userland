@@ -16,7 +16,8 @@ APPS-$(APP_FALSE)+=false
 APPS-$(APP_LN)+=ln
 APPS-$(APP_MKDIR)+=mkdir
 APPS-$(APP_MOUNT)+=mount
-APPS-later:=cut dirname wc tee 
+APPS-$(APP_WC)+=wc
+APPS-later:=cut dirname tee 
 BIN:=$(patsubst %,out/%,$(APPS-y))
 OBJ:=$(patsubst %,%.o,$(APPS-y))
 
@@ -33,7 +34,3 @@ out/%: %.o
 clean:
 	@rm -rf out
 	@rm -f $(OBJ)
-
-
-
-
