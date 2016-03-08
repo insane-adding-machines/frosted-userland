@@ -29,16 +29,16 @@
 #define GREETING "Welcome to frosted!\n"
 extern void *_init;
 
-const char idling_txt[10] = "idling";
-const char fresh_txt[10] = "fresh";
-const char serial_dev[12] = "/dev/ttyS0";
+char idling_txt[10] = "idling";
+char fresh_txt[10] = "fresh";
+char serial_dev[12] = "/dev/ttyS0";
 
 const char idling_path[30] = "/bin/idling";
 const char fresh_path[30] = "/bin/fresh";
 
 
-static const char *fresh_args[3] = {fresh_txt, serial_dev, NULL};
-static const char *idling_args[2] = {idling_txt, NULL};
+static char * const fresh_args[3] = {fresh_txt, serial_dev, NULL};
+static char * const idling_args[2] = {idling_txt, NULL};
 
 
 int main(void *arg)

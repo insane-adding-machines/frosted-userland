@@ -127,7 +127,7 @@ void signalHandler_child(int p){
     /* Wait for all dead processes.
      * We use a non-blocking call (WNOHANG) to be sure this signal handler will not
      * block if a child was cleaned up in another part of the program. */
-    while (waitpid(-1, NULL, WNOHANG) > 0) {
+    while (waitpid(-1, NULL, WNOHANG) < 0) {
     }
     printf("\r\n");
 }
@@ -328,7 +328,8 @@ void launchProg(char **args, int background){
      if (background == 0){
         int status;
         char exit_status_str[16];
-        waitpid(pid,&status,0);
+        while (waitpid(pid, &status, 0) != pid) {
+        }
         sprintf(exit_status_str, "%i", status);
         _setenv("?", exit_status_str);
      }else{
@@ -383,7 +384,8 @@ void fileIO(char * args[], char* inputFile, char* outputFile, int option)
         	kill(getpid(),SIGTERM);
         }
     }
-    wait(NULL);
+    while (waitpid(-1, NULL, 0) < 0) {
+    }
 }
 
 /**
@@ -523,7 +525,7 @@ void pipeHandler(char * args[]){
         	}
         }
 
-        waitpid(pid,NULL,0);
+        while (waitpid(pid,NULL,0) < 0) { }
 
         i++;
     }
