@@ -48,6 +48,8 @@ endmenu
 menu "Networking utils"
 config APP_IFCONFIG
     bool "ifconfig"
+config APP_HOST
+    bool "host"
 config APP_TELNETD
     bool "telnetd"
 config APP_NETCAT
