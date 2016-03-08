@@ -1,3 +1,23 @@
+/*
+ *      This file is part of frosted.
+ *
+ *      frosted is free software: you can redistribute it and/or modify
+ *      it under the terms of the GNU General Public License version 2, as
+ *      published by the Free Software Foundation.
+ *
+ *
+ *      frosted is distributed in the hope that it will be useful,
+ *      but WITHOUT ANY WARRANTY; without even the implied warranty of
+ *      MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ *      GNU General Public License for more details.
+ *
+ *      You should have received a copy of the GNU General Public License
+ *      along with frosted.  If not, see <http://www.gnu.org/licenses/>.
+ *
+ *      Authors: Daniele Lacamera
+ *
+ */
+
 #define _BSD_SOURCE
 #include <stdlib.h>
 #include <stddef.h>
@@ -77,13 +97,13 @@ char *inet_ntoa(struct in_addr a)
 }
 
 
-int 
+int
 ifdown(char *ifname)
 {
 	int sck;
 	struct ifreq eth;
 	int retval = -1;
-	
+
 
 	sck = socket(AF_INET, SOCK_DGRAM, 0);
 	if(sck < 0){
@@ -100,13 +120,13 @@ ifdown(char *ifname)
 	return 0;
 }
 
-int 
+int
 ifup(char *ifname)
 {
 	int sck;
 	struct ifreq eth;
 	int retval = -1;
-	
+
 
 	sck = socket(AF_INET, SOCK_DGRAM, 0);
 	if(sck < 0){
@@ -125,14 +145,14 @@ ifup(char *ifname)
 
 
 #if 0
-int 
+int
 ifconfig_mac(char *ifname, unsigned char *mac_address)
 {
 	int sck;
 	struct ifreq eth;
 	int retval = -1;
 	int e;
-	
+
 	sck = socket(AF_INET, SOCK_DGRAM, 0);
 	if(sck < 0){
 		return retval;
@@ -164,7 +184,7 @@ ipfail:
 }
 #endif
 
-int 
+int
 ifconfig(char *ifname, char *address, char *netmask)
 {
 	int sck;
@@ -173,7 +193,7 @@ ifconfig(char *ifname, char *address, char *netmask)
 	struct in_addr tmpaddr;
 	int retval = -1;
 	int e;
-	
+
 	sck = socket(AF_INET, SOCK_DGRAM, 0);
 	if(sck < 0){
 		return retval;
@@ -194,7 +214,7 @@ ifconfig(char *ifname, char *address, char *netmask)
 	memcpy (&eth.ifr_addr, &addr, sizeof (struct sockaddr_in));
 
 	if(ioctl(sck, SIOCSIFADDR, &eth) < 0){
-	       	goto ipfail; 
+	       	goto ipfail;
 	}
 
 	nmask.sin_family = AF_INET;
@@ -203,7 +223,7 @@ ifconfig(char *ifname, char *address, char *netmask)
 	memcpy (&eth.ifr_netmask, &nmask, sizeof (struct sockaddr_in));
 
 	if(ioctl(sck, SIOCSIFNETMASK, &eth) < 0){
-	       	goto ipfail; 
+	       	goto ipfail;
 	}
 	close(sck);
 	return 0;
@@ -231,7 +251,7 @@ int ifconf_getproperties(char *ifname, uint8_t *macaddr, struct sockaddr_in *add
 
 	// save interface name
 	strcpy(ifr.ifr_name, ifname);
-	
+
 	// IP Address
 	if (ioctl(sck, SIOCGIFADDR, &ifr) < 0) {
 		close(sck);
@@ -264,28 +284,28 @@ int ifconf_getproperties(char *ifname, uint8_t *macaddr, struct sockaddr_in *add
 		memcpy( &nmask, (struct sockaddr_in *) &ifr.ifr_netmask, sizeof(struct sockaddr_in));
 	}
 
-	if (macaddr) 
+	if (macaddr)
 		memcpy(macaddr, pmac, 6);
 	if (address)
-		memcpy(address, &addr, sizeof(struct sockaddr_in));	
+		memcpy(address, &addr, sizeof(struct sockaddr_in));
 	if (netmask)
-		memcpy(netmask, &nmask, sizeof(struct sockaddr_in));	
+		memcpy(netmask, &nmask, sizeof(struct sockaddr_in));
 	if (broadcast)
-		memcpy(broadcast, &bcast, sizeof(struct sockaddr_in));	
+		memcpy(broadcast, &bcast, sizeof(struct sockaddr_in));
 
 
-	if (ioctl(sck, SIOCGIFFLAGS, &ifr) < 0){ 
+	if (ioctl(sck, SIOCGIFFLAGS, &ifr) < 0){
 		close(sck);
 		return -1;
 	}
 
 	close(sck);
 	return  (ifr.ifr_flags & IFF_UP);
-	
+
 }
 
 #if 0
-int 
+int
 iflinksense(char *ifname)
 {
 	int sck;
@@ -316,7 +336,7 @@ iflinksense(char *ifname)
 }
 #endif
 
-int ifconf_status(char *ifname) { return ifconf_getproperties(ifname, NULL, NULL, NULL, NULL); } 
+int ifconf_status(char *ifname) { return ifconf_getproperties(ifname, NULL, NULL, NULL, NULL); }
 int ifconf_getmac(char *ifname, uint8_t *mac) { return ifconf_getproperties(ifname, mac, NULL, NULL, NULL); }
 int ifconf_getaddress(char *ifname, struct sockaddr_in *address) { return ifconf_getproperties(ifname, NULL, address, NULL, NULL); }
 int ifconf_getnetmask(char *ifname, struct sockaddr_in *netmask) { return ifconf_getproperties(ifname, NULL, NULL, netmask, NULL); }
@@ -373,7 +393,7 @@ int main(int argc, char *argv[])
         for (i = 0; i < ret; i++) {
             if ((ifbuffer[i] == '\r') || (ifbuffer[i] == ':'))
                 ifbuffer[i] = '\0';
-            if (ifbuffer[i] == '\n') { 
+            if (ifbuffer[i] == '\n') {
                     ifbuffer[i] = '\0';
                 if (prev) {
                     ifconf_show(prev);
@@ -382,7 +402,7 @@ int main(int argc, char *argv[])
             }
         }
         exit(0);
-    } 
+    }
     memset(&ifr, 0, sizeof(struct ifreq));
 
     if (argc == 2) {
@@ -404,5 +424,3 @@ int main(int argc, char *argv[])
 
     usage(argv[0]);
 }
-
-

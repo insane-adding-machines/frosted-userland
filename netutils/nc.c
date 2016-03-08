@@ -1,3 +1,23 @@
+/*
+ *      This file is part of frosted.
+ *
+ *      frosted is free software: you can redistribute it and/or modify
+ *      it under the terms of the GNU General Public License version 2, as
+ *      published by the Free Software Foundation.
+ *
+ *
+ *      frosted is distributed in the hope that it will be useful,
+ *      but WITHOUT ANY WARRANTY; without even the implied warranty of
+ *      MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ *      GNU General Public License for more details.
+ *
+ *      You should have received a copy of the GNU General Public License
+ *      along with frosted.  If not, see <http://www.gnu.org/licenses/>.
+ *
+ *      Authors: Daniele Lacamera
+ *
+ */
+
 #include <errno.h>
 #include <sys/socket.h>
 #include <netinet/in.h>
@@ -73,7 +93,7 @@ static int parse_conf(struct netcat_conf *conf, int argc, char *argv[])
         else if (!conf->mode) {
             if (!conf->host)
                 conf->host = argv[i];
-            else if (!conf->port) 
+            else if (!conf->port)
                 conf->port = atoi(argv[i]);
             else
                 fprintf(stderr, "Invalid argument '%s'\r\n", argv[i]);
@@ -95,12 +115,12 @@ static int parse_conf(struct netcat_conf *conf, int argc, char *argv[])
         }
     }
     if (conf->mode)
-        fprintf(stderr, "netcat running in listen mode, proto: %s listening port: %d\r\n", 
-            conf->socktype == SOCK_DGRAM?"UDP":"TCP", 
+        fprintf(stderr, "netcat running in listen mode, proto: %s listening port: %d\r\n",
+            conf->socktype == SOCK_DGRAM?"UDP":"TCP",
             conf->lport);
-    else 
-        fprintf(stderr, "netcat running in connect mode, proto: %s host: %s port: %d\r\n", 
-            conf->socktype == SOCK_DGRAM?"UDP":"TCP", 
+    else
+        fprintf(stderr, "netcat running in connect mode, proto: %s host: %s port: %d\r\n",
+            conf->socktype == SOCK_DGRAM?"UDP":"TCP",
             conf->host,
             conf->port);
     return 0;
@@ -122,7 +142,7 @@ int main(int argc, char *argv[])
     }
 
     sd = socket(AF_INET, conf.socktype, 0);
-    if (sd < 0) 
+    if (sd < 0)
     {
         fprintf(stderr, "Cannot open socket!\n");
         exit(1);
@@ -138,7 +158,7 @@ int main(int argc, char *argv[])
             fprintf(stderr, "Bind failed with %d - errno: %d (%s)\r\n", ret, errno, strerror(errno));
             exit(3);
         }
-    
+
         if (conf.socktype == SOCK_STREAM) {
             int asd;
             if (listen(sd, 3) < 0) {
@@ -175,7 +195,7 @@ int main(int argc, char *argv[])
         pfd[0].events = POLLIN;
         pfd[1].events = POLLIN | POLLHUP | POLLERR;
         pollret = poll(pfd, 2, -1);
-        if (pollret < 0) { 
+        if (pollret < 0) {
             fprintf(stderr, "nc: poll returned -1\r\n");
             break;
         }
@@ -214,5 +234,3 @@ int main(int argc, char *argv[])
     fprintf(stderr, "nc: interrupted\r\n");
     return 1;
 }
-
-

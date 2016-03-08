@@ -25,8 +25,6 @@ OBJ:=$(patsubst %,%.o,$(APPS-y))
 
 all: $(BIN)
 
-
-
 out/%: %.o
 	@mkdir -p out
 	@arm-frosted-eabi-gcc -o $@ $^ $(CFLAGS) $(LDFLAGS)

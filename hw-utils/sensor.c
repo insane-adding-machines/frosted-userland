@@ -1,3 +1,23 @@
+/*
+ *      This file is part of frosted.
+ *
+ *      frosted is free software: you can redistribute it and/or modify
+ *      it under the terms of the GNU General Public License version 2, as
+ *      published by the Free Software Foundation.
+ *
+ *
+ *      frosted is distributed in the hope that it will be useful,
+ *      but WITHOUT ANY WARRANTY; without even the implied warranty of
+ *      MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ *      GNU General Public License for more details.
+ *
+ *      You should have received a copy of the GNU General Public License
+ *      along with frosted.  If not, see <http://www.gnu.org/licenses/>.
+ *
+ *      Authors:
+ *
+ */
+
 #include <string.h>
 #include <strings.h>
 #include <stdio.h>
@@ -19,13 +39,13 @@ struct lsm303dlhc_ctrl_reg
 {
     uint8_t reg;
     uint8_t data;
-}; 
+};
 
 struct l3gd20_ctrl_reg
 {
     uint8_t reg;
     uint8_t data;
-}; 
+};
 
 
 #define L3GD20_WHOAMI              0x0F
@@ -95,7 +115,7 @@ int gyro(int argc, char *args[])
 
         while(i--) {
             read(fd, buffer ,6);
-            printf("%04X %04X %04X\n\r", *((uint16_t*)buffer), *((uint16_t*)&buffer[2]), *((uint16_t*)&buffer[4]) ); 
+            printf("%04X %04X %04X\n\r", *((uint16_t*)buffer), *((uint16_t*)&buffer[2]), *((uint16_t*)&buffer[4]) );
         }
     }
     close(fd);
@@ -136,7 +156,7 @@ int acc(int argc, char *args[])
         ioctl(fd, IOCTL_LSM303DLHC_WRITE_CTRL_REG, &lsm303dlhc);
 
         lsm303dlhc.reg = LSM303ACC_CTRL_REG1;
-        lsm303dlhc.data = 0x00;                 
+        lsm303dlhc.data = 0x00;
         ioctl(fd, IOCTL_LSM303DLHC_READ_CTRL_REG, &lsm303dlhc);
 
     }
@@ -178,7 +198,7 @@ int mag(int argc, char *args[])
         ioctl(fd, IOCTL_LSM303DLHC_WRITE_CTRL_REG, &lsm303dlhc);
 
         lsm303dlhc.reg = CRA_REG_M;
-        lsm303dlhc.data = 0x00;                 
+        lsm303dlhc.data = 0x00;
         ioctl(fd, IOCTL_LSM303DLHC_READ_CTRL_REG, &lsm303dlhc);
 
     }
@@ -199,4 +219,3 @@ int main(int argc, char *argv[])
     printf("Usage: %s [mag|gyro|acc] <cmd>\r\n");
     return 1;
 }
-

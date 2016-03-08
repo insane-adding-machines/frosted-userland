@@ -1,3 +1,23 @@
+/*
+ *      This file is part of frosted.
+ *
+ *      frosted is free software: you can redistribute it and/or modify
+ *      it under the terms of the GNU General Public License version 2, as
+ *      published by the Free Software Foundation.
+ *
+ *
+ *      frosted is distributed in the hope that it will be useful,
+ *      but WITHOUT ANY WARRANTY; without even the implied warranty of
+ *      MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ *      GNU General Public License for more details.
+ *
+ *      You should have received a copy of the GNU General Public License
+ *      along with frosted.  If not, see <http://www.gnu.org/licenses/>.
+ *
+ *      Authors: brabo
+ *
+ */
+
 #include <stdint.h>
 #include <stdio.h>
 #include <fcntl.h>
@@ -6,9 +26,7 @@
 #include <stdlib.h>
 #include <string.h>
 
-
 # define LED0 "/dev/led0"
-
 
 /* dits - morse short blink */
 int dits(int led)
@@ -20,7 +38,6 @@ int dits(int led)
     return 0;
 }
 
-
 /* dahs - morse long blink */
 int dahs(int led)
 {
@@ -30,7 +47,6 @@ int dahs(int led)
     sleep(100);
     return 0;
 }
-
 
 /* morse blink word on a led */
 int blinkm(int led, char *word) {
@@ -102,7 +118,6 @@ int blinkm(int led, char *word) {
 	}
 	return 0;
 }
-
 
 /* main - open led, handle arguments, if any, close led */
 int main(int argc, char *argv[])

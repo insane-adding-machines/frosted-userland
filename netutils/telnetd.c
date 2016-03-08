@@ -1,3 +1,23 @@
+/*
+ *      This file is part of frosted.
+ *
+ *      frosted is free software: you can redistribute it and/or modify
+ *      it under the terms of the GNU General Public License version 2, as
+ *      published by the Free Software Foundation.
+ *
+ *
+ *      frosted is distributed in the hope that it will be useful,
+ *      but WITHOUT ANY WARRANTY; without even the implied warranty of
+ *      MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ *      GNU General Public License for more details.
+ *
+ *      You should have received a copy of the GNU General Public License
+ *      along with frosted.  If not, see <http://www.gnu.org/licenses/>.
+ *
+ *      Authors: Daniele Lacamera, Maxime Vincent
+ *
+ */
+
 #include <netinet/in.h>
 #include <sys/types.h>
 #include <sys/socket.h>
@@ -26,7 +46,7 @@ int main(int argc, char *argv[])
     int lsd = socket(AF_INET, SOCK_STREAM, 0);
     struct sockaddr_in all = {};
 
-    if (lsd < 0) 
+    if (lsd < 0)
     {
         fprintf(stderr, "Cannot open socket!\n");
         exit(1);
@@ -39,7 +59,7 @@ int main(int argc, char *argv[])
         perror("bind");
         exit(3);
     }
-    
+
     if (listen(lsd, 3) < 0) {
         perror("listen");
         exit(2);
@@ -66,5 +86,3 @@ int main(int argc, char *argv[])
         }
     }
 }
-
-

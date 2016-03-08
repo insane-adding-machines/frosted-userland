@@ -1,10 +1,10 @@
-/*  
+/*
  *      This file is part of frosted.
  *
  *      frosted is free software: you can redistribute it and/or modify
- *      it under the terms of the GNU General Public License version 2, as 
+ *      it under the terms of the GNU General Public License version 2, as
  *      published by the Free Software Foundation.
- *      
+ *
  *
  *      frosted is distributed in the hope that it will be useful,
  *      but WITHOUT ANY WARRANTY; without even the implied warranty of
@@ -16,7 +16,8 @@
  *
  *      Authors: Daniele Lacamera, Maxime Vincent
  *
- */  
+ */
+
 #include "syscalls.h"
 #include "ioctl.h"
 #include <sys/socket.h>
@@ -56,7 +57,7 @@ int main(void *arg)
     /* open/close test */
     fd = open("/dev/null", 0, 0);
     close(fd);
-    
+
     /* socket/close test */
     sd = socket(AF_UNIX, SOCK_DGRAM, 0);
     close(sd);
@@ -66,7 +67,7 @@ int main(void *arg)
         execve(idling_path, idling_args, NULL);
         exit(1);
     }
- 
+
     if (vfork() == 0) {
         execve(fresh_path, fresh_args, NULL);
         exit(1);
@@ -77,4 +78,3 @@ int main(void *arg)
     }
     return 0;
 }
-

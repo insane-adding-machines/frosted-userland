@@ -1,22 +1,22 @@
 /*
- *      This file is part of frosted.
- *
- *      frosted is free software: you can redistribute it and/or modify
- *      it under the terms of the GNU General Public License version 2, as
- *      published by the Free Software Foundation.
- *
- *
- *      frosted is distributed in the hope that it will be useful,
- *      but WITHOUT ANY WARRANTY; without even the implied warranty of
- *      MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- *      GNU General Public License for more details.
- *
- *      You should have received a copy of the GNU General Public License
- *      along with frosted.  If not, see <http://www.gnu.org/licenses/>.
- *
- *      Authors: brabo
- *
- */
+*      This file is part of frosted.
+*
+*      frosted is free software: you can redistribute it and/or modify
+*      it under the terms of the GNU General Public License version 2, as
+*      published by the Free Software Foundation.
+*
+*
+*      frosted is distributed in the hope that it will be useful,
+*      but WITHOUT ANY WARRANTY; without even the implied warranty of
+*      MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+*      GNU General Public License for more details.
+*
+*      You should have received a copy of the GNU General Public License
+*      along with frosted.  If not, see <http://www.gnu.org/licenses/>.
+*
+*      Authors: brabo
+*
+*/
 
 #include "frosted_binutils.h"
 
@@ -59,19 +59,19 @@ int parse_opts(int argc, char *args[], struct ht *ht)
 	while ((c = getopt(argc, args, "tn:c:")) != -1) {
 		switch (c) {
 			case 'n':
-				ht->number = (strtol(optarg, NULL, 10) - 1);
-				ht->type = LINES;
-				count++;
-				break;
+			ht->number = (strtol(optarg, NULL, 10) - 1);
+			ht->type = LINES;
+			count++;
+			break;
 			case 'c':
-				ht->number = (strtol(optarg, NULL, 10) - 1);
-				ht->type = BYTES;
-				count++;
-				break;
+			ht->number = (strtol(optarg, NULL, 10) - 1);
+			ht->type = BYTES;
+			count++;
+			break;
 			default:
-				fprintf(stderr, "wc: invalid option -'%c'\r\n", c);
-				break;
-			}
+			fprintf(stderr, "wc: invalid option -'%c'\r\n", c);
+			break;
+		}
 	}
 
 	return count;

@@ -1,4 +1,3 @@
-
 /*
  *      This file is part of frosted.
  *
@@ -18,6 +17,7 @@
  *      Authors: Daniele Lacamera, Maxime Vincent
  *
  */
+
 #ifndef INCLUDED_FROSTED_BINUTILS
 #define INCLUDED_FROSTED_BINUTILS
 #include <string.h>
@@ -62,12 +62,12 @@ struct lsm303dlhc_ctrl_reg
 {
     uint8_t reg;
     uint8_t data;
-}; 
+};
 
 struct l3gd20_ctrl_reg
 {
     uint8_t reg;
     uint8_t data;
-}; 
+};
 
 #endif
