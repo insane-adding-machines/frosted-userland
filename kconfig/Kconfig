@@ -42,6 +42,10 @@ config APP_MOUNT
     bool "mount"
 config APP_WC
     bool "wc"
+config APP_HEAD
+    bool "head"
+config APP_TAIL
+    bool "tail"
 
 endmenu
 

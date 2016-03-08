@@ -17,7 +17,9 @@ APPS-$(APP_LN)+=ln
 APPS-$(APP_MKDIR)+=mkdir
 APPS-$(APP_MOUNT)+=mount
 APPS-$(APP_WC)+=wc
-APPS-later:=cut dirname tee 
+APPS-$(APP_HEAD)+=head
+APPS-$(APP_TAIL)+=tail
+APPS-later:=cut dirname tee
 BIN:=$(patsubst %,out/%,$(APPS-y))
 OBJ:=$(patsubst %,%.o,$(APPS-y))
 
