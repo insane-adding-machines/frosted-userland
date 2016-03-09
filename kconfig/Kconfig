@@ -46,6 +46,11 @@ config APP_HEAD
     bool "head"
 config APP_TAIL
     bool "tail"
+config APP_YES
+    bool "yes"
+config APP_SLEEP
+    bool "sleep"
+
 
 endmenu
 
