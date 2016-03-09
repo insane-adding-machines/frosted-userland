@@ -50,7 +50,8 @@ config APP_YES
     bool "yes"
 config APP_SLEEP
     bool "sleep"
-
+config APP_UPTIME
+    bool "uptime"
 
 endmenu
 

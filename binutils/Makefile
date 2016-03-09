@@ -21,6 +21,7 @@ APPS-$(APP_HEAD)+=head
 APPS-$(APP_TAIL)+=tail
 APPS-$(APP_YES)+=yes
 APPS-$(APP_SLEEP)+=sleep
+APPS-$(APP_UPTIME)+=uptime
 APPS-later:=cut dirname tee
 BIN:=$(patsubst %,out/%,$(APPS-y))
 OBJ:=$(patsubst %,%.o,$(APPS-y))
