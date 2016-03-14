@@ -1,5 +1,13 @@
 mainmenu "FROSTED Userspace content selection"
 menu "Libraries"
+    config LIB_WOLFSSL
+    bool "WolfSSL TLS + Encryption"
+    default n
+
+    config LIB_MONGOOSE
+    bool "Cesanta's Mongoose REST API library"
+    default n
+
 endmenu
 
 menu "Applications"

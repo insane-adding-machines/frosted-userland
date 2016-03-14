@@ -22,7 +22,7 @@ endif
 
 
 #Applications selection
-DIR-y+=binutils hw-utils netutils extra games
+DIR-y+=binutils hw-utils netutils extra games lib
 
 
 # COMPILER FLAGS -- Target CPU
@@ -54,6 +54,9 @@ binutils: FORCE
 	touch $@/out/dummy
 	make -C $@ LDFLAGS="$(LDFLAGS)" CFLAGS="$(CFLAGS)" CC=$(CC)
 
+lib: FORCE
+	make -C $@
+
 hw-utils: FORCE
 	mkdir -p $@/out
 	touch $@/out/dummy
@@ -79,6 +82,7 @@ clean:
 	@make -C netutils clean
 	@make -C hw-utils clean
 	@make -C games clean
+	@make -C lib clean
 	@rm -f $(APPS-y)
 	@rm -f *.img
 	@rm -f *.o
