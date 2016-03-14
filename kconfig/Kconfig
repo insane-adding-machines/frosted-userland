@@ -72,6 +72,8 @@ config APP_TELNETD
     bool "telnetd"
 config APP_NETCAT
     bool "netcat"
+config APP_HTTPD
+    bool "httpd"
 endmenu
 
 menu "Hardware utils"

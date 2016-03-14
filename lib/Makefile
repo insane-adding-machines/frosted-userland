@@ -13,7 +13,7 @@ libwolfssl.a:
 	make -C wolfssl -f ../Makefile.wolfssl
 
 mongoose.o: mongoose/mongoose.c
-	arm-frosted-eabi-gcc -c -o $@ $^ -D__unix__
+	arm-frosted-eabi-gcc -c -o $@ $^ -D__unix__ -DMG_DISABLE_POPEN
 
 libmongoose.a: mongoose.o
 	arm-frosted-eabi-ar cr $@ $^

@@ -22,7 +22,7 @@ endif
 
 
 #Applications selection
-DIR-y+=binutils hw-utils netutils extra games lib
+DIR-y+=lib binutils hw-utils netutils extra games
 
 
 # COMPILER FLAGS -- Target CPU
@@ -34,6 +34,7 @@ CFLAGS+=-nostartfiles
 CFLAGS+=-fPIC -mlong-calls -fno-common -msingle-pic-base -mno-pic-data-is-text-relative
 # Debugging
 CFLAGS+=-ggdb
+CFLAGS+=-I../lib/include
 
 # LINKER FLAGS
 LDFLAGS+=-fPIC -mlong-calls -fno-common -Wl,-elf2flt -lgloss
