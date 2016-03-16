@@ -48,7 +48,7 @@ apps.img: $(APPS-y) $(DIR-y)
 	@mv binutils/out/*.gdb $(PWD)/gdb || true
 	@mv hw-utils/out/*.gdb $(PWD)/gdb || true
 	@mv netutils/out/*.gdb $(PWD)/gdb || true
-	$(FROSTED)/tools/xipfstool $@ $(APPS-y) $(addsuffix /out/*,$(DIR-y))
+	$(FROSTED)/tools/xipfstool $@ $(APPS-y) $(addsuffix ,$(DIR-y))
 
 binutils: FORCE
 	mkdir -p $@/out
