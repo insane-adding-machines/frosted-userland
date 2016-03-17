@@ -56,6 +56,8 @@ binutils: FORCE
 	make -C $@ LDFLAGS="$(LDFLAGS)" CFLAGS="$(CFLAGS)" CC=$(CC)
 
 lib: FORCE
+	mkdir -p $@/out
+	touch $@/out/dummy
 	make -C $@
 
 hw-utils: FORCE
