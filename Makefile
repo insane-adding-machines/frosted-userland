@@ -43,12 +43,14 @@ all: apps.img
 	cp apps.img $(FROSTED)/
 
 
-apps.img: $(APPS-y) $(DIR-y)
-	@mkdir -p gdb
-	@mv binutils/out/*.gdb $(PWD)/gdb || true
-	@mv hw-utils/out/*.gdb $(PWD)/gdb || true
-	@mv netutils/out/*.gdb $(PWD)/gdb || true
-	$(FROSTED)/tools/xipfstool $@ $(APPS-y) $(addsuffix /out/*,$(DIR-y))
+apps.img: $(APPS-y) $(DIR-y) 
+	@find binutils/out/* -type f -executable | grep -v "gdb" | xargs mv -t $(PWD)/lib/out || true 
+	@find netutils/out/* -type f -executable | grep -v "gdb" | xargs mv -t $(PWD)/lib/out || true 
+	@find netutils/out/* -type f -executable | grep -v "gdb" | xargs mv -t $(PWD)/lib/out || true
+	@find binutils/out/* -type f -executable | grep "gdb" | xargs mv -t $(PWD)/lib/gdb || true 
+	@find hw-utils/out/* -type f -executable | grep "gdb" | xargs mv -t $(PWD)/lib/gdb || true 
+	@find netutils/out/* -type f -executable | grep "gdb" | xargs mv -t $(PWD)/lib/gdb || true
+	$(FROSTED)/tools/xipfstool $@ $(APPS-y) $(DIR-y) $(PWD)/extra
 
 binutils: FORCE
 	mkdir -p $@/out
@@ -57,6 +59,7 @@ binutils: FORCE
 
 lib: FORCE
 	mkdir -p $@/out
+	mkdir -p $@/gdb
 	touch $@/out/dummy
 	make -C $@
 
