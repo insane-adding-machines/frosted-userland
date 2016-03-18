@@ -7,6 +7,8 @@
 # PATH CONFIG
 FROSTED?=..
 PREFIX:=$(PWD)/build
+OUT:=$(PWD)/frosted-userland/lib/out
+GDB:=$(PWD)/frosted-userland/gdb
 
 # TOOLCHAIN CONFIG
 CROSS_COMPILE?=arm-frosted-eabi-
@@ -44,11 +46,11 @@ all: apps.img
 
 
 apps.img: $(APPS-y) $(DIR-y) 
-	@find binutils/out/* -type f -executable | grep -v "gdb" | xargs mv -t $(PWD)/lib/out || true 
-	@find netutils/out/* -type f -executable | grep -v "gdb" | xargs mv -t $(PWD)/lib/out || true 
+	@find binutils/out/* -type f -executable | grep -v "gdb" | xargs mv -t $(PWD)/lib/out || true
 	@find netutils/out/* -type f -executable | grep -v "gdb" | xargs mv -t $(PWD)/lib/out || true
-	@find binutils/out/* -type f -executable | grep "gdb" | xargs mv -t $(PWD)/lib/gdb || true 
-	@find hw-utils/out/* -type f -executable | grep "gdb" | xargs mv -t $(PWD)/lib/gdb || true 
+	@find netutils/out/* -type f -executable | grep -v "gdb" | xargs mv -t $(PWD)/lib/out || true
+	@find binutils/out/* -type f -executable | grep "gdb" | xargs mv -t $(PWD)/lib/gdb || true
+	@find hw-utils/out/* -type f -executable | grep "gdb" | xargs mv -t $(PWD)/lib/gdb || true
 	@find netutils/out/* -type f -executable | grep "gdb" | xargs mv -t $(PWD)/lib/gdb || true
 	$(FROSTED)/tools/xipfstool $@ $(APPS-y) $(DIR-y) $(PWD)/extra
 
