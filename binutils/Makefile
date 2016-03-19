@@ -23,16 +23,13 @@ APPS-$(APP_YES)+=yes
 APPS-$(APP_SLEEP)+=sleep
 APPS-$(APP_UPTIME)+=uptime
 APPS-later:=cut dirname tee
-BIN:=$(patsubst %,out/%,$(APPS-y))
+BIN:=$(patsubst %,../out/%,$(APPS-y))
 OBJ:=$(patsubst %,%.o,$(APPS-y))
 
 all: $(BIN)
 
-out/%: %.o
-	@mkdir -p out
+../out/%: %.o
 	@arm-frosted-eabi-gcc -o $@ $^ $(CFLAGS) $(LDFLAGS)
-	@mkdir -p out/gdb
-	@mv out/*.gdb out/gdb
 
 clean:
 	@rm -rf out

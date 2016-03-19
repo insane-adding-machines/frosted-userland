@@ -1,9 +1,6 @@
 # this makefile is to compile apps as a separate bFLT executable
 #
 #
--include ../kconfig/.config
--include ../config.mk
-
 # PATH CONFIG
 FROSTED?=..
 PREFIX:=$(PWD)/build
@@ -44,39 +41,39 @@ all: apps.img
 
 
 apps.img: $(APPS-y) $(DIR-y) 
-	@find binutils/out/* -type f -executable | grep -v "gdb" | xargs mv -t $(PWD)/lib/out || true
-	@find netutils/out/* -type f -executable | grep -v "gdb" | xargs mv -t $(PWD)/lib/out || true
-	@find netutils/out/* -type f -executable | grep -v "gdb" | xargs mv -t $(PWD)/lib/out || true
-	@find binutils/out/* -type f -executable | grep "gdb" | xargs mv -t $(PWD)/lib/gdb || true
-	@find hw-utils/out/* -type f -executable | grep "gdb" | xargs mv -t $(PWD)/lib/gdb || true
-	@find netutils/out/* -type f -executable | grep "gdb" | xargs mv -t $(PWD)/lib/gdb || true
-	$(FROSTED)/tools/xipfstool $@ $(APPS-y) $(DIR-y) $(PWD)/extra
+	mv out/*.gdb gdb/
+	$(FROSTED)/tools/xipfstool $@ $(APPS-y) out/*
 
 binutils: FORCE
-	mkdir -p $@/out
-	touch $@/out/dummy
+	mkdir -p out
+	mkdir -p gdb
 	make -C $@ LDFLAGS="$(LDFLAGS)" CFLAGS="$(CFLAGS)" CC=$(CC)
 
 lib: FORCE
-	mkdir -p $@/out
-	mkdir -p $@/gdb
-	touch $@/out/dummy
-	make -C $@
+	mkdir -p out
+	mkdir -p gdb
+	make -C $@ LDFLAGS="$(LDFLAGS)" CFLAGS="$(CFLAGS)" CC=$(CC)
 
 hw-utils: FORCE
-	mkdir -p $@/out
-	touch $@/out/dummy
+	mkdir -p out
+	mkdir -p gdb
 	make -C $@ LDFLAGS="$(LDFLAGS)" CFLAGS="$(CFLAGS)" CC=$(CC)
 
 netutils: FORCE
-	mkdir -p $@/out
-	touch $@/out/dummy
+	mkdir -p out
+	mkdir -p gdb
 	make -C $@ LDFLAGS="$(LDFLAGS)" CFLAGS="$(CFLAGS)" CC=$(CC)
 
 games: FORCE
-	mkdir -p $@/out
-	touch $@/out/dummy
+	mkdir -p out
+	mkdir -p gdb
 	make -C $@ LDFLAGS="$(LDFLAGS)" CFLAGS="$(CFLAGS)" CC=$(CC)
+
+extra: FORCE
+	mkdir -p out
+	mkdir -p gdb
+	make -C $@ LDFLAGS="$(LDFLAGS)" CFLAGS="$(CFLAGS)" CC=$(CC)
+	
 
 FORCE:
 
@@ -84,12 +81,7 @@ menuconfig:
 	@$(MAKE) -C kconfig/ menuconfig -f Makefile.frosted
 
 clean:
-	@make -C binutils clean
-	@make -C netutils clean
-	@make -C hw-utils clean
-	@make -C games clean
-	@make -C lib clean
-	@rm -f $(APPS-y)
+	$(foreach d,$(DIR-y),make -C $(d) clean;)
 	@rm -f *.img
 	@rm -f *.o
-	@rm -f *.gdb
+	@rm -rf gdb out
