@@ -43,59 +43,6 @@
 #define ntohs(x) __builtin_bswap16(x)
 #endif
 
-static int is_digit(char a)
-{
-    if (a < '0' || a > '9')
-        return 0;
-    return 1;
-}
-
-int inet_aton(const char *cp, struct in_addr *inp)
-{
-    int cnt = 0;
-    char p;
-    uint8_t buf[4] = {};
-    while((p = *cp++) != 0 && cnt < 4)
-    {
-        if (is_digit(p)) {
-            buf[cnt] = (uint8_t)((10 * buf[cnt]) + (p - '0'));
-        } else if (p == '.') {
-            cnt++;
-        } else {
-            return -1;
-        }
-    }
-    /* Handle short notation */
-    if (cnt == 1) {
-        buf[3] = buf[1];
-        buf[1] = 0;
-        buf[2] = 0;
-    } else if (cnt == 2) {
-        buf[3] = buf[2];
-        buf[2] = 0;
-    } else if (cnt != 3) {
-        /* String could not be parsed, return error */
-        return -1;
-    }
-
-    inp->s_addr = (buf[0] << 24) + (buf[1] << 16) + (buf[2] << 8) + buf[3];
-    inp->s_addr = htonl(inp->s_addr);
-    return 0;
-}
-
-static char inet_ntoa_str[20];
-char *inet_ntoa(struct in_addr a)
-{
-    int val[4];
-    memset(inet_ntoa_str, 0, 20);
-    val[0] = (a.s_addr & 0x000000FF);
-    val[1] = (a.s_addr & 0x0000FF00) >> 8;
-    val[2] = (a.s_addr & 0x00FF0000) >> 16;
-    val[3] = (a.s_addr & 0xFF000000) >> 24;
-    snprintf(inet_ntoa_str, 20, "%d.%d.%d.%d", val[0], val[1], val[2], val[3]);
-    return inet_ntoa_str;
-}
-
 
 int
 ifdown(char *ifname)
@@ -142,47 +89,6 @@ ifup(char *ifname)
 	close(sck);
 	return 0;
 }
-
-
-#if 0
-int
-ifconfig_mac(char *ifname, unsigned char *mac_address)
-{
-	int sck;
-	struct ifreq eth;
-	int retval = -1;
-	int e;
-
-	sck = socket(AF_INET, SOCK_DGRAM, 0);
-	if(sck < 0){
-		return retval;
-	}
-	memset(&eth, 0, sizeof(struct ifreq));
-	strncpy(eth.ifr_name,ifname,4);
-	eth.ifr_flags = IFF_UP|IFF_RUNNING|IFF_MULTICAST|IFF_BROADCAST;
-
-        /* Fill in the structure */
-        eth.ifr_hwaddr.sa_family = ARPHRD_ETHER;
-
-	memcpy (&eth.ifr_hwaddr.sa_data, mac_address, 6);
-
-        /* call the IOCTL */
-        if (ioctl(sck, SIOCSIFHWADDR, &eth) < 0) {
-                perror("ioctl(SIOCSIFHWADDR)");
-                goto ipfail;
-        }
-
-
-	close(sck);
-	return 0;
-
-ipfail:
-	e = errno;
-	close(sck);
-	errno = e;
-	return -1;
-}
-#endif
 
 int
 ifconfig(char *ifname, char *address, char *netmask)
@@ -260,16 +166,6 @@ int ifconf_getproperties(char *ifname, uint8_t *macaddr, struct sockaddr_in *add
 		memcpy( &addr, (struct sockaddr_in *) &ifr.ifr_addr, sizeof(struct sockaddr_in));
 	}
 
-    /*
-	// Mac Address
-	if(ioctl(sck, SIOCGIFHWADDR, &ifr) < 0) {
-		perror("ioctl(SIOCGIFHWADDR)");
-	} else {
-		memcpy(pmac, (unsigned char *)(&ifr.ifr_ifru.ifru_hwaddr.sa_data), 6);
-	}
-    */
-
-
 	// Broadcast Address
 	if (ioctl(sck, SIOCGIFBRDADDR, &ifr) < 0) {
 		perror("ioctl(SIOCGIFBRDADDR)");
@@ -303,39 +199,6 @@ int ifconf_getproperties(char *ifname, uint8_t *macaddr, struct sockaddr_in *add
 	return  (ifr.ifr_flags & IFF_UP);
 
 }
-
-#if 0
-int
-iflinksense(char *ifname)
-{
-	int sck;
-	struct ifreq eth;
-	int retval = -1;
-    struct ethtool_value ec;
-	sck = socket(AF_INET, SOCK_DGRAM, 0);
-	if(sck < 0){
-		return retval;
-	}
-	memset(&eth, 0, sizeof(struct ifreq));
-	strncpy(eth.ifr_name,ifname,4);
-
-    memset(&ec, 0, sizeof(struct ethtool_value));
-    ec.cmd = ETHTOOL_GLINK;
-    eth.ifr_data = (char *) &ec;
-
-    if (ioctl(sck, SIOCETHTOOL, &eth) < 0) {
-        close(sck);
-        return -1;
-    }
-	close(sck);
-
-    if (ec.data)
-        return 1;
-    else
-        return 0;
-}
-#endif
-
 int ifconf_status(char *ifname) { return ifconf_getproperties(ifname, NULL, NULL, NULL, NULL); }
 int ifconf_getmac(char *ifname, uint8_t *mac) { return ifconf_getproperties(ifname, mac, NULL, NULL, NULL); }
 int ifconf_getaddress(char *ifname, struct sockaddr_in *address) { return ifconf_getproperties(ifname, NULL, address, NULL, NULL); }
