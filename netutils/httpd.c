@@ -10,9 +10,19 @@
 static const char *s_http_port = ":80";
 static struct mg_serve_http_opts s_http_server_opts;
 
+static void handle_call(struct mg_connection *nc, struct http_message *hm) {
+  /* Send headers */
+  mg_printf(nc, "%s", "HTTP/1.1 200 OK\r\nTransfer-Encoding: chunked\r\n\r\n");
+
+  mg_send_http_chunk(nc, "It works!\r\n", 10);
+  mg_send_http_chunk(nc, "", 0);
+}
+
 static void ev_handler(struct mg_connection *nc, int ev, void *p) {
+  struct http_message *hm = (struct http_message *) p;
   if (ev == MG_EV_HTTP_REQUEST) {
-    mg_serve_http(nc, (struct http_message *) p, s_http_server_opts);
+    //mg_serve_http(nc, (struct http_message *) p, s_http_server_opts);
+    handle_call(nc, p);
   }
 }
 
@@ -26,7 +36,7 @@ int main(void) {
   // Set up HTTP server parameters
   mg_set_protocol_http_websocket(nc);
   s_http_server_opts.document_root = "/";  // Serve current directory
-  s_http_server_opts.dav_document_root = "/";  // Allow access via WebDav
+  //s_http_server_opts.dav_document_root = "/";  // Allow access via WebDav
   s_http_server_opts.enable_directory_listing = "yes";
 
   printf("Starting web server on port %s\n", s_http_port);

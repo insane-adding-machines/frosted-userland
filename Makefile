@@ -28,7 +28,7 @@ CFLAGS+=-DCORE_M3 -D__frosted__
 # COMPILER FLAGS -- No gcc libraries
 CFLAGS+=-nostartfiles
 # COMPILER FLAGS -- GOT/PIC
-CFLAGS+=-fPIC -mlong-calls -fno-common -msingle-pic-base -mno-pic-data-is-text-relative
+CFLAGS+=-fPIC -mlong-calls -fno-common -msingle-pic-base -mno-pic-data-is-text-relative -Wstack-usage=1024
 # Debugging
 CFLAGS+=-ggdb
 CFLAGS+=-I../lib/include
