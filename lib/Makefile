@@ -18,6 +18,7 @@ mongoose.o: mongoose/mongoose.c
 libmongoose.a: mongoose.o
 	arm-frosted-eabi-ar cr $@ $^
 	arm-frosted-eabi-ranlib $@
+	mkdir -p include
 	cp -a mongoose/mongoose.h include/
 
 
