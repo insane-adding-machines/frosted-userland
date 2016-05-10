@@ -29,6 +29,7 @@
 #include <fcntl.h>
 #include <termios.h>
 #include <unistd.h>
+#include <errno.h>
 #include <sys/stat.h>
 // Shell pid, pgid, terminal modes
 static pid_t GBSH_PID;
@@ -679,6 +680,11 @@ char *readline_tty(char *input, int size)
             const char del = 0x08;
             const char space = 0x20;
             int ret = read(STDIN_FILENO, got, 4);
+            if (ret < 0) {
+                printf("read: %s\r\n", strerror(errno));
+                shellPrompt();
+                continue;
+            }
 
             /* arrows */
             if ((ret == 3) && (got[0] == 0x1b)) {
@@ -913,12 +919,6 @@ int main(int argc, char *argv[]) {
         // We wait for user input
         /* fgets(line, MAXLINE, stdin); */
         while (readline(line, MAXLINE) == NULL);
-        if (interrupted) {
-            printf("^C\r\n");
-            fflush(stderr);
-            interrupted = 0;
-            continue;
-        }
 
         // If nothing is written, the loop is executed again
         if((tokens[0] = strtok(line," \r\n\t")) == NULL) continue;
