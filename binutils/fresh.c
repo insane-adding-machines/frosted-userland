@@ -677,44 +677,49 @@ char *readline_tty(char *input, int size)
         int out = STDOUT_FILENO;
         char got[5];
         int i, j;
+        int repeat = 0;
 
         while(len < size)
         {
             const char del = 0x08;
+            const char space = 0x20;
             int ret = read(STDIN_FILENO, got, 4);
 
             /* arrows */
             if ((ret == 3) && (got[0] == 0x1b)) {
                 char dir = got[2];
                 if (dir == 'A') {
-	                if (strlen(lastcmd) == 0) {
-        	            continue;
-                	}
+                    if ((strlen(lastcmd) == 0) || repeat) {
+                        continue;
+                    }
+                    repeat++;
 
-	                while (len > 0) {
-        	            write(STDOUT_FILENO, &del, 1);
-                	    printf( " ");
-	                    write(STDOUT_FILENO, &del, 1);
-        	            len--;
-                	}
-        	        len = strlen(lastcmd);
-        	        lastcmd[len] = 0x00;
-        	        len--;
-       	        	lastcmd[len] = 0x00;
-        	        pos = len;
-        	        printf( "%s", lastcmd);
-                	strcpy(input, lastcmd);
-	                continue;
-	        } else if (dir == 'B') {
-	        } else if (dir == 'C') {
-	        	if (pos < len) {
-	        		printf("%c", input[pos++]);
-	        	}
-	        } else if (dir == 'D') {
-	        	write(STDOUT_FILENO, &del, 1);
-	        	pos--;
-	        	continue;
-	        }
+                    while (len > 0) {
+                        write(STDOUT_FILENO, &del, 1);
+                        write(STDOUT_FILENO, &space, 1);
+                        write(STDOUT_FILENO, &del, 1);
+                        len--;
+                    }
+                    len = strlen(lastcmd);
+                    lastcmd[len] = 0x00;
+                    len--;
+                    lastcmd[len] = 0x00;
+                    pos = len;
+                    printf( "%s", lastcmd);
+                    fflush(stdout);
+                    strcpy(input, lastcmd);
+                    continue;
+                } else if (dir == 'B') {
+                } else if (dir == 'C') {
+                    if (pos < len) {
+                        printf("%c", input[pos++]);
+                        fflush(stdout);
+                    }
+                } else if (dir == 'D') {
+                    write(STDOUT_FILENO, &del, 1);
+                    pos--;
+                    continue;
+                }
             }
 
             if (ret > 3) {
@@ -728,9 +733,9 @@ char *readline_tty(char *input, int size)
                 	    if (pos < len) {
                     	for ( i = pos+1; i < len; i++) {
 	                	input[i] = input[i+1];
-        	        	printf("%c", input[i]);
+                        write(STDOUT_FILENO, &input[i], 1);
                 	}
-                    	printf(" ");
+                    write(STDOUT_FILENO, &space, 1);
 	                i = len - pos;
         	        while (i > 0) {
                 		write(STDOUT_FILENO, &del, 1);
@@ -748,7 +753,7 @@ char *readline_tty(char *input, int size)
             	}
                 continue;
             }
-            if ((ret > 0) && (got[0] >= 0x20 && got[0] <= 0x7e)) {
+            if ((ret > 0) && (got[0] >= 0x20) && (got[0] <= 0x7e)) {
                 for (i = 0; i < ret; i++) {
                     /* Echo to terminal */
                     if (got[i] >= 0x20 && got[i] <= 0x7e)
@@ -759,9 +764,9 @@ char *readline_tty(char *input, int size)
                 		}
                 		input[pos] = got[i];
                     	for ( j = pos + 1; j < len +1; j++) {
-                    		printf("%c", input[j]);
+                            write(STDOUT_FILENO, &input[j], 1);
                     	}
-                    	printf(" ");
+                        write(STDOUT_FILENO, &input[i], 1);
                     	j = len - pos + 1;
                     	while (j > 0) {
                     		write(STDOUT_FILENO, &del, 1);
@@ -780,12 +785,15 @@ char *readline_tty(char *input, int size)
             	input[len] = 0x0D;
                 input[len + 1] = '\0';
                 printf( "\r\n");
-                strncpy(lastcmd, input, 128);
+                fflush(stdout);
+                if (len > 0)
+                    strncpy(lastcmd, input, 128);
                 return input; /* CR (\r\n) */
             }
 
             if ((got[0] == 0x4)) {
                 printf( "\r\n");
+                fflush(stdout);
                 len = 0;
                 pos = 0;
                 break;
@@ -800,6 +808,7 @@ char *readline_tty(char *input, int size)
                 printf("\r\n");
                 shellPrompt();
                 printf("%s", input);
+                fflush(stdout);
                 continue;
             }
 
@@ -807,16 +816,16 @@ char *readline_tty(char *input, int size)
             if ((got[0] == 0x7F) || (got[0] == 0x08)) {
                 if (pos > 0) {
                     write(STDOUT_FILENO, &del, 1);
-                    printf( " ");
+                    write(STDOUT_FILENO, &space, 1);
                     write(STDOUT_FILENO, &del, 1);
                     pos--;
                     len--;
                     if (pos < len) {
                     	for ( i = pos; i < len; i++) {
                     		input[i] = input[i+1];
-                    		printf("%c", input[i]);
+                            write(STDOUT_FILENO, &input[i], 1);
                     	}
-                    	printf(" ");
+                        write(STDOUT_FILENO, &space, 1);
                     	i = len - pos + 1;
                     	while (i > 0) {
                     		write(STDOUT_FILENO, &del, 1);
@@ -832,6 +841,7 @@ char *readline_tty(char *input, int size)
             }
         }
         printf("\r\n");
+        fflush(stdout);
         if (len < 0)
             return NULL;
 
