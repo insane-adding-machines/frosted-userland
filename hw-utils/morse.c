@@ -32,9 +32,9 @@
 int dits(int led)
 {
     write(led, "1", 1);
-    sleep(100);
+    usleep(100000);
     write(led, "0", 1);
-    sleep(100);
+    usleep(100000);
     return 0;
 }
 
@@ -42,9 +42,9 @@ int dits(int led)
 int dahs(int led)
 {
     write(led, "1", 1);
-    sleep(300);
+    usleep(300000);
     write(led, "0", 1);
-    sleep(100);
+    usleep(100000);
     return 0;
 }
 
@@ -93,7 +93,7 @@ int blinkm(int led, char *word) {
 	while (*word != '\0') {
 		while (1) {
 			if (*word == ' ') {
-				sleep(200);
+				usleep(200000);
 				break;
 			} else if (*word >= 'a' && *word <= 'z') {
 				dec = 'a';
@@ -109,7 +109,7 @@ int blinkm(int led, char *word) {
 				dahs(led);
 				j++;
 			} else if (morse[(*word - dec)][j] == 0) {
-				sleep(200);
+				usleep(200000);
 				j = 0;
 				break;
 			}
@@ -145,7 +145,7 @@ int main(int argc, char *argv[])
 
 	do {
 		blinkm(led, argv[k]);
-		sleep(200);
+		usleep(200000);
 
 		k++;
 	} while (argc > k);

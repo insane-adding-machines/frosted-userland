@@ -23,12 +23,26 @@
 #include <sys/stat.h>
 #include <fcntl.h>
 #include <unistd.h>
+#include <signal.h>
+
+static int received_signal = 0;
+
+void usr1_hdlr(int signo)
+{
+    //sleep(1);
+    received_signal = signo;
+
+}
 
 int main(int argc, char *argv[])
 {
     int pid;
     int led[4];
     int i, j;
+    struct sigaction act = {};
+    act.sa_handler = usr1_hdlr;
+
+    sigaction(SIGUSR1, &act, NULL); 
 
 # define LED0 "/dev/led0"
 # define LED1 "/dev/led1"
@@ -50,10 +64,10 @@ int main(int argc, char *argv[])
                     for(j = 0; j < 4; j++)
                         write(led[j], &val, 1);
                 }
-                sleep(200);
+                usleep(200000);
             }
         }
     } else {
-        while(1) { sleep(1000); } /* GPIO unavailable, just sleep. */
+        while(1) { sleep(1); } /* GPIO unavailable, just sleep. */
     }
 }

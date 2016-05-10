@@ -21,23 +21,36 @@
 #include "frosted_binutils.h"
 #include <signal.h>
 
+void usage(char *name)
+{
+    printf("Usage: %s [-signo] pid\r\n", name);
+    exit(1);
+
+}
+
 int main(int argc, char *args[])
 {
     int pid;
-    if (argc != 2) {
-        printf("Usage: %s pid\r\n", args[0]);
-        exit(1);
+    int signo = SIGTERM;
+    if ((argc != 2) && (argc != 3)) {
+        usage(args[0]);
     }
-    pid = atoi(args[1]);
+    if (argc == 3) {
+        if (args[1][0] != '-')
+            usage(args[0]);
+        signo = atoi(args[1] + 1);
+        pid = atoi(args[2]);
+    } else {
+        pid = atoi(args[1]);
+    }
     if (pid < 1) {
-        printf("Usage: %s pid\r\n", args[0]);
-        exit(2);
+        usage(args[0]);
     }
     if (pid == 1) {
         printf("Error: Can't kill init!\r\n");
         exit(3);
     }
 
-    kill(pid, SIGTERM);
+    kill(pid, signo);
     exit(0);
 }

@@ -76,6 +76,7 @@ config APP_NETCAT
     bool "netcat"
 config APP_HTTPD
     bool "httpd"
+    depends on LIB_MONGOOSE
 endmenu
 
 menu "Hardware utils"
