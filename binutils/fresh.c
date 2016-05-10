@@ -132,18 +132,6 @@ void signalHandler_child(int p){
     printf("\r\n");
 }
 
-/**
- * Signal handler for SIGINT
- */
-void signalHandler_int(int p){
-    // We send a SIGTERM signal to the child process
-    if (kill(pid,SIGTERM) == 0){
-        printf("\r\nProcess %d received a SIGINT signal\r\n",pid);
-        no_reprint_prmpt = 1;
-    }else{
-        printf("\r\n");
-    }
-}
 
 /**
  *	Displays the prompt for the shell
@@ -154,6 +142,16 @@ void shellPrompt(){
     char hostn[] = "frosted";
     snprintf(prompt, 255, "root@%s %s # ", hostn, getcwd(currentDirectory, 128));
     write(STDOUT_FILENO, prompt, strlen(prompt));
+}
+
+/**
+ * Signal handler for SIGINT
+ */
+
+volatile static int interrupted = 0;
+void signalHandler_int(int p){
+    //shellPrompt();
+    interrupted++;
 }
 
 /**
@@ -306,9 +304,6 @@ void launchProg(char **args, int background){
      }
      // pid == 0 implies the following code is related to the child process
     if(pid==0){
-        // We set the child to ignore SIGINT signals (we want the parent
-        // process to handle them with signalHandler_int)
-        signal(SIGINT, SIG_IGN);
 
         // We set parent=<pathname>/simple-c-shell as an environment variable
         // for the child
@@ -877,6 +872,9 @@ int main(int argc, char *argv[]) {
     char line[MAXLINE]; // buffer for the user input
     char * tokens[LIMIT]; // array for the different tokens in the command
     int numTokens;
+    struct sigaction sigint_a = {};
+    sigint_a.sa_handler = signalHandler_int;
+
 
     no_reprint_prmpt = 0; 	// to prevent the printing of the shell
         					// after certain methods
@@ -887,6 +885,9 @@ int main(int argc, char *argv[]) {
         shell_init(argv[1]);
     else
         shell_init(NULL);
+
+
+    sigaction(SIGINT, &sigint_a, NULL);
 
     welcomeScreen();
     fprintf(stdout, "Current pid = %d\r\n", getpid());
@@ -912,6 +913,12 @@ int main(int argc, char *argv[]) {
         // We wait for user input
         /* fgets(line, MAXLINE, stdin); */
         while (readline(line, MAXLINE) == NULL);
+        if (interrupted) {
+            printf("^C\r\n");
+            fflush(stderr);
+            interrupted = 0;
+            continue;
+        }
 
         // If nothing is written, the loop is executed again
         if((tokens[0] = strtok(line," \r\n\t")) == NULL) continue;
