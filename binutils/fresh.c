@@ -309,6 +309,9 @@ void launchProg(char **args, int background){
         // We set parent=<pathname>/simple-c-shell as an environment variable
         // for the child
         //setenv("parent",getcwd(currentDirectory, 128),1);
+        //
+        if (background != 0)
+            setsid();
 
         // If we launch non-existing commands we end the process
         if (execvp(bin_arg0,args)==err){
