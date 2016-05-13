@@ -141,8 +141,12 @@ void shellPrompt(){
     // We print the prompt in the form "<user>@<host> <cwd> >"
     char prompt[256];
     char hostn[] = "frosted";
-    snprintf(prompt, 255, "root@%s %s # ", hostn, getcwd(currentDirectory, 128));
-    write(STDOUT_FILENO, prompt, strlen(prompt));
+    char * cwd = getcwd(currentDirectory, 128);
+    if ((int)cwd != -1)
+    {
+        snprintf(prompt, 255, "root@%s %s # ", hostn, cwd);
+        write(STDOUT_FILENO, prompt, strlen(prompt));
+    }
 }
 
 /**

@@ -86,6 +86,8 @@ config APP_RANDOM
     bool "Random number generator"
 config APP_SENSOR
     bool "Test for sensors"
+config APP_FBTEST
+    bool "Test for framebuffer"
 endmenu
 
 menu "Games"
