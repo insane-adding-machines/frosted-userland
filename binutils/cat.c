@@ -31,9 +31,9 @@ int main(int argc, char *args[])
             exit(-1);
         } else {
             int r;
-            char buf[10];
+            char buf[64];
             do {
-                r = read(fd, buf, 10);
+                r = read(fd, buf, 64);
                 if (r > 0) {
                     write(STDOUT_FILENO, buf, r);
                 }

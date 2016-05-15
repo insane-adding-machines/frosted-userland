@@ -26,6 +26,8 @@
 #include <signal.h>
 #include <unistd.h>
 #include <stdlib.h>
+#include <fcntl.h>
+#include <sys/wait.h>
 #define IDLE() while(1){do{}while(0);}
 #define GREETING "Welcome to frosted!\n"
 extern void *_init;
@@ -72,9 +74,8 @@ int main(void *arg)
         execve(fresh_path, fresh_args, NULL);
         exit(1);
     }
-
     while(1) {
-        pid = wait(&status);
+        pid = waitpid(-1, &status, 0);
     }
     return 0;
 }

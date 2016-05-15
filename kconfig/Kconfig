@@ -60,6 +60,8 @@ config APP_SLEEP
     bool "sleep"
 config APP_UPTIME
     bool "uptime"
+config APP_KLOGD
+    bool "klogd"
 
 endmenu
 

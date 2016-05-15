@@ -124,13 +124,14 @@ void welcomeScreen(){
 /**
  * signal handler for SIGCHLD
  */
+static int child_pid = 0;
+static int child_status = 0;
+
 void signalHandler_child(int p){
     /* Wait for all dead processes.
      * We use a non-blocking call (WNOHANG) to be sure this signal handler will not
      * block if a child was cleaned up in another part of the program. */
-    while (waitpid(-1, NULL, WNOHANG) < 0) {
-    }
-    printf("\r\n");
+    child_pid = waitpid(-1, &child_status, WNOHANG);
 }
 
 
@@ -329,11 +330,12 @@ void launchProg(char **args, int background){
      // If the process is not requested to be in background, we wait for
      // the child to finish.
      if (background == 0){
-        int status;
         char exit_status_str[16];
-        while (waitpid(pid, &status, 0) != pid) {
+
+        while (child_pid != pid) {
+            sleep(1); /* Will be interrupted by sigchld. */
         }
-        sprintf(exit_status_str, "%i", status);
+        sprintf(exit_status_str, "%d", child_status);
         _setenv("?", exit_status_str);
      }else{
          // In order to create a background process, the current process
@@ -387,7 +389,9 @@ void fileIO(char * args[], char* inputFile, char* outputFile, int option)
         	kill(getpid(),SIGTERM);
         }
     }
-    while (waitpid(-1, NULL, 0) < 0) {
+
+    while (child_pid != pid) {
+        sleep(60); /* Will be interrupted by sigchld */
     }
 }
 
@@ -527,8 +531,9 @@ void pipeHandler(char * args[]){
         		close(filedes2[1]);
         	}
         }
-
-        while (waitpid(pid,NULL,0) < 0) { }
+        while (child_pid != pid) {
+            sleep(60); /* Will be interrupted by sigchld. */
+        }
 
         i++;
     }
@@ -886,7 +891,10 @@ int main(int argc, char *argv[]) {
     char * tokens[LIMIT]; // array for the different tokens in the command
     int numTokens;
     struct sigaction sigint_a = {};
+    struct sigaction sigcld_a = {};
     sigint_a.sa_handler = signalHandler_int;
+    sigcld_a.sa_handler = signalHandler_child;
+    
 
 
     no_reprint_prmpt = 0; 	// to prevent the printing of the shell
@@ -901,6 +909,7 @@ int main(int argc, char *argv[]) {
 
 
     sigaction(SIGINT, &sigint_a, NULL);
+    sigaction(SIGCHLD, &sigcld_a, NULL);
 
     welcomeScreen();
     fprintf(stdout, "Current pid = %d\r\n", getpid());
