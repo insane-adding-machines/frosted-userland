@@ -49,22 +49,8 @@ int main(void *arg)
     volatile int i = (int)arg;
     volatile int pid;
     int status;
-    int fd, sd;
-    uint32_t *temp;
-    int testval = 42;
-    /* c-lib and init test */
-    temp = (uint32_t *)malloc(32);
-    free(temp);
 
-    /* open/close test */
-    fd = open("/dev/null", 0, 0);
-    close(fd);
 
-    /* socket/close test */
-    sd = socket(AF_UNIX, SOCK_DGRAM, 0);
-    close(sd);
-
-    /* Thread create test */
     if (vfork() == 0) {
         execve(idling_path, idling_args, NULL);
         exit(1);
