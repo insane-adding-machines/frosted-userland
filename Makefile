@@ -19,7 +19,7 @@ endif
 
 
 #Applications selection
-DIR-y+=lib binutils hw-utils netutils extra games
+DIR-y+=lib binutils hw-utils netutils games
 
 
 # COMPILER FLAGS -- Target CPU
@@ -41,7 +41,7 @@ all: apps.img
 
 
 apps.img: $(APPS-y) $(DIR-y) 
-	mv out/*.gdb gdb/
+	(mv out/*.gdb gdb/ 2>/dev/null) || true
 	$(FROSTED)/tools/xipfstool $@ $(APPS-y) out/*
 
 binutils: FORCE

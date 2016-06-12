@@ -93,6 +93,8 @@ config APP_FBTEST
 endmenu
 
 menu "Games"
+config APP_DOOM
+    bool "ID Software's DOOM"
 config APP_DICE
     bool "Roll the dice"
 endmenu
