@@ -20,6 +20,7 @@
 
 #include "frosted_binutils.h"
 #include <signal.h>
+#include <errno.h>
 
  int mount(const char *source, const char *target,
                           const char *filesystemtype, unsigned long mountflags,
@@ -48,8 +49,11 @@ int main(int argc, char *argv[])
         } while (r > 0);
     } else if (argc == 4) {
         if(mount(argv[1], argv[2], argv[3], 0, NULL) == 0) {
-            printf("Successfully mounted %s on %s, type=%s\n", argv[1], argv[2], argv[3]);
+            fprintf(stderr, "Successfully mounted %s on %s, type=%s\r\n", argv[1], argv[2], argv[3]);
+        } else {
+            fprintf(stderr, "Could not mount %s on %s (type %s): %s\r\n", argv[1], argv[2], argv[3], strerror(errno));
         }
     }
+    fflush(stderr);
     exit(0);
 }

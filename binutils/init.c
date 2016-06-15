@@ -40,7 +40,7 @@ const char idling_path[30] = "/bin/idling";
 const char fresh_path[30] = "/bin/fresh";
 
 
-static char * const fresh_args[3] = {fresh_txt, serial_dev, NULL};
+static char * const fresh_args[4] = {fresh_txt, "-t", serial_dev, NULL};
 static char * const idling_args[2] = {idling_txt, NULL};
 
 

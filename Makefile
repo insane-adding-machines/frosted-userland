@@ -40,8 +40,8 @@ all: apps.img
 	cp apps.img $(FROSTED)/
 
 
-apps.img: $(APPS-y) $(DIR-y) 
-	(mv out/*.gdb gdb/ 2>/dev/null) || true
+apps.img: $(APPS-y) $(DIR-y) sh
+	mv out/*.gdb gdb/ 2>/dev/null || true
 	$(FROSTED)/tools/xipfstool $@ $(APPS-y) out/*
 
 binutils: FORCE
@@ -69,10 +69,9 @@ games: FORCE
 	mkdir -p gdb
 	make -C $@ LDFLAGS="$(LDFLAGS)" CFLAGS="$(CFLAGS)" CC=$(CC)
 
-extra: FORCE
+sh: FORCE
 	mkdir -p out
-	mkdir -p gdb
-	make -C $@ LDFLAGS="$(LDFLAGS)" CFLAGS="$(CFLAGS)" CC=$(CC)
+	cp $@/* out/
 	
 
 FORCE:

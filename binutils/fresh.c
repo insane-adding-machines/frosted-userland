@@ -23,6 +23,7 @@
 #include <stdlib.h>
 #include <unistd.h>
 #include <string.h>
+#include <stdint.h>
 #include <sys/types.h>
 #include <signal.h>
 #include <sys/wait.h>
@@ -31,7 +32,6 @@
 #include <unistd.h>
 #include <errno.h>
 #include <sys/stat.h>
-// Shell pid, pgid, terminal modes
 static pid_t GBSH_PID;
 static pid_t GBSH_PGID;
 static int GBSH_IS_INTERACTIVE;
@@ -42,8 +42,6 @@ struct sigaction act_child;
 struct sigaction act_int;
 
 int no_reprint_prmpt;
-
-pid_t pid;
 
 struct env {
     char *key;
@@ -72,6 +70,8 @@ int puts_r(struct _reent *r, const char *s)
 {
     return strlen(s);
 }
+
+static int fresh_exec(char *arg0, char **argv);
 
 
 /**
@@ -124,8 +124,8 @@ void welcomeScreen(){
 /**
  * signal handler for SIGCHLD
  */
-static int child_pid = 0;
-static int child_status = 0;
+static volatile int child_pid = 0;
+static volatile int child_status = 0;
 
 void signalHandler_child(int p){
     /* Wait for all dead processes.
@@ -143,7 +143,7 @@ void shellPrompt(){
     char prompt[256];
     char hostn[] = "frosted";
     char * cwd = getcwd(currentDirectory, 128);
-    if ((int)cwd != -1)
+    if (cwd != NULL)
     {
         snprintf(prompt, 255, "root@%s %s # ", hostn, cwd);
         write(STDOUT_FILENO, prompt, strlen(prompt));
@@ -290,46 +290,118 @@ int manageEnviron(char * args[], int option){
 * Method for launching a program. It can be run in the background
 * or in the foreground
 */
-void launchProg(char **args, int background){
-     int err = -1;
-     struct stat st;
-     char bin_arg0[60] = "/bin/";
-     strcpy(bin_arg0 + 5, args[0]);
 
-     /* Find executable command */
-     if (stat(bin_arg0, &st) < 0) {
-         printf("Command not found.\r\n");
-         return;
-     }
+enum x_type {
+    X_ERR = -1,
+    X_SH = 0,
+    X_bFLT,
+    X_ELF,
+    X_UNK = 0x99,
+};
 
-     pid = vfork();
 
-     if(pid == -1) {
-         printf("Child process could not be created\r\n");
-         return;
-     }
-     // pid == 0 implies the following code is related to the child process
+static enum x_type get_x_type(char *arg)
+{
+    int fd = open(arg, O_RDONLY); 
+    char hdr[4] = { };
+    if (fd < 0) {
+        return X_ERR;
+    }
+    if (read(fd, hdr, 4) <= 0) {
+        close(fd);
+        return X_ERR;
+    }
+    close(fd);
+
+    if (strncmp(hdr, "bFLT", 4) == 0) 
+        return X_bFLT;
+    if (hdr[0] == '#' && hdr[1] == '!')
+        return X_SH;
+    if (strncmp(hdr + 1, "ELF", 3) == 0)
+        return X_ELF;
+
+    return X_UNK;
+}
+
+static int launchProg(char **args, int background){
+    int err = -1;
+    struct stat st;
+    char bin_arg0[60] = "/bin/";
+    enum x_type xt;
+    int pid;
+
+
+    /* Try to look for path */
+    if (!strchr(args[0], '/') || (stat(args[0], &st) < 0))
+        strcpy(bin_arg0 + 5, args[0]);
+    else
+        strcpy(bin_arg0, args[0]);
+
+    /* Find in path: executable command */
+    if (stat(bin_arg0, &st) < 0) {
+        printf("Command not found.\r\n");
+        return 1;
+    }
+
+    child_pid = 0;
+    pid = vfork();
+
+    if(pid == -1) {
+        printf("Child process could not be created\r\n");
+        return 1;
+    }
     if(pid==0){
 
-        // We set parent=<pathname>/simple-c-shell as an environment variable
-        // for the child
-        //setenv("parent",getcwd(currentDirectory, 128),1);
-        //
         if (background != 0)
             setsid();
 
-        // If we launch non-existing commands we end the process
-        if (execvp(bin_arg0,args)==err){
-        	printf("Command not found");
-        	kill(getpid(),SIGTERM);
+        /* Test file type */
+        xt = get_x_type(bin_arg0);
+        switch(xt) {
+            case X_bFLT:
+                // If we launch non-existing commands we end the process
+                if (execvp(bin_arg0,args)==err){
+                    printf("Command not found");
+                }
+                exit(255);
+
+            case X_SH:
+                {
+                    char fresh_bin[] = "/bin/fresh";
+                    char *aux[LIMIT] = { NULL };
+                    int i;
+                    aux[0] = fresh_bin;
+                    aux[1] = bin_arg0;
+
+                    i = 1;
+                    while(args[i] != NULL) {
+                        aux[i+1] = args[i++];
+                    }
+                    err = execvp(fresh_bin,aux);
+                    exit(err);
+                }
+
+            case X_ELF:
+                printf("Unable to execute ELF: format not (yet) supported.\r\n");
+                exit(254);
+
+            case X_UNK:
+                printf("Cannot execute: unknown file type.\r\n");
+                exit(254);
+
+            case X_ERR:
+                printf("Command not found");
+                exit(255);
+
         }
-     }
+        exit(255); /* Never reached */
+    }
 
-     // The following will be executed by the parent
+    // The following will be executed by the parent
 
-     // If the process is not requested to be in background, we wait for
-     // the child to finish.
-     if (background == 0){
+    // If the process is not requested to be in background, we wait for
+    // the child to finish.
+    if (background == 0){
         char exit_status_str[16];
 
         while (child_pid != pid) {
@@ -337,13 +409,15 @@ void launchProg(char **args, int background){
         }
         sprintf(exit_status_str, "%d", child_status);
         _setenv("?", exit_status_str);
-     }else{
-         // In order to create a background process, the current process
-         // should just skip the call to wait. The SIGCHILD handler
-         // signalHandler_child will take care of the returning values
-         // of the childs.
-         printf("Process created with PID: %d\r\n",pid);
-     }
+        return child_status;
+    }else{
+        // In order to create a background process, the current process
+        // should just skip the call to wait. The SIGCHILD handler
+        // signalHandler_child will take care of the returning values
+        // of the childs.
+        printf("Process created with PID: %d\r\n",pid);
+        return 0;
+    }
 }
 
 /**
@@ -353,6 +427,7 @@ void fileIO(char * args[], char* inputFile, char* outputFile, int option)
 {
     int err = -1;
     int fileDescriptor; // between 0 and 19, describing the output or input file
+    int pid;
 
     if((pid=vfork())==-1){
         printf("Child process could not be created\r\n");
@@ -402,17 +477,11 @@ void pipeHandler(char * args[]){
     // File descriptors
     int filedes[2]; // pos. 0 output, pos. 1 input of the pipe
     int filedes2[2];
-
     int num_cmds = 0;
-
     char *command[LIMIT];
-
-
     pid_t pid;
-
     int err = -1;
     int end = 0;
-
     // Variables used for the different loops
     int i = 0;
     int j = 0;
@@ -542,22 +611,22 @@ void pipeHandler(char * args[]){
 /**
 * Method used to handle the commands entered via the standard input
 */
-int commandHandler(char * args[]){
+int commandHandler(char * args[], int argc){
     int i = 0;
     int j = 0;
 
     int fileDescriptor;
     int standardOut;
 
-    int aux;
+    int aux = -1;
     int background = 0;
 
-    char *args_aux[8] = { NULL };
+    char *args_aux[LIMIT] = { NULL };
 
 
     // We look for the special characters and separate the command itself
     // in a new array for the arguments
-    while ( args[j] != NULL){
+    while ( j < argc ){
         if ( (strcmp(args[j],">") == 0) || (strcmp(args[j],"<") == 0) || (strcmp(args[j],"&") == 0)){
         	break;
         }
@@ -616,14 +685,14 @@ int commandHandler(char * args[]){
     }
     // 'unsetenv' command to undefine environment variables
     else if (strcmp(args[0],"unsetenv") == 0) manageEnviron(args,2);
-    else{
+    else {
         // If none of the preceding commands were used, we invoke the
         // specified program. We have to detect if I/O redirection,
         // piped execution or background execution were solicited
         while (args[i] != NULL && background == 0){
         	// If background execution was solicited (last argument '&')
         	// we exit the loop
-        	if (strcmp(args[i],"&") == 0){
+            if (strcmp(args[i],"&") == 0){
         		background = 1;
         	// If '|' is detected, piping was solicited, and we call
         	// the appropriate method that will handle the different
@@ -663,10 +732,9 @@ int commandHandler(char * args[]){
         }
         // We launch the program with our method, indicating if we
         // want background execution or not
-        launchProg(args_aux,background);
+        return launchProg(args_aux,background);
 
     }
-return 1;
 }
 
 void pointer_shift(int *a, int s, int n) {
@@ -881,51 +949,131 @@ static char *readline(char *input, int len)
     else
         return readline_notty(input, len);
 }
+        
+
+static int parseLine(char *line) {
+    char * tokens[LIMIT] = { };
+    char *end = NULL;
+    char *saveptr;
+    int numTokens;
+
+    if((tokens[0] = strtok_r(line," \r\n\t", &saveptr)) == NULL) 
+        return 0;
+
+    if (tokens[0][0] == '#')
+        return 0;
+
+    end = strchr(tokens[0], '#');
+    if (end)
+        *end = (char)0;
+
+    for (numTokens = 1; numTokens < LIMIT; numTokens++) {
+        tokens[numTokens] = strtok_r(NULL, " \r\n\t", &saveptr);
+        if (tokens[numTokens] == NULL)
+            break;
+
+        /* Look for comment '#' */
+        end = strchr(tokens[numTokens], '#');
+        if (end) {
+            *end = (char)0;
+            if (strlen(tokens[numTokens]) == 0)
+                    numTokens--;
+            break;
+        }
+
+    }
+    if (numTokens > 0)
+        return commandHandler(tokens, numTokens);
+    else
+        return 0;
+}
+
+/* Fresh exec */
+
+static int fresh_exec(char *arg0, char **argv)
+{
+    struct stat st;
+    char *script_mem;
+    int fd;
+    int r, count = 0;
+    char *line, *eol;
+
+    if (stat(arg0, &st) < 0) {
+        fprintf(stderr, "Error: cannot stat script %s\n", arg0);
+        return 254;
+    }
+    script_mem = malloc(st.st_size + 1);
+    if (script_mem == NULL) {
+        fprintf(stderr, "Error: cannot allocate memory for script %s\n", arg0);
+        return 9;
+    }
+
+    fd = open(arg0, O_RDONLY);
+    if (fd < 0) {
+        fprintf(stderr, "Error: cannot read script %s\n", arg0);
+        free(script_mem);
+        return 254;
+    }
+
+    while ((r = read(fd, script_mem + count, st.st_size - count)) > 0) {
+        count += r;
+    }
+    if (count != st.st_size) {
+        fprintf(stderr, "Error while reading script %s\n", arg0);
+        free(script_mem);
+        return 254;
+    }
+    script_mem[count - 1] = '\0';
+
+    line = script_mem;
+    r = 0;
+    while (line) {
+        eol = strchr(line, '\n');
+        if (eol)
+            *(eol++) = '\0';
+        printf(" + %s\r\n", line);
+        r = parseLine(line);
+        line = eol;
+    }
+    free(script_mem);
+    return r;
+}
 
 
-/**
-* Main method of our shell
-*/
+
+/* Main */
+
 int main(int argc, char *argv[]) {
     char line[MAXLINE]; // buffer for the user input
-    char * tokens[LIMIT]; // array for the different tokens in the command
-    int numTokens;
+    int ret;
     struct sigaction sigint_a = {};
     struct sigaction sigcld_a = {};
+    int idx = 1;
     sigint_a.sa_handler = signalHandler_int;
     sigcld_a.sa_handler = signalHandler_child;
-    
-
-
     no_reprint_prmpt = 0; 	// to prevent the printing of the shell
         					// after certain methods
-    pid = -10; // we initialize pid to an pid that is not possible
-
-    // We call the method of initialization and the welcome screen
-    if (argc > 1)
-        shell_init(argv[1]);
-    else
-        shell_init(NULL);
-
 
     sigaction(SIGINT, &sigint_a, NULL);
     sigaction(SIGCHLD, &sigcld_a, NULL);
 
+    /* Check for "-t" arg */
+    if ((argc > 2) && (strcmp(argv[1], "-t") == 0)) {
+        shell_init(argv[2]);
+        idx = 3;
+    } else
+        shell_init(NULL);
+
+    /* Execute script */
+    if (argc > idx) {
+        ret = fresh_exec(argv[idx], &argv[idx]);
+        return ret;
+    }
+
     welcomeScreen();
     fprintf(stdout, "Current pid = %d\r\n", getpid());
 
-    // We set our extern char** environ to the environment, so that
-    // we can treat it later in other methods
-    environ = NULL;
-
-    // We set shell=<pathname>/simple-c-shell as an environment variable for
-    // the child
-    //setenv("shell",getcwd(currentDirectory, 128),1);
-
-    // Main loop, where the user input will be read and the prompt
-    // will be printed
     while(1){
-        // We print the shell prompt if necessary
         if (no_reprint_prmpt == 0) shellPrompt();
         no_reprint_prmpt = 0;
 
@@ -936,17 +1084,7 @@ int main(int argc, char *argv[]) {
         /* fgets(line, MAXLINE, stdin); */
         while (readline(line, MAXLINE) == NULL);
 
-        // If nothing is written, the loop is executed again
-        if((tokens[0] = strtok(line," \r\n\t")) == NULL) continue;
-
-        // We read all the tokens of the input and pass it to our
-        // commandHandler as the argument
-        numTokens = 1;
-        while((tokens[numTokens] = strtok(NULL, " \r\n\t")) != NULL) numTokens++;
-
-        commandHandler(tokens);
-
+        ret = parseLine(line);
     }
-
     exit(0);
 }
