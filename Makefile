@@ -39,10 +39,13 @@ LDFLAGS+=-fPIC -mlong-calls -fno-common -Wl,-elf2flt -lgloss
 all: apps.img
 	cp apps.img $(FROSTED)/
 
+xipfstool: xipfs
+	make -C $^
+	mv $^/xipfstool .
 
-apps.img: $(APPS-y) $(DIR-y) sh
+apps.img: $(APPS-y) $(DIR-y) sh xipfstool
 	mv out/*.gdb gdb/ 2>/dev/null || true
-	$(FROSTED)/tools/xipfstool $@ $(APPS-y) out/*
+	./xipfstool $@ $(APPS-y) out/*
 
 binutils: FORCE
 	mkdir -p out
@@ -84,3 +87,5 @@ clean:
 	@rm -f *.img
 	@rm -f *.o
 	@rm -rf gdb out
+	@make -C xipfs clean
+	@rm -f xipfstool

@@ -7,3 +7,6 @@
 [submodule "games/DOOM"]
 	path = games/DOOM
 	url = https://github.com/insane-adding-machines/DOOM.git
+[submodule "frosted-headers"]
+	path = frosted-headers
+	url = https://github.com/insane-adding-machines/frosted-headers.git
