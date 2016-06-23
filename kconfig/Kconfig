@@ -62,6 +62,8 @@ config APP_UPTIME
     bool "uptime"
 config APP_KLOGD
     bool "klogd"
+config APP_GDBSERVER
+    bool "gdbserver"
 
 endmenu
 

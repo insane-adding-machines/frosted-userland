@@ -23,6 +23,7 @@ APPS-$(APP_YES)+=yes
 APPS-$(APP_SLEEP)+=sleep
 APPS-$(APP_UPTIME)+=uptime
 APPS-$(APP_KLOGD)+=klogd
+APPS-$(APP_GDBSERVER)+=gdbserver
 APPS-later:=cut dirname tee
 BIN:=$(patsubst %,../out/%,$(APPS-y))
 OBJ:=$(patsubst %,%.o,$(APPS-y))
