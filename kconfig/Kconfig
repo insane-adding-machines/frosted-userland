@@ -48,6 +48,8 @@ config APP_MKDIR
     bool "mkdir"
 config APP_MOUNT
     bool "mount"
+config APP_PLAY
+    bool "play"
 config APP_WC
     bool "wc"
 config APP_HEAD
