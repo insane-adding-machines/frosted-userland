@@ -49,11 +49,14 @@ int main(void *arg)
     volatile int i = (int)arg;
     volatile int pid;
     int status;
+    struct stat st;
 
 
-    if (vfork() == 0) {
-        execve(idling_path, idling_args, NULL);
-        exit(1);
+    if (stat(idling_path, &st) == 0) {
+        if (vfork() == 0) {
+            execve(idling_path, idling_args, NULL);
+            exit(1);
+        }
     }
 
     if (vfork() == 0) {

@@ -68,6 +68,6 @@ int main(int argc, char *argv[])
             }
         }
     } else {
-        while(1) { sleep(1); } /* GPIO unavailable, just sleep. */
+        exit(1); /* GPIO unavailable, exit. */
     }
 }
