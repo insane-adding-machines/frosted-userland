@@ -66,6 +66,8 @@ config APP_KLOGD
     bool "klogd"
 config APP_GDBSERVER
     bool "gdbserver"
+config APP_REBOOT
+    bool "reboot"
 
 endmenu
 
