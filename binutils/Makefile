@@ -26,6 +26,7 @@ APPS-$(APP_KLOGD)+=klogd
 APPS-$(APP_GDBSERVER)+=gdbserver
 APPS-$(APP_PLAY)+=play
 APPS-$(APP_REBOOT)+=reboot
+APPS-$(APP_RENICE)+=renice
 APPS-later:=cut dirname tee
 BIN:=$(patsubst %,../out/%,$(APPS-y))
 OBJ:=$(patsubst %,%.o,$(APPS-y))

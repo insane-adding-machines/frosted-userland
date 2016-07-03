@@ -68,6 +68,8 @@ config APP_GDBSERVER
     bool "gdbserver"
 config APP_REBOOT
     bool "reboot"
+config APP_RENICE
+    bool "renice"
 
 endmenu
 
