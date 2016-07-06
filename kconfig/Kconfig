@@ -95,6 +95,8 @@ config APP_HTTPD
 endmenu
 
 menu "Hardware utils"
+config APP_BUSYLOOP
+    bool "busyloop - CPU busy test"
 config APP_MORSE
     bool "Morse led blinker"
 config APP_RANDOM
@@ -103,6 +105,8 @@ config APP_SENSOR
     bool "Test for sensors"
 config APP_FBTEST
     bool "Test for framebuffer"
+config APP_GPIOCTL
+    bool "gpioctl - Tools to set up GPIOs"
 endmenu
 
 menu "Games"

@@ -7,6 +7,8 @@ APPS-$(APP_RANDOM)+=random
 APPS-$(APP_SENSOR)+=sensor
 APPS-$(APP_MORSE)+=morse
 APPS-$(APP_FBTEST)+=fbtest
+APPS-$(APP_BUSYLOOP)+=busyloop
+APPS-$(APP_GPIOCTL)+=gpioctl
 BIN:=$(patsubst %,../out/%,$(APPS-y))
 OBJ:=$(patsubst %,%.o,$(APPS-y))
 
