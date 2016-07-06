@@ -27,7 +27,8 @@ APPS-$(APP_GDBSERVER)+=gdbserver
 APPS-$(APP_PLAY)+=play
 APPS-$(APP_REBOOT)+=reboot
 APPS-$(APP_RENICE)+=renice
-APPS-later:=cut dirname tee
+APPS-$(APP_CUT)+=cut
+APPS-later:=dirname tee
 BIN:=$(patsubst %,../out/%,$(APPS-y))
 OBJ:=$(patsubst %,%.o,$(APPS-y))
 

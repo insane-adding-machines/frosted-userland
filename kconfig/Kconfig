@@ -70,6 +70,9 @@ config APP_REBOOT
     bool "reboot"
 config APP_RENICE
     bool "renice"
+config APP_CUT
+    bool "cut"
+
 
 endmenu
 
