@@ -36,12 +36,13 @@ char idling_txt[10] = "idling";
 char fresh_txt[10] = "fresh";
 char serial_dev[12] = "/dev/ttyS0";
 
-const char idling_path[30] = "/bin/idling";
 const char fresh_path[30] = "/bin/fresh";
 
+static char initsh[] = "/bin/init.sh";
 
-static char * const fresh_args[4] = {fresh_txt, "-t", serial_dev, NULL};
-static char * const idling_args[2] = {idling_txt, NULL};
+
+static const char * fresh_args[4] = {fresh_txt, "-t", serial_dev, NULL};
+static const char * idling_args[2] = {idling_txt, NULL};
 
 
 int main(void *arg)
@@ -51,18 +52,30 @@ int main(void *arg)
     int status;
     struct stat st;
 
-
-    if (stat(idling_path, &st) == 0) {
+    if (stat(initsh, &st) == 0) {
+        fresh_args[1] = initsh;
+        fresh_args[2] = NULL;
         if (vfork() == 0) {
-            execve(idling_path, idling_args, NULL);
+            execve(fresh_path, fresh_args, NULL);
+            exit(1);
+        }
+    } else {
+        int fd = open("/dev/ttyS0", O_RDWR);
+        int stdo, stde;
+        if (fd >= 0) {
+            stdo = dup(fd);
+            stde = dup(fd);
+            fprintf(stderr, "WARNING: /bin/init.sh not found. Starting emergency shell.\r\n");
+            close(fd);
+            close(stdo);
+            close(stde);
+        }
+        if (vfork() == 0) {
+            execve(fresh_path, fresh_args, NULL);
             exit(1);
         }
     }
 
-    if (vfork() == 0) {
-        execve(fresh_path, fresh_args, NULL);
-        exit(1);
-    }
     while(1) {
         pid = waitpid(-1, &status, 0);
     }

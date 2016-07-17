@@ -82,6 +82,9 @@ void shell_init(char *file){
     int stdin_fileno, stdout_fileno, stderr_fileno;
 
     if (file) {
+        close(0);
+        close(1);
+        close(2);
         do {
             stdin_fileno = open(file, O_RDONLY, 0);
         } while (stdin_fileno < 0);
