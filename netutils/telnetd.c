@@ -43,8 +43,9 @@ const char *fresh_args[2] = {FRESH_BIN, NULL};
 
 int main(int argc, char *argv[])
 {
-    int lsd = socket(AF_INET, SOCK_STREAM, 0);
+    int lsd;
     struct sockaddr_in all = {};
+    lsd = socket(AF_INET, SOCK_STREAM, 0);
 
     if (lsd < 0)
     {
@@ -73,15 +74,20 @@ int main(int argc, char *argv[])
         socklen_t cli_len = sizeof(struct sockaddr_in);
         asd = accept(lsd, (struct sockaddr *)&client, &cli_len);
         if (asd > 0) {
-            printf("telnetd accepted connection\r\n");
             if (vfork() == 0) {
-                close(STDIN_FILENO);
-                close(STDOUT_FILENO);
-                close(STDERR_FILENO);
-                dup(asd); dup(asd); dup(asd);
+                if (asd != STDIN_FILENO) {
+                    close(STDIN_FILENO);
+                    dup(asd);
+                }
+                if (asd != STDOUT_FILENO) {
+                    close(STDOUT_FILENO);
+                    dup(asd);
+                }
+                if (asd != STDERR_FILENO) {
+                    close(STDERR_FILENO);
+                    dup(asd);
+                }
                 execv(FRESH_BIN, fresh_args);
-            } else {
-                // close(asd);
             }
         }
     }

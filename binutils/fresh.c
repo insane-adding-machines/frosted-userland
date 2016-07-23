@@ -1,8 +1,9 @@
 /*
   * Fresh v. 0.2
-  * Based on Simple C shell:
+  * Originally derived from Simple C shell:
   * Copyright (c) 2013 Juan Manuel Reyes
   * Copyright (c) 2015 Daniele Lacamera
+  * Copyright (c) 2015 brabo
   *
   * This program is free software: you can redistribute it and/or modify
   * it under the terms of the GNU General Public License as published by
@@ -42,15 +43,6 @@ struct sigaction act_child;
 struct sigaction act_int;
 
 int no_reprint_prmpt;
-
-struct env {
-    char *key;
-    char *value;
-    struct env *next;
-};
-
-
-struct env *Environment = NULL;
 
 /**
  * SIGNAL HANDLERS
@@ -103,9 +95,9 @@ void shell_init(char *file){
     // The shell is interactive if STDIN is the terminal
     GBSH_IS_INTERACTIVE = isatty(STDIN_FILENO);
 
-    if (!GBSH_IS_INTERACTIVE) {
-        printf("Warning: this shell is not a TTY.\r\n");
-    }
+//    if (!GBSH_IS_INTERACTIVE) {
+//        printf("Warning: this shell is not a TTY.\r\n");
+//    }
 }
 
 /**
@@ -164,55 +156,6 @@ void signalHandler_int(int p){
 }
 
 /**
- * Method to set an environment variable
- */
-static int _setenv(const char *key, const char *value)
-{
-    struct env *ee = Environment;
-
-    while (ee) {
-        if (strcmp(ee->key, key) == 0) {
-            strcpy(ee->value, value);
-            return 0;
-        }
-        ee = ee->next;
-    }
-
-
-    struct env *e = malloc(sizeof(struct env));
-    if (!e)
-        return -1;
-
-    e->key = malloc(strlen(key) + 1);
-    e->value = malloc(strlen(value) + 1);
-    /* TODO: check each failing malloc... */
-
-    strcpy(e->key, key);
-    strcpy(e->value, value);
-    e->next = Environment;
-    Environment = e;
-
-    return 0;
-}
-
-/**
- * Method to get an environment variable
- */
-char *_getenv(const char *key)
-{
-    struct env *e = Environment;
-
-    while (e) {
-        if (strcmp(e->key, key) == 0) {
-            return e->value;
-        }
-        e = e->next;
-    }
-
-    return NULL;
-}
-
-/**
  * Method to change directory
  */
 int changeDirectory(char* args[]){
@@ -229,63 +172,6 @@ int changeDirectory(char* args[]){
             return -1;
         }
     }
-    return 0;
-}
-
-/**
- * Method used to manage the environment variables with different
- * options
- */
-int manageEnviron(char * args[], int option){
-    /*
-    char **env_aux;
-    switch(option){
-        // Case 'environ': we print the environment variables along with
-        // their values
-        case 0:
-        	for(env_aux = environ; *env_aux != 0; env_aux ++){
-        		printf("%s\r\n", *env_aux);
-        	}
-        	break;
-        // Case 'setenv': we set an environment variable to a value
-        case 1:
-        	if((args[1] == NULL) && args[2] == NULL){
-        		printf("%s","Not enought input arguments\r\n");
-        		return -1;
-        	}
-
-        	// We use different output for new and overwritten variables
-        	if(getenv(args[1]) != NULL){
-        		printf("%s", "The variable has been overwritten\r\n");
-        	}else{
-        		printf("%s", "The variable has been created\r\n");
-        	}
-
-        	// If we specify no value for the variable, we set it to ""
-        	if (args[2] == NULL){
-        		setenv(args[1], "", 1);
-        	// We set the variable to the given value
-        	}else{
-        		setenv(args[1], args[2], 1);
-        	}
-        	break;
-        // Case 'unsetenv': we delete an environment variable
-        case 2:
-        	if(args[1] == NULL){
-        		printf("%s","Not enought input arguments\r\n");
-        		return -1;
-        	}
-        	if(getenv(args[1]) != NULL){
-        		unsetenv(args[1]);
-        		printf("%s", "The variable has been erased\r\n");
-        	}else{
-        		printf("%s", "The variable does not exist\r\n");
-        	}
-        break;
-
-
-    }
-    */
     return 0;
 }
 
@@ -411,8 +297,8 @@ static int launchProg(char **args, int background){
             sleep(1); /* Will be interrupted by sigchld. */
         }
         sprintf(exit_status_str, "%d", child_status);
-        _setenv("?", exit_status_str);
-        return child_status;
+        setenv("?", exit_status_str, 1);
+        return WEXITSTATUS(child_status);
     }else{
         // In order to create a background process, the current process
         // should just skip the call to wait. The SIGCHILD handler
@@ -659,36 +545,24 @@ int commandHandler(char * args[], int argc){
     }
     // 'cd' command to change directory
     else if (strcmp(args[0],"cd") == 0) changeDirectory(args);
-    // 'environ' command to list the environment variables
-    else if (strcmp(args[0],"environ") == 0){
-        if (args[j] != NULL){
-        	// If we want file output
-        	if ( (strcmp(args[j],">") == 0) && (args[j+1] != NULL) ){
-        		fileDescriptor = open(args[j+1], O_CREAT | O_TRUNC | O_WRONLY, 0600);
-        		// We replace de standard output with the appropriate file
-        		standardOut = dup(STDOUT_FILENO); 	// first we make a copy of stdout
-        											// because we'll want it back
-        		dup2(fileDescriptor, STDOUT_FILENO);
-        		close(fileDescriptor);
-        		manageEnviron(args,0);
-        		dup2(standardOut, STDOUT_FILENO);
-        	}
-        }else{
-        	manageEnviron(args,0);
-        }
-    }
     // 'setenv' command to set environment variables
     else if (strcmp(args[0],"setenv") == 0) {
-        _setenv(args[1], args[2]);
+        setenv(args[1], args[2], 1);
     }
     else if (strcmp(args[0],"getenv") == 0) {
-        char *value;
-        value = _getenv(args[1]);
-        printf("%s\r\n", *value);
+        if (argc > 1) {
+            char *value;
+            value = getenv(args[1]);
+            if (value)
+                printf("%s\r\n", value);
+            else
+                printf("getenv: variable '%s' is not set\r\n", args[1]);
+        }
     }
     // 'unsetenv' command to undefine environment variables
-    else if (strcmp(args[0],"unsetenv") == 0) manageEnviron(args,2);
-    else {
+    else if (strcmp(args[0],"unsetenv") == 0) {
+        unsetenv(args[1]);
+    } else {
         // If none of the preceding commands were used, we invoke the
         // specified program. We have to detect if I/O redirection,
         // piped execution or background execution were solicited
@@ -888,7 +762,7 @@ char *readline_tty(char *input, int size)
                 input[len] = 0;
                 printf("\r\n");
                 printf("Built-in commands: \r\n");
-                printf("\t pwd cd ");
+                printf("\t cd getenv pwd setenv");
                 printf("\r\n");
                 shellPrompt();
                 printf("%s", input);
@@ -959,16 +833,19 @@ static int parseLine(char *line) {
     char *end = NULL;
     char *saveptr;
     int numTokens;
+    
+    /* Find inline comments */
+    end = strchr(tokens[0], '#');
+    if (end)
+        *end = (char)0;
 
+    /* Find special symbols */
     if((tokens[0] = strtok_r(line," \r\n\t", &saveptr)) == NULL) 
         return 0;
 
     if (tokens[0][0] == '#')
         return 0;
 
-    end = strchr(tokens[0], '#');
-    if (end)
-        *end = (char)0;
 
     for (numTokens = 1; numTokens < LIMIT; numTokens++) {
         tokens[numTokens] = strtok_r(NULL, " \r\n\t", &saveptr);
@@ -1042,10 +919,7 @@ static int fresh_exec(char *arg0, char **argv)
     return r;
 }
 
-
-
 /* Main */
-
 int main(int argc, char *argv[]) {
     char line[MAXLINE]; // buffer for the user input
     int ret;

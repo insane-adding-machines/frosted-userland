@@ -28,7 +28,7 @@ int main(int argc, char *args[])
         fd = open(args[1], O_RDONLY);
         if (fd < 0) {
             printf("File not found.\r\n");
-            exit(-1);
+            exit(5);
         } else {
             int r;
             char buf[64];
