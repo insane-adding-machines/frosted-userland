@@ -73,8 +73,11 @@ int main(int argc, char *argv[])
         struct sockaddr_in client = {};
         socklen_t cli_len = sizeof(struct sockaddr_in);
         asd = accept(lsd, (struct sockaddr *)&client, &cli_len);
-        if (asd > 0) {
-            if (vfork() == 0) {
+        if (asd >= 0) {
+            pid = vfork();
+            if (pid == 0) {
+                close(lsd);
+                write(asd, "Welcome to frosted!\r\n", 21);
                 if (asd != STDIN_FILENO) {
                     close(STDIN_FILENO);
                     dup(asd);
@@ -88,7 +91,12 @@ int main(int argc, char *argv[])
                     dup(asd);
                 }
                 execv(FRESH_BIN, fresh_args);
+            } else {
+                close(asd);
             }
+        } else {
+            perror("accept");
+            exit(1);
         }
     }
 }
