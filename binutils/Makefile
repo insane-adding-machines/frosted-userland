@@ -29,6 +29,7 @@ APPS-$(APP_REBOOT)+=reboot
 APPS-$(APP_RENICE)+=renice
 APPS-$(APP_CUT)+=cut
 APPS-$(APP_GREP)+=grep
+APPS-$(APP_KILO)+=kilo
 APPS-later:=dirname tee
 BIN:=$(patsubst %,../out/%,$(APPS-y))
 OBJ:=$(patsubst %,%.o,$(APPS-y))

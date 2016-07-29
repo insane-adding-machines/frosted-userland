@@ -74,6 +74,8 @@ config APP_CUT
     bool "cut"
 config APP_GREP
     bool "grep"
+config APP_KILO
+    bool "kilo (text editor)"
 
 
 endmenu
