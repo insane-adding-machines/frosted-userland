@@ -835,7 +835,7 @@ static int parseLine(char *line) {
     int numTokens;
     
     /* Find inline comments */
-    end = strchr(tokens[0], '#');
+    end = strchr(line, '#');
     if (end)
         *end = (char)0;
 
