@@ -9,6 +9,7 @@ APPS-$(APP_MORSE)+=morse
 APPS-$(APP_FBTEST)+=fbtest
 APPS-$(APP_BUSYLOOP)+=busyloop
 APPS-$(APP_GPIOCTL)+=gpioctl
+APPS-$(APP_LATENCY)+=latency
 BIN:=$(patsubst %,../out/%,$(APPS-y))
 OBJ:=$(patsubst %,%.o,$(APPS-y))
 

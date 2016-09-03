@@ -109,6 +109,8 @@ config APP_FBTEST
     bool "Test for framebuffer"
 config APP_GPIOCTL
     bool "gpioctl - Tools to set up GPIOs"
+config APP_LATENCY
+    bool "process latency measurement"
 endmenu
 
 menu "Games"
