@@ -8,7 +8,6 @@ APPS-$(APP_NETCAT)+=nc
 APPS-$(APP_HOST)+=host
 APPS-$(APP_HTTPD)+=httpd
 
-CFLAGS-y+=-Ilib/include
 LIBS-$(LIB_MONGOOSE)+=../lib/libmongoose.a
 LIBS-$(LIB_WOLFSSL)+=../lib/libwolfssl.a
 
@@ -18,7 +17,7 @@ OBJ:=$(patsubst %,%.o,$(APPS-y))
 all: $(BIN)
 
 ../out/%: %.o
-	@arm-frosted-eabi-gcc -o $@ $^ $(CFLAGS) $(LDFLAGS) $(LIBS-y)
+	@arm-frosted-eabi-gcc -o $@ $^ $(CFLAGS) $(CFLAGS-y) $(LDFLAGS) $(LIBS-y) -lm
 
 clean:
 	@rm -f $(OBJ)

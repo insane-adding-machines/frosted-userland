@@ -5,6 +5,7 @@
 FROSTED?=..
 PREFIX:=$(PWD)/build
 
+-include kconfig/.config
 # TOOLCHAIN CONFIG
 CROSS_COMPILE?=arm-frosted-eabi-
 CC:=$(CROSS_COMPILE)gcc
@@ -31,7 +32,10 @@ CFLAGS+=-nostartfiles
 CFLAGS+=-fPIC -mlong-calls -fno-common -msingle-pic-base -mno-pic-data-is-text-relative -Wstack-usage=1024
 # Debugging
 CFLAGS+=-ggdb
-CFLAGS+=-I../lib/include
+CFLAGS+=-I../lib/include -I../lib/wolfssl
+
+CFLAGS-$(LIB_WOLFSSL)+=-DENABLE_SSL -DMG_ENABLE_SSL -DWOLFSSL_FROSTED
+CFLAGS+=$(CFLAGS-y)
 
 # LINKER FLAGS
 LDFLAGS+=-fPIC -mlong-calls -fno-common -Wl,-elf2flt -lgloss

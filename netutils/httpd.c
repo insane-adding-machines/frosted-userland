@@ -8,6 +8,7 @@
 #include "mongoose.h"
 
 static const char *s_http_port = ":80";
+static const char *s_https_port = ":443";
 static struct mg_serve_http_opts s_http_server_opts;
 
 static void handle_call(struct mg_connection *nc, struct http_message *hm) {
@@ -29,9 +30,17 @@ static void ev_handler(struct mg_connection *nc, int ev, void *p) {
 int main(void) {
   struct mg_mgr mgr;
   struct mg_connection *nc;
+  const char *port = NULL;
 
   mg_mgr_init(&mgr, NULL);
-  nc = mg_bind(&mgr, s_http_port, ev_handler);
+#ifdef ENABLE_SSL
+  port = s_https_port;
+  nc = mg_bind(&mgr, port, ev_handler);
+  printf("Enabling SSL in Mongoose: %s\n", mg_set_ssl(nc, (char *)1u, NULL));
+#else
+  port = s_http_port;
+  nc = mg_bind(&mgr, port, ev_handler);
+#endif
 
   // Set up HTTP server parameters
   mg_set_protocol_http_websocket(nc);
@@ -39,7 +48,7 @@ int main(void) {
   //s_http_server_opts.dav_document_root = "/";  // Allow access via WebDav
   s_http_server_opts.enable_directory_listing = "yes";
 
-  printf("Starting web server on port %s\n", s_http_port);
+  printf("Starting web server on port %s\n", port);
   for (;;) {
     mg_mgr_poll(&mgr, 1000);
   }

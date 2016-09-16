@@ -1,7 +1,7 @@
 -include ../kconfig/.config
 LIBS-y:=
-LIBS-$(LIB_MONGOOSE)+=libmongoose.a
 LIBS-$(LIB_WOLFSSL)+=libwolfssl.a
+LIBS-$(LIB_MONGOOSE)+=libmongoose.a
 
 
 
@@ -13,7 +13,7 @@ libwolfssl.a:
 	make -C wolfssl -f ../Makefile.wolfssl
 
 mongoose.o: mongoose/mongoose.c
-	arm-frosted-eabi-gcc -c -o $@ $^ -D__unix__ -DMG_DISABLE_POPEN -g -ggdb -O0 -DCS_DISABLE_STDIO -DFROSTED -DMG_DISABLE_WS_RANDOM_MASK -DMG_DISABLE_CGI $(CFLAGS) 
+	arm-frosted-eabi-gcc -c -o $@ $^ -D__unix__ -DMG_DISABLE_POPEN -g -ggdb -O0 -DCS_DISABLE_STDIO -DFROSTED -DMG_DISABLE_SOCKETPAIR -DMG_DISABLE_WS_RANDOM_MASK -DMG_DISABLE_PFS $(CFLAGS) 
 
 libmongoose.a: mongoose.o
 	arm-frosted-eabi-ar cr $@ $^
