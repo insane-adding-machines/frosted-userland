@@ -94,6 +94,9 @@ config APP_NETCAT
 config APP_HTTPD
     bool "httpd"
     depends on LIB_MONGOOSE
+
+config APP_STARWARS
+    bool "starwars"
 endmenu
 
 menu "Hardware utils"
