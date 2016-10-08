@@ -76,6 +76,8 @@ config APP_GREP
     bool "grep"
 config APP_KILO
     bool "kilo (text editor)"
+config APP_POWERCTL
+    bool "Remote power control (powerctl)"
 
 
 endmenu
