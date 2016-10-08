@@ -157,6 +157,15 @@ int main(int argc, char *argv[])
                     usage(argv[0]);
                 }
                 break;
+            case 'P':
+                cmd = IOCTL_GPIO_SET_PULLUPDOWN;
+                arg=&var;
+                if (strcmp(optarg,"pullup") == 0)
+                    var = IOCTL_GPIO_PUPD_PULLUP;
+                else if (strcmp(optarg, "pulldown") == 0)
+                    var = IOCTL_GPIO_PUPD_PULLDOWN;
+                else
+                    var = IOCTL_GPIO_PUPD_NONE;
             default: 
                 {
                     fprintf(stderr, "Unrecognized command '-%c'\r\n", opt);
