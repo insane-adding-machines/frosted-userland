@@ -112,8 +112,6 @@ config APP_RANDOM
     bool "Random number generator"
 config APP_SENSOR
     bool "Test for sensors (obsolete)"
-config APP_ACC
-    bool "Accelerometer test"
 config APP_FBTEST
     bool "Test for framebuffer"
 config APP_GPIOCTL
