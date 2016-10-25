@@ -31,7 +31,6 @@ APPS-$(APP_CUT)+=cut
 APPS-$(APP_GREP)+=grep
 APPS-$(APP_KILO)+=kilo
 APPS-$(APP_POWERCTL)+=powerctl
-APPS-$(APP_PTHREADS)+=pthreads
 APPS-later:=dirname tee
 BIN:=$(patsubst %,../out/%,$(APPS-y))
 OBJ:=$(patsubst %,%.o,$(APPS-y))

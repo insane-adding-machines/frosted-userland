@@ -78,8 +78,6 @@ config APP_KILO
     bool "kilo (text editor)"
 config APP_POWERCTL
     bool "Remote power control (powerctl)"
-config APP_PTHREADS
-    bool "Pthreads test (pthreads)"
 
 
 endmenu
@@ -111,9 +109,7 @@ config APP_MORSE
 config APP_RANDOM
     bool "Random number generator"
 config APP_SENSOR
-    bool "Test for sensors (obsolete)"
-config APP_ACC
-    bool "Accelerometer test"
+    bool "Test for sensors"
 config APP_FBTEST
     bool "Test for framebuffer"
 config APP_GPIOCTL

@@ -7,8 +7,6 @@
 #define __unix__
 #include "mongoose.h"
 
-#define ECC_CERT "/bin/ecc_ssl_cert.pem"
-
 static const char *s_http_port = ":80";
 static const char *s_https_port = ":443";
 static struct mg_serve_http_opts s_http_server_opts;
@@ -38,7 +36,7 @@ int main(void) {
 #ifdef ENABLE_SSL
   port = s_https_port;
   nc = mg_bind(&mgr, port, ev_handler);
-  printf("Enabling SSL in Mongoose: %s\n", mg_set_ssl(nc, ECC_CERT, NULL));
+  printf("Enabling SSL in Mongoose: %s\n", mg_set_ssl(nc, (char *)1u, NULL));
 #else
   port = s_http_port;
   nc = mg_bind(&mgr, port, ev_handler);
