@@ -118,6 +118,8 @@ config APP_GPIOCTL
     bool "gpioctl - Tools to set up GPIOs"
 config APP_LATENCY
     bool "process latency measurement"
+config APP_ACC
+    bool "Accelerometer tool (acc)"
 endmenu
 
 menu "Games"
