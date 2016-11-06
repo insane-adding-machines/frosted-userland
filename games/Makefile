@@ -4,6 +4,7 @@ CC?=arm-frosted-eabi-cc
 APPS-y:=
 
 APPS-$(APP_DICE)+=dice
+APPS-$(APP_BYTEBEAT)+=bytebeat
 BIN:=$(patsubst %,../out/%,$(APPS-y))
 OBJ:=$(patsubst %,%.o,$(APPS-y))
 

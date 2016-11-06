@@ -127,6 +127,8 @@ config APP_DOOM
     bool "ID Software's DOOM"
 config APP_DICE
     bool "Roll the dice"
+config APP_BYTEBEAT
+    bool "sample bytebeat"
 endmenu
 
 
