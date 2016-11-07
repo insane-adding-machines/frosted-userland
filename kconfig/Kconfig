@@ -129,6 +129,8 @@ config APP_DICE
     bool "Roll the dice"
 config APP_BYTEBEAT
     bool "sample bytebeat"
+config APP_GROOVY
+    bool "groovy - bytebeat positional generator"
 endmenu
 
 

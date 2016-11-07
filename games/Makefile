@@ -5,6 +5,7 @@ APPS-y:=
 
 APPS-$(APP_DICE)+=dice
 APPS-$(APP_BYTEBEAT)+=bytebeat
+APPS-$(APP_GROOVY)+=groovy
 BIN:=$(patsubst %,../out/%,$(APPS-y))
 OBJ:=$(patsubst %,%.o,$(APPS-y))
 
