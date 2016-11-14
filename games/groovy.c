@@ -15,7 +15,7 @@
  *      You should have received a copy of the GNU General Public License
  *      along with frosted.  If not, see <http://www.gnu.org/licenses/>.
  *
- *      Authors: brabo
+ *      Authors: danielinux
  *
  */
 
@@ -31,9 +31,26 @@
 #include <pthread.h>
 #include <sys/time.h>
 #include <sys/resource.h>
+#include <sys/ioctl.h>
 #define PLAY_SIZE 8192
 static int16_t x, y, z;
 static int lx, ly, lz, rx=100, ry=200, rz=300;
+static volatile int mode = 0;
+
+static int swfd[2] = { -1, -1};
+
+void mode_set(void) {
+    char c;
+    //printf("x y z: %hd %hd %hd\r\n", x,y,z);
+    if ((read(swfd[0], &c, 1) == 1) &&  (c == '0'))
+        mode = 1;
+    else if ((read(swfd[1], &c, 1) == 1) && (c == '0'))
+        mode = 2;
+    else
+        mode = 0;
+    //printf("mode = %d\n", mode);
+}
+
 
 void *acc_task(void *arg) {
     int fd;
@@ -87,10 +104,52 @@ void *acc_task(void *arg) {
             if (rz > 31)
                 rz = 31;
         }
-        //printf("x y z: %hd %hd %hd\r\n", x,y,z);
         usleep(30000);
     }
     return 0;
+}
+
+void switch_init(void)
+{
+    int fd = open("/dev/gpiomx", O_RDWR);
+    char sw0[] = "sw0";
+    char sw1[] = "sw1";
+    struct gpio_req req = { };
+    int val = IOCTL_GPIO_PUPD_PULLUP;
+    int yes = 1;
+    int i;
+
+    if (fd < 0) {
+        fprintf(stderr, "Error opening /dev/gpiomx: %s\r\n", strerror(errno));
+        exit(2);
+    }
+    req.name = sw0;
+    req.base = 3;
+    req.pin = 2;
+    if (ioctl(fd, IOCTL_GPIOMX_CREATE, &req) < 0) {
+        fprintf(stderr, "IOCTL: %s\r\n", strerror(errno));
+        exit(2);
+    }
+    req.name = sw1;
+    req.base = 1;
+    req.pin = 2;
+    if (ioctl(fd, IOCTL_GPIOMX_CREATE, &req) < 0) {
+        fprintf(stderr, "IOCTL: %s\r\n", strerror(errno));
+        exit(2);
+    }
+    close(fd);
+
+    /* SW 0 */
+    swfd[0] = open("/dev/sw0", O_RDWR);
+    swfd[1] = open("/dev/sw1", O_RDWR);
+    if ((swfd[0] < 0) || (swfd[1] < 0)) {
+        fprintf(stderr, "Error opening /dev/sw0 or /dev/sw1: %s\r\n", strerror(errno));
+        exit(2);
+    }
+    for (i = 0; i < 2; i++) {
+        ioctl(swfd[i], IOCTL_GPIO_SET_INPUT, &yes);
+        ioctl(swfd[i], IOCTL_GPIO_SET_PULLUPDOWN, &val);
+    }
 }
 
 int main(int argc, char *argv[])
@@ -100,7 +159,7 @@ int main(int argc, char *argv[])
     int t = 0;
     char *buffer;
     struct stat st;
-    pthread_t acc;
+    pthread_t acc, mt;
     dsp = open("/dev/dsp", O_WRONLY);
     if (dsp < 0) {
         fprintf(stderr, "Error opening /dev/dsp: %s\r\n", strerror(errno));
@@ -111,27 +170,44 @@ int main(int argc, char *argv[])
         fprintf(stderr, "Error allocating memory for %s: %s\r\n", argv[i], strerror(errno));
         exit(2);
     }
+
+    switch_init();
+    mode_set();
+
     pthread_create(&acc, NULL, acc_task, NULL);
     
 
     setpriority(PRIO_PROCESS, getpid(), -20);
     for(;;t++) { 
-        buffer[r] = 0;
-        if (rx)
-            buffer[r] |= ((t >> (rx >> 2)) | (t >> 4));
-        if (lx)
-            buffer[r] |= ((t << (lx >> 4)) | (t >> 4));
-        if (ry)
-            buffer[r] |= (t >> ry) | (t >> 12);
-        if (ly)
-            buffer[r] |= (t << ly) | (t >> 12);
-        if (rz)
-            buffer[r] |= ((t >> rz) & (t >> 6));
-        if (lz)
-            buffer[r] |= ((t << lz) & (t >> 6));
+        if (mode == 0) {
+            buffer[r] = 0;
+            if (rx)
+                buffer[r] |= ((t >> (rx >> 2)) | (t >> 4));
+            if (lx)
+                buffer[r] |= ((t << (lx >> 4)) | (t >> 4));
+            if (ry)
+                buffer[r] |= (t >> ry) | (t >> 12);
+            if (ly)
+                buffer[r] |= (t << ly) | (t >> 12);
+            if (rz)
+                buffer[r] |= ((t >> rz) & (t >> 6));
+            if (lz)
+                buffer[r] |= ((t << lz) & (t >> 6));
 
-        buffer[r++] *= (t >> 4);
-
+            buffer[r++] *= (t >> 4);
+        } else if (mode == 1) {
+        } else {
+            buffer[r] = 0;
+            if (rx)
+                buffer[r] |= ((t << 3 | t >> rx) & t >> 7);
+            if (lx)
+                buffer[r] |= ((t << 3 | t << lx) & t >> 7);
+            if (ry)
+                buffer[r] |= ((t << 2 | t >> ry) & t >> 10);
+            if (ly)
+                buffer[r] |= ((t << 2 | t << ly) & t >> 10);
+            r++;
+        }
         if (r >= PLAY_SIZE) {
             write(dsp, buffer, PLAY_SIZE);
             r = 0;
