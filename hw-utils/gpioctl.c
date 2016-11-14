@@ -91,7 +91,7 @@ int main(int argc, char *argv[])
     int retval;
     int gpioget, gpioset;
 
-    while ((opt = getopt(argc, argv, "t:rw:op:dis:c:")) != -1) {
+    while ((opt = getopt(argc, argv, "t:rw:op:P:dis:c:")) != -1) {
         switch (opt) {
             case 'c':
                 create = 1;
@@ -166,6 +166,7 @@ int main(int argc, char *argv[])
                     var = IOCTL_GPIO_PUPD_PULLDOWN;
                 else
                     var = IOCTL_GPIO_PUPD_NONE;
+                break;
             default: 
                 {
                     fprintf(stderr, "Unrecognized command '-%c'\r\n", opt);
