@@ -21,6 +21,12 @@
 #include "frosted_binutils.h"
 #include <dirent.h>
 
+#define ALLFLAG (1<<0)
+#define HUMANFLAG (1<<1)
+#define LONGFLAG (1<<2)
+
+char mag[] = " KMGT";
+
 int main(int argc, char *args[])
 {
     char *fname;
@@ -31,6 +37,34 @@ int main(int argc, char *args[])
     char type;
     int i;
     char ch_size[8] = "";
+    unsigned int flags;
+    int c;
+    extern int optind, optopt;
+    extern char *optarg;
+
+
+    if (argc < 1) {
+        fprintf(stderr, "Usage: ls [OPTION]... [FILE]...\n");
+        exit(1);
+    }
+
+    flags = 0;
+    while ((c = getopt(argc, (char **)args, "ahl")) != -1) {
+        switch (c) {
+        case 'a':
+            flags |= ALLFLAG;
+            break;
+        case 'h':
+            flags |= HUMANFLAG;
+            break;
+        case 'l':
+            flags |= LONGFLAG;
+            break;
+        default:
+            fprintf(stderr, "ls: invalid option -- '%c'\n", optopt);
+            exit(1);
+        }
+    }
 
     fname_start = malloc(MAX_FILE);
     ep = malloc(sizeof(struct dirent));
@@ -55,20 +89,36 @@ int main(int argc, char *args[])
             fname++;
 
         if (stat(fname, &st) == 0) {
-            printf(fname);
-            printf( "\t");
-            if (S_ISDIR(st.st_mode)) {
-                type = 'd';
-            } else if (S_ISLNK(st.st_mode)) {
-                type = 'l';
-            } else {
-                snprintf(ch_size, 8, "%lu", st.st_size);
-                type = 'f';
+            if ((!strncmp(fname, ".", 1) || !strncmp(fname, "..", 2)) && !(flags & ALLFLAG)) {
+                continue;
             }
+            printf(fname);
+            if (flags & LONGFLAG) {
+                printf( "\t");
+                if (S_ISDIR(st.st_mode)) {
+                    type = 'd';
+                } else if (S_ISLNK(st.st_mode)) {
+                    type = 'l';
+                } else {
+                    unsigned long size = st.st_size;;
+                    int order = 0;
+                    char magn;
+                    if (flags & HUMANFLAG) {
+                        while (size > 1000) {
+                            size /= 1000;
+                            order++;
+                        }
+                        magn = mag[order];
+                    }
 
-            printf( "%c", type);
-            printf( "    ");
-            printf( ch_size);
+                    snprintf(ch_size, 9, "%lu%c ", size, magn);
+                    type = 'f';
+                }
+
+                printf( "%c", type);
+                printf( "    ");
+                printf( ch_size);
+            }
             printf( "\r\n");
         } else {
             fprintf(stderr, "stat error on %s: %s.\r\n", fname, strerror(errno));
