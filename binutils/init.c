@@ -18,17 +18,21 @@
  *
  */
 
-#include "syscalls.h"
 #include "ioctl.h"
-#include <sys/socket.h>
-#include <string.h>
-#include <stdio.h>
-#include <signal.h>
-#include <unistd.h>
-#include <stdlib.h>
+#include "syscalls.h"
 #include <fcntl.h>
+#include <signal.h>
+#include <stdio.h>
+#include <stdlib.h>
+#include <string.h>
+#include <sys/socket.h>
 #include <sys/wait.h>
-#define IDLE() while(1){do{}while(0);}
+#include <unistd.h>
+#define IDLE()                                                                 \
+    while (1) {                                                                \
+        do {                                                                   \
+        } while (0);                                                           \
+    }
 #define GREETING "Welcome to frosted!\n"
 extern void *_init;
 
@@ -40,10 +44,8 @@ const char fresh_path[30] = "/bin/fresh";
 
 static char initsh[] = "/bin/init.sh";
 
-
-static const char * fresh_args[4] = {fresh_txt, "-t", serial_dev, NULL};
-static const char * idling_args[2] = {idling_txt, NULL};
-
+static char *fresh_args[4] = {fresh_txt, "-t", serial_dev, NULL};
+static char *idling_args[2] = {idling_txt, NULL};
 
 int main(void *arg)
 {
@@ -65,7 +67,8 @@ int main(void *arg)
         if (fd >= 0) {
             stdo = dup(fd);
             stde = dup(fd);
-            fprintf(stderr, "WARNING: /bin/init.sh not found. Starting emergency shell.\r\n");
+            fprintf(stderr, "WARNING: /bin/init.sh not found. Starting "
+                            "emergency shell.\r\n");
             close(fd);
             close(stdo);
             close(stde);
@@ -76,7 +79,7 @@ int main(void *arg)
         }
     }
 
-    while(1) {
+    while (1) {
         pid = waitpid(-1, &status, 0);
     }
     return 0;

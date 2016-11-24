@@ -19,7 +19,6 @@
   * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-
 #include <stdio.h>
 #include <stdlib.h>
 #include <unistd.h>
@@ -38,7 +37,6 @@ static pid_t GBSH_PGID;
 static int GBSH_IS_INTERACTIVE;
 static struct termios GBSH_TMODES;
 
-
 struct sigaction act_child;
 struct sigaction act_int;
 
@@ -51,9 +49,9 @@ int no_reprint_prmpt;
 void signalHandler_child(int p);
 // signal handler for SIGINT
 void signalHandler_int(int p);
-int changeDirectory(char * args[]);
+int changeDirectory(char *args[]);
 
-#define LIMIT 16 // max number of tokens for a command
+#define LIMIT 16    // max number of tokens for a command
 #define MAXLINE 256 // max number of characters from user input
 static char currentDirectory[128];
 static char lastcmd[128] = "";
@@ -65,12 +63,12 @@ int puts_r(struct _reent *r, const char *s)
 
 static int fresh_exec(char *arg0, char **argv);
 
-
 /**
  * Function used to initialize our shell. We used the approach explained in
  * http://www.gnu.org/software/libc/manual/html_node/Initializing-the-Shell.html
  */
-void shell_init(char *file){
+void shell_init(char *file)
+{
     int stdin_fileno, stdout_fileno, stderr_fileno;
 
     if (file) {
@@ -95,21 +93,22 @@ void shell_init(char *file){
     // The shell is interactive if STDIN is the terminal
     GBSH_IS_INTERACTIVE = isatty(STDIN_FILENO);
 
-//    if (!GBSH_IS_INTERACTIVE) {
-//        printf("Warning: this shell is not a TTY.\r\n");
-//    }
+    //    if (!GBSH_IS_INTERACTIVE) {
+    //        printf("Warning: this shell is not a TTY.\r\n");
+    //    }
 }
 
 /**
  * Method used to print the welcome screen of our shell
  */
-void welcomeScreen(){
-        printf("\r\n\t============================================\r\n");
-        printf("\t          Frosted shell - aka \"Fresh\"         \r\n");
-        printf("\t--------------------------------------------\r\n");
-        printf("\t             Licensed under GPL             \r\n");
-        printf("\t============================================\r\n");
-        printf("\r\n\r\n");
+void welcomeScreen()
+{
+    printf("\r\n\t============================================\r\n");
+    printf("\t          Frosted shell - aka \"Fresh\"         \r\n");
+    printf("\t--------------------------------------------\r\n");
+    printf("\t             Licensed under GPL             \r\n");
+    printf("\t============================================\r\n");
+    printf("\r\n\r\n");
 }
 
 /**
@@ -119,27 +118,28 @@ void welcomeScreen(){
 /**
  * signal handler for SIGCHLD
  */
-static volatile int child_pid = 0;
-static volatile int child_status = 0;
+static int child_pid = 0;
+static int child_status = 0;
 
-void signalHandler_child(int p){
+void signalHandler_child(int p)
+{
     /* Wait for all dead processes.
-     * We use a non-blocking call (WNOHANG) to be sure this signal handler will not
+     * We use a non-blocking call (WNOHANG) to be sure this signal handler will
+     * not
      * block if a child was cleaned up in another part of the program. */
     child_pid = waitpid(-1, &child_status, WNOHANG);
 }
 
-
 /**
  *	Displays the prompt for the shell
  */
-void shellPrompt(){
+void shellPrompt()
+{
     // We print the prompt in the form "<user>@<host> <cwd> >"
     char prompt[256];
     char hostn[] = "frosted";
-    char * cwd = getcwd(currentDirectory, 128);
-    if (cwd != NULL)
-    {
+    char *cwd = getcwd(currentDirectory, 128);
+    if (cwd != NULL) {
         snprintf(prompt, 255, "root@%s %s # ", hostn, cwd);
         write(STDOUT_FILENO, prompt, strlen(prompt));
     }
@@ -150,15 +150,17 @@ void shellPrompt(){
  */
 
 volatile static int interrupted = 0;
-void signalHandler_int(int p){
-    //shellPrompt();
+void signalHandler_int(int p)
+{
+    // shellPrompt();
     interrupted++;
 }
 
 /**
  * Method to change directory
  */
-int changeDirectory(char* args[]){
+int changeDirectory(char *args[])
+{
     // If we write no path (only 'cd'), then go to the home directory
     if (args[1] == NULL) {
         chdir(getenv("HOME"));
@@ -166,9 +168,9 @@ int changeDirectory(char* args[]){
     }
     // Else we change the directory to the one specified by the
     // argument, if possible
-    else{
+    else {
         if (chdir(args[1]) == -1) {
-        	printf(" %s: no such directory\r\n", args[1]);
+            printf(" %s: no such directory\r\n", args[1]);
             return -1;
         }
     }
@@ -188,11 +190,10 @@ enum x_type {
     X_UNK = 0x99,
 };
 
-
 static enum x_type get_x_type(char *arg)
 {
-    int fd = open(arg, O_RDONLY); 
-    char hdr[4] = { };
+    int fd = open(arg, O_RDONLY);
+    char hdr[4] = {};
     if (fd < 0) {
         return X_ERR;
     }
@@ -202,7 +203,7 @@ static enum x_type get_x_type(char *arg)
     }
     close(fd);
 
-    if (strncmp(hdr, "bFLT", 4) == 0) 
+    if (strncmp(hdr, "bFLT", 4) == 0)
         return X_bFLT;
     if (hdr[0] == '#' && hdr[1] == '!')
         return X_SH;
@@ -212,13 +213,13 @@ static enum x_type get_x_type(char *arg)
     return X_UNK;
 }
 
-static int launchProg(char **args, int background){
+static int launchProg(char **args, int background)
+{
     int err = -1;
     struct stat st;
     char bin_arg0[60] = "/bin/";
     enum x_type xt;
     int pid;
-
 
     /* Try to look for path */
     if (!strchr(args[0], '/') || (stat(args[0], &st) < 0))
@@ -235,53 +236,50 @@ static int launchProg(char **args, int background){
     child_pid = 0;
     pid = vfork();
 
-    if(pid == -1) {
+    if (pid == -1) {
         printf("Child process could not be created\r\n");
         return 1;
     }
-    if(pid==0){
-
+    if (pid == 0) {
         if (background != 0)
             setsid();
 
         /* Test file type */
         xt = get_x_type(bin_arg0);
-        switch(xt) {
-            case X_bFLT:
-                // If we launch non-existing commands we end the process
-                if (execvp(bin_arg0,args)==err){
-                    printf("Command not found");
-                }
-                exit(255);
-
-            case X_SH:
-                {
-                    char fresh_bin[] = "/bin/fresh";
-                    char *aux[LIMIT] = { NULL };
-                    int i;
-                    aux[0] = fresh_bin;
-                    aux[1] = bin_arg0;
-
-                    i = 1;
-                    while(args[i] != NULL) {
-                        aux[i+1] = args[i++];
-                    }
-                    err = execvp(fresh_bin,aux);
-                    exit(err);
-                }
-
-            case X_ELF:
-                printf("Unable to execute ELF: format not (yet) supported.\r\n");
-                exit(254);
-
-            case X_UNK:
-                printf("Cannot execute: unknown file type.\r\n");
-                exit(254);
-
-            case X_ERR:
+        switch (xt) {
+        case X_bFLT:
+            // If we launch non-existing commands we end the process
+            if (execvp(bin_arg0, args) == err) {
                 printf("Command not found");
-                exit(255);
+            }
+            exit(255);
 
+        case X_SH: {
+            char fresh_bin[] = "/bin/fresh";
+            char *aux[LIMIT] = {NULL};
+            int i;
+            aux[0] = fresh_bin;
+            aux[1] = bin_arg0;
+
+            i = 1;
+            while (args[i] != NULL) {
+                aux[i + 1] = args[i++];
+            }
+            err = execvp(fresh_bin, aux);
+            exit(err);
+        }
+
+        case X_ELF:
+            printf("Unable to execute ELF: format not (yet) supported.\r\n");
+            exit(254);
+
+        case X_UNK:
+            printf("Cannot execute: unknown file type.\r\n");
+            exit(254);
+
+        case X_ERR:
+            printf("Command not found");
+            exit(255);
         }
         exit(255); /* Never reached */
     }
@@ -290,7 +288,7 @@ static int launchProg(char **args, int background){
 
     // If the process is not requested to be in background, we wait for
     // the child to finish.
-    if (background == 0){
+    if (background == 0) {
         char exit_status_str[16];
 
         while (child_pid != pid) {
@@ -299,12 +297,12 @@ static int launchProg(char **args, int background){
         sprintf(exit_status_str, "%d", child_status);
         setenv("?", exit_status_str, 1);
         return WEXITSTATUS(child_status);
-    }else{
+    } else {
         // In order to create a background process, the current process
         // should just skip the call to wait. The SIGCHILD handler
         // signalHandler_child will take care of the returning values
         // of the childs.
-        printf("Process created with PID: %d\r\n",pid);
+        printf("Process created with PID: %d\r\n", pid);
         return 0;
     }
 }
@@ -312,45 +310,46 @@ static int launchProg(char **args, int background){
 /**
 * Method used to manage I/O redirection
 */
-void fileIO(char * args[], char* inputFile, char* outputFile, int option)
+void fileIO(char *args[], char *inputFile, char *outputFile, int option)
 {
     int err = -1;
     int fileDescriptor; // between 0 and 19, describing the output or input file
     int pid;
 
-    if((pid=vfork())==-1){
+    if ((pid = vfork()) == -1) {
         printf("Child process could not be created\r\n");
         return;
     }
-    if(pid==0){
+    if (pid == 0) {
         // Option 0: output redirection
-        if (option == 0){
+        if (option == 0) {
             uint32_t flags;
-        	// We open (create) the file truncating it at 0, for write only
+            // We open (create) the file truncating it at 0, for write only
             flags = O_CREAT;
             flags |= O_TRUNC | O_WRONLY;
-        	fileDescriptor = open(outputFile, flags, 0600);
-        	// We replace de standard output with the appropriate file
-        	dup2(fileDescriptor, STDOUT_FILENO);
-        	close(fileDescriptor);
-        // Option 1: input and output redirection
-        }else if (option == 1){
-        	// We open file for read only (it's STDIN)
-        	fileDescriptor = open(inputFile, O_RDONLY, 0600);
-        	// We replace de standard input with the appropriate file
-        	dup2(fileDescriptor, STDIN_FILENO);
-        	close(fileDescriptor);
-        	// Same as before for the output file
-        	fileDescriptor = open(outputFile, O_CREAT | O_TRUNC | O_WRONLY, 0600);
-        	dup2(fileDescriptor, STDOUT_FILENO);
-        	close(fileDescriptor);
+            fileDescriptor = open(outputFile, flags, 0600);
+            // We replace de standard output with the appropriate file
+            dup2(fileDescriptor, STDOUT_FILENO);
+            close(fileDescriptor);
+            // Option 1: input and output redirection
+        } else if (option == 1) {
+            // We open file for read only (it's STDIN)
+            fileDescriptor = open(inputFile, O_RDONLY, 0600);
+            // We replace de standard input with the appropriate file
+            dup2(fileDescriptor, STDIN_FILENO);
+            close(fileDescriptor);
+            // Same as before for the output file
+            fileDescriptor =
+                open(outputFile, O_CREAT | O_TRUNC | O_WRONLY, 0600);
+            dup2(fileDescriptor, STDOUT_FILENO);
+            close(fileDescriptor);
         }
 
-        //setenv("parent",getcwd(currentDirectory, 128),1);
+        // setenv("parent",getcwd(currentDirectory, 128),1);
 
-        if (execvp(args[0],args)==err){
-        	printf("err");
-        	kill(getpid(),SIGTERM);
+        if (execvp(args[0], args) == err) {
+            printf("err");
+            kill(getpid(), SIGTERM);
         }
     }
 
@@ -362,7 +361,8 @@ void fileIO(char * args[], char* inputFile, char* outputFile, int option)
 /**
 * Method used to manage pipes.
 */
-void pipeHandler(char * args[]){
+void pipeHandler(char *args[])
+{
     // File descriptors
     int filedes[2]; // pos. 0 output, pos. 1 input of the pipe
     int filedes2[2];
@@ -379,9 +379,9 @@ void pipeHandler(char * args[]){
 
     // First we calculate the number of commands (they are separated
     // by '|')
-    while (args[l] != NULL){
-        if (strcmp(args[l],"|") == 0){
-        	num_cmds++;
+    while (args[l] != NULL) {
+        if (strcmp(args[l], "|") == 0) {
+            num_cmds++;
         }
         l++;
     }
@@ -390,21 +390,21 @@ void pipeHandler(char * args[]){
     // Main loop of this method. For each command between '|', the
     // pipes will be configured and standard input and/or output will
     // be replaced. Then it will be executed
-    while (args[j] != NULL && end != 1){
+    while (args[j] != NULL && end != 1) {
         k = 0;
         // We use an auxiliary array of pointers to store the command
         // that will be executed on each iteration
-        while (strcmp(args[j],"|") != 0){
-        	command[k] = args[j];
-        	j++;
-        	if (args[j] == NULL){
-        		// 'end' variable used to keep the program from entering
-        		// again in the loop when no more arguments are found
-        		end = 1;
-        		k++;
-        		break;
-        	}
-        	k++;
+        while (strcmp(args[j], "|") != 0) {
+            command[k] = args[j];
+            j++;
+            if (args[j] == NULL) {
+                // 'end' variable used to keep the program from entering
+                // again in the loop when no more arguments are found
+                end = 1;
+                k++;
+                break;
+            }
+            k++;
         }
         // Last position of the command will be NULL to indicate that
         // it is its end when we pass it to the exec function
@@ -416,78 +416,77 @@ void pipeHandler(char * args[]){
         // output. This way, a pipe will be shared between each two
         // iterations, enabling us to connect the inputs and outputs of
         // the two different commands.
-        if (i % 2 != 0){
-        	pipe(filedes); // for odd i
-        }else{
-        	pipe(filedes2); // for even i
+        if (i % 2 != 0) {
+            pipe(filedes); // for odd i
+        } else {
+            pipe(filedes2); // for even i
         }
 
-        pid=vfork();
+        pid = vfork();
 
-        if(pid==-1){
-        	if (i != num_cmds - 1){
-        		if (i % 2 != 0){
-        			close(filedes[1]); // for odd i
-        		}else{
-        			close(filedes2[1]); // for even i
-        		}
-        	}
-        	printf("Child process could not be created\r\n");
-        	return;
+        if (pid == -1) {
+            if (i != num_cmds - 1) {
+                if (i % 2 != 0) {
+                    close(filedes[1]); // for odd i
+                } else {
+                    close(filedes2[1]); // for even i
+                }
+            }
+            printf("Child process could not be created\r\n");
+            return;
         }
-        if(pid==0){
-        	// If we are in the first command
-        	if (i == 0){
-        		dup2(filedes2[1], STDOUT_FILENO);
-        	}
-        	// If we are in the last command, depending on whether it
-        	// is placed in an odd or even position, we will replace
-        	// the standard input for one pipe or another. The standard
-        	// output will be untouched because we want to see the
-        	// output in the terminal
-        	else if (i == num_cmds - 1){
-        		if (num_cmds % 2 != 0){ // for odd number of commands
-        			dup2(filedes[0],STDIN_FILENO);
-        		}else{ // for even number of commands
-        			dup2(filedes2[0],STDIN_FILENO);
-        		}
-        	// If we are in a command that is in the middle, we will
-        	// have to use two pipes, one for input and another for
-        	// output. The position is also important in order to choose
-        	// which file descriptor corresponds to each input/output
-        	}else{ // for odd i
-        		if (i % 2 != 0){
-        			dup2(filedes2[0],STDIN_FILENO);
-        			dup2(filedes[1],STDOUT_FILENO);
-        		}else{ // for even i
-        			dup2(filedes[0],STDIN_FILENO);
-        			dup2(filedes2[1],STDOUT_FILENO);
-        		}
-        	}
+        if (pid == 0) {
+            // If we are in the first command
+            if (i == 0) {
+                dup2(filedes2[1], STDOUT_FILENO);
+            }
+            // If we are in the last command, depending on whether it
+            // is placed in an odd or even position, we will replace
+            // the standard input for one pipe or another. The standard
+            // output will be untouched because we want to see the
+            // output in the terminal
+            else if (i == num_cmds - 1) {
+                if (num_cmds % 2 != 0) { // for odd number of commands
+                    dup2(filedes[0], STDIN_FILENO);
+                } else { // for even number of commands
+                    dup2(filedes2[0], STDIN_FILENO);
+                }
+                // If we are in a command that is in the middle, we will
+                // have to use two pipes, one for input and another for
+                // output. The position is also important in order to choose
+                // which file descriptor corresponds to each input/output
+            } else { // for odd i
+                if (i % 2 != 0) {
+                    dup2(filedes2[0], STDIN_FILENO);
+                    dup2(filedes[1], STDOUT_FILENO);
+                } else { // for even i
+                    dup2(filedes[0], STDIN_FILENO);
+                    dup2(filedes2[1], STDOUT_FILENO);
+                }
+            }
 
-        	if (execvp(command[0],command)==err){
-        		kill(getpid(),SIGTERM);
-        	}
+            if (execvp(command[0], command) == err) {
+                kill(getpid(), SIGTERM);
+            }
         }
 
         // CLOSING DESCRIPTORS ON PARENT
-        if (i == 0){
-        	close(filedes2[1]);
-        }
-        else if (i == num_cmds - 1){
-        	if (num_cmds % 2 != 0){
-        		close(filedes[0]);
-        	}else{
-        		close(filedes2[0]);
-        	}
-        }else{
-        	if (i % 2 != 0){
-        		close(filedes2[0]);
-        		close(filedes[1]);
-        	}else{
-        		close(filedes[0]);
-        		close(filedes2[1]);
-        	}
+        if (i == 0) {
+            close(filedes2[1]);
+        } else if (i == num_cmds - 1) {
+            if (num_cmds % 2 != 0) {
+                close(filedes[0]);
+            } else {
+                close(filedes2[0]);
+            }
+        } else {
+            if (i % 2 != 0) {
+                close(filedes2[0]);
+                close(filedes[1]);
+            } else {
+                close(filedes[0]);
+                close(filedes2[1]);
+            }
         }
         while (child_pid != pid) {
             sleep(60); /* Will be interrupted by sigchld. */
@@ -500,7 +499,8 @@ void pipeHandler(char * args[]){
 /**
 * Method used to handle the commands entered via the standard input
 */
-int commandHandler(char * args[], int argc){
+int commandHandler(char *args[], int argc)
+{
     int i = 0;
     int j = 0;
 
@@ -510,46 +510,49 @@ int commandHandler(char * args[], int argc){
     int aux = -1;
     int background = 0;
 
-    char *args_aux[LIMIT] = { NULL };
-
+    char *args_aux[LIMIT] = {NULL};
 
     // We look for the special characters and separate the command itself
     // in a new array for the arguments
-    while ( j < argc ){
-        if ( (strcmp(args[j],">") == 0) || (strcmp(args[j],"<") == 0) || (strcmp(args[j],"&") == 0)){
-        	break;
+    while (j < argc) {
+        if ((strcmp(args[j], ">") == 0) || (strcmp(args[j], "<") == 0) ||
+            (strcmp(args[j], "&") == 0)) {
+            break;
         }
         args_aux[j] = args[j];
         j++;
     }
 
     // 'exit' command quits the shell
-    if(strcmp(args[0],"exit") == 0) exit(0);
+    if (strcmp(args[0], "exit") == 0)
+        exit(0);
     // 'pwd' command prints the current directory
- 	else if (strcmp(args[0],"pwd") == 0){
-        if (args[j] != NULL){
-        	// If we want file output
-        	if ( (strcmp(args[j],">") == 0) && (args[j+1] != NULL) ){
-        		fileDescriptor = open(args[j+1], O_CREAT | O_TRUNC | O_WRONLY, 0600);
-        		// We replace de standard output with the appropriate file
-        		standardOut = dup(STDOUT_FILENO); 	// first we make a copy of stdout
-        											// because we'll want it back
-        		dup2(fileDescriptor, STDOUT_FILENO);
-        		close(fileDescriptor);
-        		printf("%s\r\n", getcwd(currentDirectory, 128));
-        		dup2(standardOut, STDOUT_FILENO);
-        	}
-        }else{
-        	printf("%s\r\n", getcwd(currentDirectory, 128));
+    else if (strcmp(args[0], "pwd") == 0) {
+        if (args[j] != NULL) {
+            // If we want file output
+            if ((strcmp(args[j], ">") == 0) && (args[j + 1] != NULL)) {
+                fileDescriptor =
+                    open(args[j + 1], O_CREAT | O_TRUNC | O_WRONLY, 0600);
+                // We replace de standard output with the appropriate file
+                standardOut =
+                    dup(STDOUT_FILENO); // first we make a copy of stdout
+                                        // because we'll want it back
+                dup2(fileDescriptor, STDOUT_FILENO);
+                close(fileDescriptor);
+                printf("%s\r\n", getcwd(currentDirectory, 128));
+                dup2(standardOut, STDOUT_FILENO);
+            }
+        } else {
+            printf("%s\r\n", getcwd(currentDirectory, 128));
         }
     }
     // 'cd' command to change directory
-    else if (strcmp(args[0],"cd") == 0) changeDirectory(args);
+    else if (strcmp(args[0], "cd") == 0)
+        changeDirectory(args);
     // 'setenv' command to set environment variables
-    else if (strcmp(args[0],"setenv") == 0) {
+    else if (strcmp(args[0], "setenv") == 0) {
         setenv(args[1], args[2], 1);
-    }
-    else if (strcmp(args[0],"getenv") == 0) {
+    } else if (strcmp(args[0], "getenv") == 0) {
         if (argc > 1) {
             char *value;
             value = getenv(args[1]);
@@ -560,80 +563,79 @@ int commandHandler(char * args[], int argc){
         }
     }
     // 'unsetenv' command to undefine environment variables
-    else if (strcmp(args[0],"unsetenv") == 0) {
+    else if (strcmp(args[0], "unsetenv") == 0) {
         unsetenv(args[1]);
     } else {
         // If none of the preceding commands were used, we invoke the
         // specified program. We have to detect if I/O redirection,
         // piped execution or background execution were solicited
-        while (args[i] != NULL && background == 0){
-        	// If background execution was solicited (last argument '&')
-        	// we exit the loop
-            if (strcmp(args[i],"&") == 0){
-        		background = 1;
-        	// If '|' is detected, piping was solicited, and we call
-        	// the appropriate method that will handle the different
-        	// executions
-        	}else if (strcmp(args[i],"|") == 0){
-        		pipeHandler(args);
-        		return 1;
-        	// If '<' is detected, we have Input and Output redirection.
-        	// First we check if the structure given is the correct one,
-        	// and if that is the case we call the appropriate method
-        	}else if (strcmp(args[i],"<") == 0){
-        		aux = i+1;
-        		if (args[aux] == NULL || args[aux+1] == NULL || args[aux+2] == NULL ){
-        			printf("Not enough input arguments\r\n");
-        			return -1;
-        		}else{
-        			if (strcmp(args[aux+1],">") != 0){
-        				printf("Usage: Expected '>' and found %s\r\n",args[aux+1]);
-        				return -2;
-        			}
-        		}
-        		fileIO(args_aux,args[i+1],args[i+3],1);
-        		return 1;
-        	}
-        	// If '>' is detected, we have output redirection.
-        	// First we check if the structure given is the correct one,
-        	// and if that is the case we call the appropriate method
-        	else if (strcmp(args[i],">") == 0){
-        		if (args[i+1] == NULL){
-        			printf("Not enough input arguments\r\n");
-        			return -1;
-        		}
-        		fileIO(args_aux,NULL,args[i+1],0);
-        		return 1;
-        	}
-        	i++;
+        while (args[i] != NULL && background == 0) {
+            // If background execution was solicited (last argument '&')
+            // we exit the loop
+            if (strcmp(args[i], "&") == 0) {
+                background = 1;
+                // If '|' is detected, piping was solicited, and we call
+                // the appropriate method that will handle the different
+                // executions
+            } else if (strcmp(args[i], "|") == 0) {
+                pipeHandler(args);
+                return 1;
+                // If '<' is detected, we have Input and Output redirection.
+                // First we check if the structure given is the correct one,
+                // and if that is the case we call the appropriate method
+            } else if (strcmp(args[i], "<") == 0) {
+                aux = i + 1;
+                if (args[aux] == NULL || args[aux + 1] == NULL ||
+                    args[aux + 2] == NULL) {
+                    printf("Not enough input arguments\r\n");
+                    return -1;
+                } else {
+                    if (strcmp(args[aux + 1], ">") != 0) {
+                        printf("Usage: Expected '>' and found %s\r\n",
+                               args[aux + 1]);
+                        return -2;
+                    }
+                }
+                fileIO(args_aux, args[i + 1], args[i + 3], 1);
+                return 1;
+            }
+            // If '>' is detected, we have output redirection.
+            // First we check if the structure given is the correct one,
+            // and if that is the case we call the appropriate method
+            else if (strcmp(args[i], ">") == 0) {
+                if (args[i + 1] == NULL) {
+                    printf("Not enough input arguments\r\n");
+                    return -1;
+                }
+                fileIO(args_aux, NULL, args[i + 1], 0);
+                return 1;
+            }
+            i++;
         }
         // We launch the program with our method, indicating if we
         // want background execution or not
-        return launchProg(args_aux,background);
-
+        return launchProg(args_aux, background);
     }
 }
 
-void pointer_shift(int *a, int s, int n) {
-   int i;
-   for (i = n; i > s - 1; i--) {
-      *(a+i+1) = *(a+i);
-   }
+void pointer_shift(int *a, int s, int n)
+{
+    int i;
+    for (i = n; i > s - 1; i--) {
+        *(a + i + 1) = *(a + i);
+    }
 }
 
 char *readline_tty(char *input, int size)
 {
-
-    while (2>1)
-    {
+    while (2 > 1) {
         int len = 0, pos = 0;
         int out = STDOUT_FILENO;
         char got[5];
         int i, j;
         int repeat = 0;
 
-        while(len < size)
-        {
+        while (len < size) {
             const char del = 0x08;
             const char space = 0x20;
             int ret = read(STDIN_FILENO, got, 4);
@@ -663,7 +665,7 @@ char *readline_tty(char *input, int size)
                     len--;
                     lastcmd[len] = 0x00;
                     pos = len;
-                    printf( "%s", lastcmd);
+                    printf("%s", lastcmd);
                     fflush(stdout);
                     strcpy(input, lastcmd);
                     continue;
@@ -681,34 +683,34 @@ char *readline_tty(char *input, int size)
             }
 
             if (ret > 3) {
-            	if ((got[0] == 0x1B) && (got[2] == 0x33) && (got[3] == 0x7E)) {
-                	if (pos < len) {
-	                    //write(STDOUT_FILENO, &del, 1);
-        	            //printf( " ");
-                	    //write(STDOUT_FILENO, &del, 1);
-                	    pos--;
-        	            len--;
-                	    if (pos < len) {
-                    	for ( i = pos+1; i < len; i++) {
-	                	input[i] = input[i+1];
-                        write(STDOUT_FILENO, &input[i], 1);
-                	}
-                    write(STDOUT_FILENO, &space, 1);
-	                i = len - pos;
-        	        while (i > 0) {
-                		write(STDOUT_FILENO, &del, 1);
-                    		i--;
-                    	}
+                if ((got[0] == 0x1B) && (got[2] == 0x33) && (got[3] == 0x7E)) {
+                    if (pos < len) {
+                        // write(STDOUT_FILENO, &del, 1);
+                        // printf( " ");
+                        // write(STDOUT_FILENO, &del, 1);
+                        pos--;
+                        len--;
+                        if (pos < len) {
+                            for (i = pos + 1; i < len; i++) {
+                                input[i] = input[i + 1];
+                                write(STDOUT_FILENO, &input[i], 1);
+                            }
+                            write(STDOUT_FILENO, &space, 1);
+                            i = len - pos;
+                            while (i > 0) {
+                                write(STDOUT_FILENO, &del, 1);
+                                i--;
+                            }
 
-	                    } else {
-	                    input[pos] = 0x00;
-	                    pos--;
-	                    len--;
-	            }
+                        } else {
+                            input[pos] = 0x00;
+                            pos--;
+                            len--;
+                        }
 
-                    continue;
+                        continue;
+                    }
                 }
-            	}
                 continue;
             }
             if ((ret > 0) && (got[0] >= 0x20) && (got[0] <= 0x7e)) {
@@ -716,23 +718,23 @@ char *readline_tty(char *input, int size)
                     /* Echo to terminal */
                     if (got[i] >= 0x20 && got[i] <= 0x7e)
                         write(STDOUT_FILENO, &got[i], 1);
-                	if (pos < len) {
-                		for (j = len + 1; j > pos; j--) {
-                			input[j] = input[j-1];
-                		}
-                		input[pos] = got[i];
-                    	for ( j = pos + 1; j < len +1; j++) {
+                    if (pos < len) {
+                        for (j = len + 1; j > pos; j--) {
+                            input[j] = input[j - 1];
+                        }
+                        input[pos] = got[i];
+                        for (j = pos + 1; j < len + 1; j++) {
                             write(STDOUT_FILENO, &input[j], 1);
-                    	}
+                        }
                         write(STDOUT_FILENO, &input[i], 1);
-                    	j = len - pos + 1;
-                    	while (j > 0) {
-                    		write(STDOUT_FILENO, &del, 1);
-                    		j--;
-                    	}
-                	} else {
-                		input[pos] = got[i];
-                	}
+                        j = len - pos + 1;
+                        while (j > 0) {
+                            write(STDOUT_FILENO, &del, 1);
+                            j--;
+                        }
+                    } else {
+                        input[pos] = got[i];
+                    }
 
                     len++;
                     pos++;
@@ -740,9 +742,9 @@ char *readline_tty(char *input, int size)
             }
 
             if ((got[0] == 0x0D)) {
-            	input[len] = 0x0D;
+                input[len] = 0x0D;
                 input[len + 1] = '\0';
-                printf( "\r\n");
+                printf("\r\n");
                 fflush(stdout);
                 if (len > 0)
                     strncpy(lastcmd, input, 128);
@@ -750,7 +752,7 @@ char *readline_tty(char *input, int size)
             }
 
             if ((got[0] == 0x4)) {
-                printf( "\r\n");
+                printf("\r\n");
                 fflush(stdout);
                 len = 0;
                 pos = 0;
@@ -779,20 +781,20 @@ char *readline_tty(char *input, int size)
                     pos--;
                     len--;
                     if (pos < len) {
-                    	for ( i = pos; i < len; i++) {
-                    		input[i] = input[i+1];
+                        for (i = pos; i < len; i++) {
+                            input[i] = input[i + 1];
                             write(STDOUT_FILENO, &input[i], 1);
-                    	}
+                        }
                         write(STDOUT_FILENO, &space, 1);
-                    	i = len - pos + 1;
-                    	while (i > 0) {
-                    		write(STDOUT_FILENO, &del, 1);
-                    		i--;
-                    	}
+                        i = len - pos + 1;
+                        while (i > 0) {
+                            write(STDOUT_FILENO, &del, 1);
+                            i--;
+                        }
 
                     } else {
-	                    input[pos] = 0x00;
-	            }
+                        input[pos] = 0x00;
+                    }
 
                     continue;
                 }
@@ -826,26 +828,25 @@ static char *readline(char *input, int len)
     else
         return readline_notty(input, len);
 }
-        
 
-static int parseLine(char *line) {
-    char * tokens[LIMIT] = { };
+static int parseLine(char *line)
+{
+    char *tokens[LIMIT] = {};
     char *end = NULL;
     char *saveptr;
     int numTokens;
-    
+
     /* Find inline comments */
     end = strchr(line, '#');
     if (end)
         *end = (char)0;
 
     /* Find special symbols */
-    if((tokens[0] = strtok_r(line," \r\n\t", &saveptr)) == NULL) 
+    if ((tokens[0] = strtok_r(line, " \r\n\t", &saveptr)) == NULL)
         return 0;
 
     if (tokens[0][0] == '#')
         return 0;
-
 
     for (numTokens = 1; numTokens < LIMIT; numTokens++) {
         tokens[numTokens] = strtok_r(NULL, " \r\n\t", &saveptr);
@@ -857,10 +858,9 @@ static int parseLine(char *line) {
         if (end) {
             *end = (char)0;
             if (strlen(tokens[numTokens]) == 0)
-                    numTokens--;
+                numTokens--;
             break;
         }
-
     }
     if (numTokens > 0)
         return commandHandler(tokens, numTokens);
@@ -920,7 +920,8 @@ static int fresh_exec(char *arg0, char **argv)
 }
 
 /* Main */
-int main(int argc, char *argv[]) {
+int main(int argc, char *argv[])
+{
     char line[MAXLINE]; // buffer for the user input
     int ret;
     struct sigaction sigint_a = {};
@@ -928,8 +929,8 @@ int main(int argc, char *argv[]) {
     int idx = 1;
     sigint_a.sa_handler = signalHandler_int;
     sigcld_a.sa_handler = signalHandler_child;
-    no_reprint_prmpt = 0; 	// to prevent the printing of the shell
-        					// after certain methods
+    no_reprint_prmpt = 0; // to prevent the printing of the shell
+                          // after certain methods
 
     sigaction(SIGINT, &sigint_a, NULL);
     sigaction(SIGCHLD, &sigcld_a, NULL);
@@ -950,16 +951,18 @@ int main(int argc, char *argv[]) {
     welcomeScreen();
     fprintf(stdout, "Current pid = %d\r\n", getpid());
 
-    while(1){
-        if (no_reprint_prmpt == 0) shellPrompt();
+    while (1) {
+        if (no_reprint_prmpt == 0)
+            shellPrompt();
         no_reprint_prmpt = 0;
 
         // We empty the line buffer
-        memset ( line, '\0', MAXLINE );
+        memset(line, '\0', MAXLINE);
 
         // We wait for user input
         /* fgets(line, MAXLINE, stdin); */
-        while (readline(line, MAXLINE) == NULL);
+        while (readline(line, MAXLINE) == NULL)
+            ;
 
         ret = parseLine(line);
     }
