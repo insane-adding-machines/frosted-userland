@@ -18,44 +18,31 @@
  *
  */
 
-#include <sys/types.h>
 #include <pthread.h>
-#include <semaphore.h>
 #include <stdio.h>
 #include <stdlib.h>
+#include <sys/types.h>
 #include <unistd.h>
-
-static sem_t *semaphore;
-static int myarg = 42;
-
 
 void *consumer_thread(void *arg)
 {
-    int r_arg = *((int *)(arg));
-    int i;
-
-    if (r_arg != myarg)
-        printf("Bad arg value!\n");
-
-    while(1) {
-        i == 0;
-        sem_wait(semaphore);
-        printf("C\r\n");
-    }
+    pthread_mutex_t *mutex = (pthread_mutex_t *)arg;
+    pthread_mutex_lock(mutex);
+    printf("Consumer\r\n");
+    pthread_mutex_unlock(mutex);
+    pthread_exit(NULL);
 }
 
 int main(int argc, char *args[])
 {
-    int fd;
-    semaphore = sem_init(0);
-    pthread_t cons ;
+    pthread_t cons;
+    pthread_mutex_t mutex = PTHREAD_MUTEX_INITIALIZER;
 
-    pthread_create(&cons, NULL, consumer_thread, &myarg);
-
-    while(1) {
-        sleep(1);
-        printf("P\r\n");
-        sem_post(semaphore);
-    }
-    exit(0);
+    pthread_create(&cons, NULL, consumer_thread, &mutex);
+    pthread_mutex_lock(&mutex);
+    printf("Producer\r\n");
+    pthread_mutex_unlock(&mutex);
+    pthread_join(cons, NULL);
+    pthread_mutex_destroy(&mutex);
+    pthread_exit(NULL);
 }
