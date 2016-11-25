@@ -21,10 +21,10 @@
 #include <stdlib.h>
 #include <stdio.h>
 #include <sys/reboot.h>
+#include <unistd.h>
 
 int main(int argc, char *args[])
 {
-
     fprintf(stderr, "Rebooting frosted NOW!\r\n");
     fflush(stderr);
     usleep(500000);
