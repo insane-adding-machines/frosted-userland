@@ -69,7 +69,7 @@ hw-utils: FORCE
 netutils: FORCE
 	mkdir -p out
 	mkdir -p gdb
-	make -C $@ LDFLAGS="$(LDFLAGS)" CFLAGS="$(CFLAGS)" CC=$(CC)
+	make -C $@ LDFLAGS="$(LDFLAGS)" CFLAGS="$(CFLAGS) -D__USE_MISC" CC=$(CC)
 
 games: FORCE
 	mkdir -p out
@@ -79,7 +79,7 @@ games: FORCE
 sh: FORCE
 	mkdir -p out
 	cp $@/* out/
-	
+
 
 FORCE:
 
