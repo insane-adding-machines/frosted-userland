@@ -8,4 +8,4 @@ xipfs-ls: xipfs-ls.c
 	gcc -o $@ $^ -I. -I../frosted-headers/include
 
 clean:
-	rm -f xipfstool
+	rm -f xipfstool xipfs-ls
