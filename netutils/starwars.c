@@ -43,7 +43,8 @@
 # define STDERR_FILENO 2
 #endif
 
-static char buf_sock[2048];
+#define BUFSIZE (16 * 1024)
+
 int main(int argc, char *argv[])
 {
 
@@ -55,6 +56,8 @@ int main(int argc, char *argv[])
     int off = 0;
     int fbcon = -1;
     int r;
+
+    char *buf_sock = malloc(BUFSIZE);
 
     fbcon = open("/dev/fbcon", O_RDWR);
     if (fbcon < 0) {
@@ -76,7 +79,7 @@ int main(int argc, char *argv[])
         exit(3);
     }
     while(1) {
-        r = read(sd, buf_sock, 2048);
+        r = read(sd, buf_sock, BUFSIZE);
         if (r > 0) {
             write(fbcon, buf_sock, r);
         }
