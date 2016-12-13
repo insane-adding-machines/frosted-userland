@@ -1,6 +1,7 @@
 #include <sys/ptrace.h>
 #include <netinet/in.h>
 #include <sys/types.h>
+#include <sys/wait.h>
 #include <sys/socket.h>
 #include <stdlib.h>
 #include <stdio.h>
@@ -8,13 +9,15 @@
 #include <unistd.h>
 #include <string.h>
 #include <errno.h>
-#ifndef htonl
-#define htonl(x) __builtin_bswap32(x)
-#define ntohl(x) __builtin_bswap32(x)
-#define htons(x) __builtin_bswap16(x)
-#define ntohs(x) __builtin_bswap16(x)
-#endif
+#include <signal.h>
 
+
+void TrapHandler(int sgn)
+{
+    int status;
+    printf("SIGTRAP\n\r");
+    wait(&status);
+}
 
 
 struct gdbpkt {
@@ -25,12 +28,12 @@ struct gdbpkt {
 
 static int gdb_continue(int pid, int dd)
 {
-    return 0;
+    return ptrace(PTRACE_CONT, pid, NULL, NULL);
 }
 
 static int gdb_detach(int pid, int dd)
 {
-    return 0;
+    return ptrace(PTRACE_DETACH, pid, NULL, NULL);
 }
 
 static int gdb_getregs(int pid, int dd)
@@ -107,12 +110,21 @@ void gdbserver(pid_t pid, int dd)
     int ret, cmdr;
     char cmd;
     struct gdbpkt *p;
+    uint32_t text_base;
+    int status;
+    struct sigaction sigtrap = {};
+    int idx = 1;
+    sigtrap.sa_handler = TrapHandler;
+    sigaction(SIGTRAP, &sigtrap, NULL);
+
     
     ret = ptrace(PTRACE_ATTACH, pid, 0, 0);
     if (ret < 0) {
         perror("ptrace");
     }
+    text_base = ptrace(PTRACE_PEEKUSER, pid, (void *)(16 * 4), 0);
 
+    printf("Process 0 is now stopped, .text: %08x PC:%08x LR:%08x\n", text_base, ptrace(PTRACE_PEEKUSER, pid, (void*)(15 * 4), 0), ptrace(PTRACE_PEEKUSER, pid, (void*)(14 * 4), 0));
     do {
         ret = read(dd, &cmd, 1);
         if (ret == 1) {
@@ -124,7 +136,10 @@ void gdbserver(pid_t pid, int dd)
                     /* Handle automatic error if flag present */
                     if (pkt_parse_tab[i].auto_err) {
                         if (cmdr == 0) {
-                            write(dd, "OK\n", 3);
+                            if (dd)
+                                write(dd, "OK\n", 3);
+                            else
+                                printf("OK\r\n");
                         } else {
                             char reply_err[8];
                             snprintf(reply_err, 7, "E %d", 0 - cmdr);
@@ -147,8 +162,9 @@ int main(int argc, char *argv[])
     struct sockaddr_in gdbsock = { .sin_family = AF_INET, .sin_addr = INADDR_ANY };
     struct sockaddr_in client = { };
     socklen_t socklen = sizeof(struct sockaddr_in);
+    printf("Argc: %d\r\n", argc);
     
-    if (argc < 3) {
+    if (argc < 2) {
         printf ("Usage: %s <pid> [<tcp_port|serial_device>]\r\n", argv[0]);
         printf ("                   (Default: tcp port 3333) \r\n");
         exit(1);
@@ -156,42 +172,45 @@ int main(int argc, char *argv[])
 
     pid = atoi(argv[1]);
 
-    if (strstr(argv[2], "tty") != NULL) {
-        dd = open(argv[2], O_RDWR);
-        if (dd < 0) {
-            fprintf(stderr, "Serial port error: %s\n", strerror(errno));
-            exit(1);
-        }
-        gdbserver(pid, dd);
-    } else {
-        if (argc > 2)
-            gdbsock.sin_port = htons(atoi(argv[2]));
-        else
-            gdbsock.sin_port = htons(3333);
-
-        ld = socket(AF_INET, SOCK_STREAM, 0);
-        if (ld < 0) {
-            fprintf(stderr, "Socket error: %s\n", strerror(errno));
-            exit(1);
-        }
-
-        if ((listen(ld, 1) < 0) || (bind(ld, (struct sockaddr *)&gdbsock, sizeof(struct sockaddr_in) < 0)) ) {
-            fprintf(stderr, "Socket error: %s\n", strerror(errno));
-            exit(1);
-        }
-
-        while(1) {
-            printf("GDB - Waiting for connection...\r\n");
-            dd = accept(ld, (struct sockaddr *)&client, &socklen);
-            if (dd >= 0) {
-                printf("GDB - Connection accepted!\r\n");
-                gdbserver(pid, dd);
-            } else {
-                printf("GDB - Connection failed: %s\r\n", strerror(errno));
+    if (argc > 2) {
+        if (strstr(argv[2], "tty") != NULL) {
+            dd = open(argv[2], O_RDWR);
+            if (dd < 0) {
+                fprintf(stderr, "Serial port error: %s\n", strerror(errno));
+                exit(1);
             }
-            close(dd);
+            gdbserver(pid, dd);
+        } else {
+            if (argc > 2)
+                gdbsock.sin_port = htons(atoi(argv[2]));
+            else
+                gdbsock.sin_port = htons(3333);
+
+            ld = socket(AF_INET, SOCK_STREAM, 0);
+            if (ld < 0) {
+                fprintf(stderr, "Socket error: %s\n", strerror(errno));
+                exit(1);
+            }
+
+            if (bind(ld, (struct sockaddr *)&gdbsock, sizeof(struct sockaddr_in) < 0) || ((listen(ld, 1) < 0)) ) {
+                fprintf(stderr, "Socket error: %s\n", strerror(errno));
+                exit(1);
+            }
+
+            while(1) {
+                printf("GDB - Waiting for connection...\r\n");
+                dd = accept(ld, (struct sockaddr *)&client, &socklen);
+                if (dd >= 0) {
+                    printf("GDB - Connection accepted!\r\n");
+                    gdbserver(pid, dd);
+                } else {
+                    printf("GDB - Connection failed: %s\r\n", strerror(errno));
+                }
+                close(dd);
+            }
         }
+    } else {
+        gdbserver(pid, 0);
     }
     exit(0);
-    
 }
