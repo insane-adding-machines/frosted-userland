@@ -38,6 +38,9 @@ OBJ:=$(patsubst %,%.o,$(APPS-y))
 
 all: $(BIN)
 
+../out/gdbserver: gdb-server.o gdb-remote.o
+	@arm-frosted-eabi-gcc -o $@ $^ $(CFLAGS) $(LDFLAGS)
+
 ../out/%: %.o
 	@arm-frosted-eabi-gcc -o $@ $^ $(CFLAGS) $(LDFLAGS)
 
