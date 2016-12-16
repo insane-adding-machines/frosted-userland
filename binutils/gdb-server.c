@@ -86,7 +86,7 @@ int main(int argc, char** argv) {
         pid = atoi(argv[2]);
         if (pid < 2)
             usage(argv[0]);
-        ret = ptrace(PTRACE_ATTACH, pid, 0, 0);
+        ret = ptrace(PTRACE_ATTACH, pid, NULL, NULL);
         if (ret < 0) {
             fprintf(stderr, "Cannot vfork(): %s\r\n", strerror(errno));
             exit(1);
@@ -111,13 +111,12 @@ int main(int argc, char** argv) {
             exit(1);
         }
     }
-    text_base = ptrace(PTRACE_PEEKUSER, pid, (void *)(16 * 4), 0);
+    text_base = ptrace(PTRACE_PEEKUSER, pid, (void *)(19 * 4), NULL);
+    text_size = ptrace(PTRACE_PEEKUSER, pid, (void *)(16 * 4), NULL);
 
-    printf("Process %d is now stopped, .text: %08x size: %u PC:%08x LR:%08x\n", pid, text_base, text_size, ptrace(PTRACE_PEEKUSER, pid, (void*)(15 * 4), 0), ptrace(PTRACE_PEEKUSER, pid, (void*)(14 * 4), 0));
-    do {
-        if (serve())
-    	  sleep (1); // don't go bezurk if serve returns with error
-	} while (1<2);
+    printf("Process %d is now stopped, .text: %08x size: %u PC:%08x LR:%08x\n", pid, text_base, text_size, ptrace(PTRACE_PEEKUSER, pid, (void*)(15 * 4), NULL), ptrace(PTRACE_PEEKUSER, pid, (void*)(14 * 4), NULL));
+    serve();
+    printf("gdb: Session terminated.\r\n");
     return 0;
 }
 
@@ -126,7 +125,7 @@ static const char* const target_description =
     "<!DOCTYPE target SYSTEM \"gdb-target.dtd\">"
     "<target version=\"1.0\">"
     "   <architecture>arm</architecture>"
-    "   <feature name=\"org.gnu.gdb.arm.frosted\">"
+    "   <feature name=\"org.gnu.gdb.arm.m-profile\">"
     "       <reg name=\"r0\" bitsize=\"32\"/>"
     "       <reg name=\"r1\" bitsize=\"32\"/>"
     "       <reg name=\"r2\" bitsize=\"32\"/>"
@@ -146,21 +145,6 @@ static const char* const target_description =
     "       <reg name=\"xpsr\" bitsize=\"32\"/>"
     "   </feature>"
     "</target>";
-
-/*
- * DWT_COMP0     0xE0001020
- * DWT_MASK0     0xE0001024
- * DWT_FUNCTION0 0xE0001028
- * DWT_COMP1     0xE0001030
- * DWT_MASK1     0xE0001034
- * DWT_FUNCTION1 0xE0001038
- * DWT_COMP2     0xE0001040
- * DWT_MASK2     0xE0001044
- * DWT_FUNCTION2 0xE0001048
- * DWT_COMP3     0xE0001050
- * DWT_MASK3     0xE0001054
- * DWT_FUNCTION3 0xE0001058
- */
 
 #define DATA_WATCH_NUM 4
 
@@ -260,7 +244,7 @@ static int code_lit_num;
 #define CODE_BREAK_NUM_MAX	15
 #define CODE_BREAK_LOW	0x01
 #define CODE_BREAK_HIGH	0x02
-#define USER_BKPT(x) (56 + 4 * x)
+#define USER_BKPT(x) ((void *)(56 + 4 * x))
 
 struct code_hw_breakpoint {
     uint32_t addr;
@@ -274,7 +258,7 @@ static void init_code_breakpoints(void) {
     printf("Support for 8 hw breakpoint registers\n");
     for(int i = 0; i < 8; i++) {
         code_breaks[i].type = 0;
-        ptrace(PTRACE_POKEUSER, pid, USER_BKPT(i), 0);
+        ptrace(PTRACE_POKEUSER, pid, USER_BKPT(i), NULL);
     }
 }
 
@@ -317,11 +301,11 @@ static int update_code_breakpoint(uint32_t addr, int set) {
 
     if(set == 0) {
         printf("clearing hw break %d\n", id);
-        ptrace(PTRACE_POKEUSER, pid, USER_BKPT(id), 0);
+        ptrace(PTRACE_POKEUSER, pid, USER_BKPT(id), NULL);
     } else {
         printf("setting hw break %d at %08x (%d)\n",
                     id, brk->addr, brk->type);
-        ptrace(PTRACE_POKEUSER, pid, USER_BKPT(id), brk->addr);
+        ptrace(PTRACE_POKEUSER, pid, USER_BKPT(id), (void *)brk->addr);
     }
     return 0;
 }
@@ -379,7 +363,7 @@ int serve(void) {
         int status = gdb_recv_packet(client, &packet);
         if(status < 0) {
             printf("cannot recv: %d\n", status);
-            return 1;
+            exit(1);
         }
 
         printf("recv: %s\n", packet);
@@ -407,7 +391,29 @@ int serve(void) {
                 printf("query: %s;%s\n", queryName, params);
 
                 if(!strcmp(queryName, "Supported")) {
-                    reply = strdup("PacketSize=04B0;qXfer:features:read+");
+                    reply = strdup("PacketSize=04B0;qXfer:features:read+;multiprocess+");
+                } else if(!strcmp(queryName, "TStatus")) {
+                    reply = strdup("T0");
+                } else if(!strcmp(queryName, "fThreadInfo")) {
+                    reply = calloc(10,1);
+                    snprintf(reply,10,"m %d", pid);
+                } else if(!strcmp(queryName, "sThreadInfo")) {
+                    reply = strdup("l");
+                } else if(!strcmp(queryName, "TfV")) {
+                    reply = strdup("l");
+                } else if(!strcmp(queryName, "TfP")) {
+                    reply = strdup("l");
+                } else if(!strcmp(queryName, "Attached")) {
+                    reply = strdup("1");
+                } else if(!strcmp(queryName, "sThreadInfo")) {
+                    reply = strdup("l");
+                } else if(!strcmp(queryName, "Symbol")) {
+                    reply = strdup("OK");
+                } else if(!strcmp(queryName, "Offsets")) {
+                    uint32_t text = ptrace(PTRACE_PEEKUSER, pid, (void *)(19 * 4), NULL);
+                    uint32_t data = 0;
+                    reply = calloc(30,1);
+                    snprintf(reply,30,"TextSeg=%x",text);
                 } else if(!strcmp(queryName, "Xfer")) {
                     char *type, *op, *__s_addr, *s_length;
                     char *tok = params;
@@ -439,6 +445,10 @@ int serve(void) {
                             reply = strdup("l");
                         } else {
                             reply = calloc(length + 2, 1);
+                            if (!reply) {
+                                printf("OOM!\r\n");
+                                exit(1);
+                            }
                             reply[0] = 'm';
                             strncpy(&reply[1], data, length);
                         }
@@ -466,12 +476,34 @@ int serve(void) {
                 } else if(!strcmp(cmdName, "Kill")) {
                     kill(pid, SIGKILL);
                     reply = strdup("OK");
+                } else if(!strcmp(cmdName, "Cont")) {
+                    /* Process continues. */
+                    Stopped = 0;
+                    ptrace(PTRACE_CONT, pid, NULL, NULL);
+                    while(!Stopped) {
+                        status = gdb_check_for_interrupt(client);
+
+                        if(status < 0) {
+                            printf("cannot check for int: %d\n", status);
+                            return 1;
+                        }
+                        if(status == 1) {
+                            /* Ctrl+C from client */
+                            Stopped = 1;
+                            kill(pid, SIGSTOP);
+                        }
+                        sleep(1);
+                    }
+                    reply = strdup("S05"); // TRAP
                 }
                 if(reply == NULL)
                     reply = strdup("");
 
                 break;
             }
+            case 'H':
+                reply = strdup("OK");
+                break;
 
             case 'c':
                 /* Process continues. */
@@ -519,13 +551,11 @@ int serve(void) {
                 unsigned reg_val;
 
                 if(id < 16) {
-                    reg_val = ptrace(PTRACE_PEEKUSER, pid, id * 4, NULL);
+                    reg_val = ptrace(PTRACE_PEEKUSER, pid, (void *)(id * 4), NULL);
                     myreg = htonl(reg_val);
-                    reply = calloc(8 + 1, 1);
-                    sprintf(reply, "%08x", myreg);
-                } else {
-                    reply = strdup("E00");
                 }
+                reply = calloc(8 + 1, 1);
+                sprintf(reply, "%08x", myreg);
                 break;
             }
 
@@ -535,7 +565,7 @@ int serve(void) {
                 unsigned reg   = (unsigned) strtoul(s_reg,   NULL, 16);
                 unsigned value = (unsigned) strtoul(s_value, NULL, 16);
 
-                if ((reg < 16) && (ptrace(PTRACE_POKEUSER, pid, reg * 4, value) == 0)) 
+                if ((reg < 16) && (ptrace(PTRACE_POKEUSER, pid, (void *)(reg * 4), (void *)value) == 0)) 
                     reply = strdup("OK");
                 else
                     reply = strdup("E00");
@@ -547,7 +577,7 @@ int serve(void) {
                     char str[9] = {0};
                     strncpy(str, &packet[1 + i * 8], 8);
                     uint32_t reg = (uint32_t) strtoul(str, NULL, 16);
-                    ptrace(PTRACE_POKEUSER, pid, i * 4, reg);
+                    ptrace(PTRACE_POKEUSER, pid, (void *)(i * 4), (void *)reg);
                 }
                 reply = strdup("OK");
                 break;
@@ -566,7 +596,7 @@ int serve(void) {
                     count = count_rnd;
 
                 for (i = 0; i < count_rnd / 4; i+=4) {
-                    uint32_t res = ptrace(PTRACE_PEEKDATA, pid, start - adj_start, 0);
+                    uint32_t res = ptrace(PTRACE_PEEKDATA, pid, (void *)(start - adj_start), NULL);
                     memcpy(mbuf + i, &res, sizeof(uint32_t));
                 }
                 reply = calloc(count * 2 + 1, 1);
@@ -594,7 +624,7 @@ int serve(void) {
                 }
 
                 if(align != 0) {
-                    uint32_t res = ptrace(PTRACE_PEEKDATA, pid, start / 4 * 4, 0);
+                    uint32_t res = ptrace(PTRACE_PEEKDATA, pid, (void *)(start / 4 * 4), NULL);
                     if (align == 1) {
                         res &= 0xFF00FFFF;
                         res |= mbuf[mpos++] << 16;
@@ -609,7 +639,7 @@ int serve(void) {
                         res &= 0xFFFFFF00;
                         res |= mbuf[mpos++];
                     }
-                    ptrace(PTRACE_POKEDATA, pid, start - align, res);
+                    ptrace(PTRACE_POKEDATA, pid, (void *)(start - align), (void *)res);
                     start = start + (4 - align);
                 }
                 while(mpos + 3 < count) {
@@ -617,11 +647,11 @@ int serve(void) {
                     val |= mbuf[mpos++] << 16;
                     val |= mbuf[mpos++] << 8;
                     val |= mbuf[mpos++];
-                    ptrace(PTRACE_POKEDATA, pid, start, val);
+                    ptrace(PTRACE_POKEDATA, pid, (void *)start, (void *)val);
                     start+=4;
                 }
                 if (mpos < count) {
-                    uint32_t val = ptrace(PTRACE_PEEKDATA, pid, start / 4 * 4, 0);
+                    uint32_t val = ptrace(PTRACE_PEEKDATA, pid, (void *)(start / 4 * 4), 0);
                     val &= 0x00FFFFFF;
                     val |= mbuf[mpos++] << 24;
                     if (mpos < count) {
@@ -632,7 +662,7 @@ int serve(void) {
                         val &= 0xFFFF00FF;
                         val |= mbuf[mpos++] << 8;
                     }
-                    ptrace(PTRACE_POKEDATA, pid, start, val);
+                    ptrace(PTRACE_POKEDATA, pid, (void *)start, (void *)val);
                 }
                 reply = strdup("OK");
                 break;
@@ -705,8 +735,7 @@ int serve(void) {
             }
 
             case '!': {
-                /* Not supported */
-                reply = strdup("");
+                reply = strdup("OK");
                 break;
             }
             default:
@@ -714,9 +743,9 @@ int serve(void) {
         }
 
         if(reply) {
-            printf("send: %s\n", reply);
 
             int result = gdb_send_packet(client, reply);
+            printf("send: %s\n", reply);
             if(result != 0) {
                 printf("cannot send: %d\n", result);
                 free(reply);
