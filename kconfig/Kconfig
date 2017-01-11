@@ -114,6 +114,8 @@ config APP_SENSOR
     bool "Test for sensors (obsolete)"
 config APP_FBTEST
     bool "Test for framebuffer"
+config APP_FBCTL
+    bool "fbctl (screen on/off utility)"
 config APP_GPIOCTL
     bool "gpioctl - Tools to set up GPIOs"
 config APP_LATENCY

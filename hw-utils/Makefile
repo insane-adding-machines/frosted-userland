@@ -11,6 +11,7 @@ APPS-$(APP_BUSYLOOP)+=busyloop
 APPS-$(APP_GPIOCTL)+=gpioctl
 APPS-$(APP_LATENCY)+=latency
 APPS-$(APP_ACC)+=acc
+APPS-$(APP_FBCTL)+=fbctl
 BIN:=$(patsubst %,../out/%,$(APPS-y))
 OBJ:=$(patsubst %,%.o,$(APPS-y))
 

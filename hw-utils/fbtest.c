@@ -24,25 +24,30 @@
 #include <fcntl.h>
 #include <math.h>
 #include <unistd.h>
-
-#define WR_SIZE (100)
-
-char buf[WR_SIZE];
+#include <sys/ioctl.h>
 
 int main(int argc, char *args[])
 {
     int fd;
     int i;
+    char *buf;
     fd = open("/dev/fb0", O_RDWR);
     if (fd < 0) {
         printf("Could not open /dev/fb0\r\n");
-        exit(-1);
+        exit(1);
     } else {
         int r;
-        do {
-            for (i = 0; i < WR_SIZE; i++) { buf[i] = rand(); }
-            r = write(fd, buf, WR_SIZE);
-        } while (r > 0);
+        struct fb_var_screeninfo scr;
+        if (ioctl(fd, IOCTL_FB_GET_VSCREENINFO, &scr) < 0) {
+            printf("IOCTL_FB_GET_VSCREENINFO: error.\r\n");
+            exit(2);
+        }
+        printf("Screen information:\r\nResolution: %lux%lu@%lubpp - mmap address: %08x size: %lu\r\n",
+                scr.xres, scr.yres, scr.bits_per_pixel, scr.smem_start, scr.smem_len);
+        buf = (char *)scr.smem_start;
+        for (i = 0; i < scr.smem_len; i++) { 
+            buf[i] = rand(); 
+        }
         close(fd);
     }
     exit(0);
