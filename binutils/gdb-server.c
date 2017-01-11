@@ -372,7 +372,7 @@ int serve(void) {
 
         switch(packet[0]) {
             case 'q': {
-                if(packet[1] == 'P' || packet[1] == 'C' || packet[1] == 'L') {
+                if(packet[1] == 'P' || packet[1] == 'L') {
                     reply = strdup("");
                     break;
                 }
