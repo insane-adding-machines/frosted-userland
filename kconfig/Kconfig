@@ -80,6 +80,8 @@ config APP_POWERCTL
     bool "Remote power control (powerctl)"
 config APP_PTHREADS
     bool "Pthreads test (pthreads)"
+config APP_SEM
+    bool "Semaphore test(sem)"
 
 
 endmenu
