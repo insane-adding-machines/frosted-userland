@@ -33,6 +33,7 @@ APPS-$(APP_KILO)+=kilo
 APPS-$(APP_POWERCTL)+=powerctl
 APPS-$(APP_PTHREADS)+=pthreads
 APPS-later:=dirname tee
+APPS-$(APP_SEM)+=sem
 BIN:=$(patsubst %,../out/%,$(APPS-y))
 OBJ:=$(patsubst %,%.o,$(APPS-y))
 
