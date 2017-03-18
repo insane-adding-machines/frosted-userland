@@ -32,8 +32,6 @@ config APP_ECHO
     bool "echo"
 config APP_LS
     bool "ls"
-config APP_CP
-    bool "cp"
 config APP_TOUCH
     bool "touch"
 config APP_RM

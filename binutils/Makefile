@@ -8,7 +8,6 @@ APPS-$(APP_FRESH)+=fresh
 APPS-$(APP_CAT)+=cat
 APPS-$(APP_ECHO)+=echo
 APPS-$(APP_LS)+=ls
-APPS-$(APP_CP)+=cp
 APPS-$(APP_TOUCH)+=touch
 APPS-$(APP_RM)+=rm
 APPS-$(APP_KILL)+=kill
