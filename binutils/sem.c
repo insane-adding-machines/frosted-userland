@@ -27,10 +27,10 @@
 #include <sys/time.h>
 
 #define TEST_WAIT
-//#define TEST_TRYWAIT
-//#define TEST_TIMEDWAIT
+#define TEST_TRYWAIT
+#define TEST_TIMEDWAIT
 
-#define TEST test_wait
+#define TEST test_timedwait
 
 
 

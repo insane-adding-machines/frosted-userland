@@ -3,7 +3,7 @@
 #include <fcntl.h>
 #include <string.h>
 #include <stdlib.h>
-#include "sys/fs/xipfs.h"
+#include "xipfs.h"
 #include <sys/stat.h>
 #include <libgen.h>
 #include <unistd.h>

@@ -33,16 +33,25 @@ void *consumer_thread(void *arg)
     pthread_exit(NULL);
 }
 
+void *useless_thread(void *arg)
+{
+    while(1)
+        sleep(1);
+}
+
 int main(int argc, char *args[])
 {
-    pthread_t cons;
+    pthread_t cons, useless;
     pthread_mutex_t mutex = PTHREAD_MUTEX_INITIALIZER;
 
     pthread_create(&cons, NULL, consumer_thread, &mutex);
+    pthread_create(&useless, NULL, useless_thread, NULL);
     pthread_mutex_lock(&mutex);
     printf("Producer\r\n");
     pthread_mutex_unlock(&mutex);
     pthread_join(cons, NULL);
     pthread_mutex_destroy(&mutex);
+    pthread_kill(useless, 0);
+    pthread_join(useless, NULL);
     pthread_exit(NULL);
 }

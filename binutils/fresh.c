@@ -229,7 +229,7 @@ static int launchProg(char **args, int background)
 
     /* Find in path: executable command */
     if (stat(bin_arg0, &st) < 0) {
-        printf("Command not found.\r\n");
+        printf("stat: Command not found.\r\n");
         return 1;
     }
 
