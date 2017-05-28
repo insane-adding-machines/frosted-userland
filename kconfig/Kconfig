@@ -82,6 +82,8 @@ config APP_PTHREADS
     bool "Pthreads test (pthreads)"
 config APP_SEM
     bool "Semaphore test(sem)"
+config APP_PS
+    bool "ps"
 
 
 endmenu
