@@ -376,6 +376,11 @@ int serve(void) {
                     reply = strdup("");
                     break;
                 }
+                if(packet[1] == 'C') {
+                    reply = calloc(10,1);
+                    snprintf(reply,10,"QC %04x", htons(pid));
+                    break;
+                }
 
                 char *separator = strstr(packet, ":"), *params = "";
                 if(separator == NULL) {
@@ -393,20 +398,31 @@ int serve(void) {
                 if(!strcmp(queryName, "Supported")) {
                     reply = strdup("PacketSize=04B0;qXfer:features:read+;multiprocess+");
                 } else if(!strcmp(queryName, "TStatus")) {
-                    reply = strdup("T0");
+                    if (Stopped) {
+                        reply = strdup("T1");
+                    } else {
+                        reply = strdup("T1");
+                    }
                 } else if(!strcmp(queryName, "fThreadInfo")) {
                     reply = calloc(10,1);
                     snprintf(reply,10,"m %d", pid);
                 } else if(!strcmp(queryName, "sThreadInfo")) {
-                    reply = strdup("l");
+                    static int sThreadQueryOn;
+                    /* All threads of the OS: reply with this thread only */
+                    if (sThreadQueryOn) {
+                        reply = strdup("l");
+                        sThreadQueryOn = 0;
+                    } else {
+                        reply = calloc(10,1);
+                        snprintf(reply,10,"m %d", pid);
+                        sThreadQueryOn = 1;
+                    }
                 } else if(!strcmp(queryName, "TfV")) {
                     reply = strdup("l");
                 } else if(!strcmp(queryName, "TfP")) {
                     reply = strdup("l");
                 } else if(!strcmp(queryName, "Attached")) {
                     reply = strdup("1");
-                } else if(!strcmp(queryName, "sThreadInfo")) {
-                    reply = strdup("l");
                 } else if(!strcmp(queryName, "Symbol")) {
                     reply = strdup("OK");
                 } else if(!strcmp(queryName, "Offsets")) {
