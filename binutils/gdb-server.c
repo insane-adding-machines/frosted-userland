@@ -42,6 +42,7 @@
 static int pid = -1;
 static int client = -1;
 static volatile int Stopped = 1;
+static volatile int Detach = 0;
 static uint16_t listen_port = 4444;
 static const char hex[] = "0123456789abcdef";
 static uint8_t mbuf[600];
@@ -378,7 +379,7 @@ int serve(void) {
                 }
                 if(packet[1] == 'C') {
                     reply = calloc(10,1);
-                    snprintf(reply,10,"QC %04x", htons(pid));
+                    snprintf(reply,10,"QC%04x", htons(pid));
                     break;
                 }
 
@@ -396,31 +397,27 @@ int serve(void) {
                 printf("query: %s;%s\n", queryName, params);
 
                 if(!strcmp(queryName, "Supported")) {
-                    reply = strdup("PacketSize=04B0;qXfer:features:read+;multiprocess+");
+                    reply = strdup("PacketSize=04B0;qXfer:features:read+;multiprocess+:qXfer:memory-map:read+");
                 } else if(!strcmp(queryName, "TStatus")) {
+                    reply = strdup("");
+                    /*
                     if (Stopped) {
-                        reply = strdup("T1");
+                        reply = strdup("T0;tstop:0");
                     } else {
                         reply = strdup("T1");
                     }
+                    */
                 } else if(!strcmp(queryName, "fThreadInfo")) {
-                    reply = calloc(10,1);
-                    snprintf(reply,10,"m %d", pid);
+                    reply = calloc(20,1);
+                    snprintf(reply,20,"mp%04x.1", pid);
                 } else if(!strcmp(queryName, "sThreadInfo")) {
-                    static int sThreadQueryOn;
-                    /* All threads of the OS: reply with this thread only */
-                    if (sThreadQueryOn) {
-                        reply = strdup("l");
-                        sThreadQueryOn = 0;
-                    } else {
-                        reply = calloc(10,1);
-                        snprintf(reply,10,"m %d", pid);
-                        sThreadQueryOn = 1;
-                    }
+                    reply = strdup("l");
                 } else if(!strcmp(queryName, "TfV")) {
                     reply = strdup("l");
                 } else if(!strcmp(queryName, "TfP")) {
-                    reply = strdup("l");
+                        reply = strdup("");
+                } else if(!strcmp(queryName, "TsP")) {
+                        reply = strdup("");
                 } else if(!strcmp(queryName, "Attached")) {
                     reply = strdup("1");
                 } else if(!strcmp(queryName, "Symbol")) {
@@ -478,6 +475,14 @@ int serve(void) {
 
                 break;
             } /* end of 'q..' packets */
+
+            case 'D': {
+                      /* Detach */
+                          reply = strdup("OK");
+                          Detach = 1;
+
+                      }
+                      break;
 
             case 'v': {
                 char *params = NULL;
@@ -548,7 +553,12 @@ int serve(void) {
                 break;
 
             case '?':
-                reply = strdup("S05"); // TRAP
+                reply = calloc(80, 1);
+                snprintf(reply, 80, "T000d:%08x;0f:%08x;0e:%08x;thread:p%04x.0001;core:0;", 
+                        htonl((uint32_t)ptrace(PTRACE_PEEKUSER, pid, (void*)(13 * 4), NULL)),  
+                        htonl((uint32_t)ptrace(PTRACE_PEEKUSER, pid, (void*)(15 * 4), NULL)), 
+                        htonl((uint32_t)ptrace(PTRACE_PEEKUSER, pid, (void*)(14 * 4), NULL)), 
+                        pid);
                 break;
 
             case 'g': {
@@ -557,13 +567,13 @@ int serve(void) {
 
                     reply = calloc(8 * 16 + 1, 1);
                     for(int i = 0; i < 16; i++)
-                        sprintf(&reply[i * 8], "%08x", htonl(u.regs[i]));
+                        sprintf(&reply[i * 8], "%08x", htonl((uint32_t)u.regs[i]));
                     break;
                 }
 
             case 'p': {
                 unsigned id = (unsigned) strtoul(&packet[1], NULL, 16);
-                unsigned myreg = 0xDEADDEAD;
+                unsigned myreg = 0xDEADDEADUL;
                 unsigned reg_val;
 
                 if(id < 16) {
@@ -773,6 +783,12 @@ int serve(void) {
         }
 
         free(packet);
+        if (Detach) {
+           printf("Detaching from debug session...");
+           ptrace(PTRACE_DETACH, pid, NULL, NULL);
+           printf("Process %d resumed. Exiting...\n");
+           exit(0);
+        }
     }
     return 0;
 }
