@@ -8,6 +8,7 @@ APPS-$(APP_NETCAT)+=nc
 APPS-$(APP_HOST)+=host
 APPS-$(APP_HTTPD)+=httpd
 APPS-$(APP_STARWARS)+=starwars
+APPS-$(APP_NTPC)+=ntpc
 
 LIBS-$(LIB_MONGOOSE)+=../lib/libmongoose.a
 LIBS-$(LIB_WOLFSSL)+=../lib/libwolfssl.a

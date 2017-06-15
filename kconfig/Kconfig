@@ -82,8 +82,6 @@ config APP_PTHREADS
     bool "Pthreads test (pthreads)"
 config APP_SEM
     bool "Semaphore test(sem)"
-config APP_PS
-    bool "ps"
 
 
 endmenu
@@ -102,7 +100,8 @@ config APP_NETCAT
 config APP_HTTPD
     bool "httpd"
     depends on LIB_MONGOOSE
-
+config APP_NTPC
+    bool "NTPC"
 config APP_STARWARS
     bool "starwars"
 endmenu
