@@ -83,6 +83,7 @@ int mk_ntp(uint8_t *buf)
     int len = 0;
 
     ntp = (struct ntp_request *)buf;
+    memset(buf, 0, MAX_LEN);
 
     ntp->flags      = NTP_FLAGS;
     ntp->stratum    = NTP_STRATUM;
@@ -92,7 +93,7 @@ int mk_ntp(uint8_t *buf)
     ntp->root_disp  = NTP_ROOT_DISP;
     ntp->ref_id = 0x00;
 
-    len = sizeof(struct ntp_request);
+    len = sizeof (struct ntp_request);
 
     return len;
 }
@@ -118,7 +119,7 @@ int query_ntp(int nfd, char *host)
     dest.sin_family = AF_INET;
     inet_aton(host, &dest.sin_addr);
     dest.sin_port = htons(NTP_PORT);
-    destsz = sizeof(dest);
+    destsz = sizeof (dest);
 
     if (sendto(nfd, (char *)buffer, len, 0, (struct sockaddr *)&dest, destsz) < 0) {
         printf("ntpc: write fail to: %s", host);
