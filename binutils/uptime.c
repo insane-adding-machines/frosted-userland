@@ -25,11 +25,11 @@
 
  int main(int argc, char *args[])
  {
-	 struct timeval tv;
+	 struct timespec tv;
 	 time_t now;
 	 long days = 0;
 
-	 gettimeofday(&tv, NULL);
+	 clock_gettime(CLOCK_MONOTONIC, &tv);
 	 now = tv.tv_sec;
 
 	 if (now > 86400) {
