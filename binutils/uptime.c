@@ -25,19 +25,24 @@
 
  int main(int argc, char *args[])
  {
-	 struct timespec tv;
-	 time_t now;
+	 struct timespec ts;
+	 time_t now, hours, mins;
 	 long days = 0;
 
-	 clock_gettime(CLOCK_MONOTONIC, &tv);
-	 now = tv.tv_sec;
+	 clock_gettime(CLOCK_MONOTONIC, &ts);
+	 now = ts.tv_sec;
 
 	 if (now > 86400) {
 		 days = now / 86400;
 	 }
 
 	 struct tm *tm = localtime(&now);
-	 printf(" %d:%d:%d up %ld days, %02d:%02d, 1 user\r\n", tm->tm_hour, tm->tm_min, tm->tm_sec, days, tm->tm_hour, tm->tm_min);
+	 hours = tm->tm_hour;
+	 mins = tm->tm_min;
+
+	 clock_gettime(CLOCK_REALTIME, &ts);
+	 tm = localtime(&ts.tv_sec);
+	 printf(" %02d:%02d:%02d up %ld days, %02d:%02d, 1 user\r\n", tm->tm_hour, tm->tm_min, tm->tm_sec, days, hours, mins);
 
 	 exit(0);
  }
