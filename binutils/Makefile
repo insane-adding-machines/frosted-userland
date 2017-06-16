@@ -32,9 +32,9 @@ APPS-$(APP_GREP)+=grep
 APPS-$(APP_KILO)+=kilo
 APPS-$(APP_POWERCTL)+=powerctl
 APPS-$(APP_PTHREADS)+=pthreads
-APPS-$(APP_PS)+=ps
 APPS-later:=dirname tee
 APPS-$(APP_SEM)+=sem
+APPS-$(APP_DATE)+=date
 BIN:=$(patsubst %,../out/%,$(APPS-y))
 OBJ:=$(patsubst %,%.o,$(APPS-y))
 
