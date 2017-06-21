@@ -18,7 +18,8 @@
  *
  */
 
-#include "frosted_binutils.h"
+#include <stdio.h>
+#include <stdlib.h>
 #include <signal.h>
 
 void usage(char *name)

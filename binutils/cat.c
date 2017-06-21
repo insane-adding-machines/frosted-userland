@@ -18,7 +18,12 @@
  *
  */
 
-#include "frosted_binutils.h"
+#include <stdio.h>
+#include <stdlib.h>
+#include <unistd.h>
+#include <sys/types.h>
+#include <sys/stat.h>
+#include <fcntl.h>
 
 int main(int argc, char *args[])
 {
@@ -35,7 +40,7 @@ int main(int argc, char *args[])
             do {
                 r = read(fd, buf, 64);
                 if (r > 0) {
-                    write(STDOUT_FILENO, buf, r);
+                    write(1, buf, r);
                 }
             } while (r > 0);
             close(fd);

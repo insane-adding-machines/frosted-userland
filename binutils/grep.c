@@ -18,8 +18,17 @@
  *
  */
 
-#include "frosted_binutils.h"
+#include <stdio.h>
+#include <stdlib.h>
+#include <unistd.h>
+#include <string.h>
+#include <sys/types.h>
+#include <sys/stat.h>
+#include <fcntl.h>
 #include <regex.h>
+
+#define BUFSIZE 256
+#define MAXFILES 13
 
 #define CFLAG 0x1
 #define XFLAG 0x2
@@ -43,19 +52,19 @@ int inputline(char *input, int size)
     int len;
     while (1 < 2) {
         len = 0;
-        int out = STDOUT_FILENO;
+        int out = 1;
         int i;
         memset(input, 0, size);
         while (len < size) {
             const char del = 0x08;
-            int ret = read(STDIN_FILENO, input + len, 4);
+            int ret = read(0, input + len, 4);
             /*if ( ret > 3 )
                 continue;*/
             if ((ret > 0) && (input[len] >= 0x20 && input[len] <= 0x7e)) {
                 for (i = 0; i < ret; i++) {
                     /* Echo to terminal */
                     if (input[len + i] >= 0x20 && input[len + i] <= 0x7e)
-                        write(STDOUT_FILENO, &input[len + i], 1);
+                        write(out, &input[len + i], 1);
 
                     len++;
                 }

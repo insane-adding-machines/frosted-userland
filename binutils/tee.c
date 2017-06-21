@@ -17,8 +17,17 @@
  *      Authors:
  *
  */
- 
-#include "frosted_binutils.h"
+
+#include <stdio.h>
+#include <stdlib.h>
+#include <unistd.h>
+#include <string.h>
+#include <sys/types.h>
+#include <sys/stat.h>
+#include <fcntl.h>
+
+#define BUFSIZE 256
+#define MAXFILES 13
 
 int main(int argc, char *args[])
 {
@@ -32,7 +41,7 @@ int main(int argc, char *args[])
     setlocale(LC_ALL, "");
     opterr = 0;
     optind = 0;
-    fdfn[j][0] = STDOUT_FILENO;
+    fdfn[j][0] = 1;
     while ((c = getopt(argc,(char**) args, "ai")) != -1)
         switch (c)
         {
@@ -52,7 +61,7 @@ int main(int argc, char *args[])
     /*setting extra stdout redirections, getopt does not count them*/
     for( i = 0; i < optind ; i++ ){
         if( strcmp( args[i] , "-" ) == 0 )
-            fdfn[++j][0] = STDOUT_FILENO;
+            fdfn[++j][0] = 1;
     }
 
     for (slot = j+1; i < argc ; i++)

@@ -18,27 +18,35 @@
  *
  */
 
-#include "frosted_binutils.h"
+#include <stdio.h>
+#include <stdlib.h>
+#include <unistd.h>
+#include <string.h>
+#include <sys/types.h>
+#include <sys/stat.h>
+#include <fcntl.h>
 
+#define BUFSIZE 256
+#define MAXFILES 13
 
 int inputline(char *input, int size)
 {
     int len;
     while (1 < 2) {
         len = 0;
-        int out = STDOUT_FILENO;
+        int out = 1;
         int i;
         memset(input, 0, size);
         while (len < size) {
             const char del = 0x08;
-            int ret = read(STDIN_FILENO, input + len, 4);
+            int ret = read(0, input + len, 4);
             /*if ( ret > 3 )
                 continue;*/
             if ((ret > 0) && (input[len] >= 0x20 && input[len] <= 0x7e)) {
                 for (i = 0; i < ret; i++) {
                     /* Echo to terminal */
                     if (input[len + i] >= 0x20 && input[len + i] <= 0x7e)
-                        write(STDOUT_FILENO, &input[len + i], 1);
+                        write(out, &input[len + i], 1);
 
                     len++;
                 }
@@ -273,7 +281,7 @@ int main(int argc, char *args[])
                     if (b < 0)
                         break;
                     else if (b == 0) {
-                        write(STDOUT_FILENO, "\r\n", 2);
+                        write(1, "\r\n", 2);
                         readuntil(fdfn[i], &line, '\n');
                     }
                 }
@@ -286,8 +294,8 @@ int main(int argc, char *args[])
                 len = strlen(line) - 1;
                 len = (end < len && end >= 0) ? end : len - 1;
                 for (i = start; i <= len; i++)
-                    write(STDOUT_FILENO, &line[i], 1);
-                write(STDOUT_FILENO, "\r\n", 2);
+                    write(1, &line[i], 1);
+                write(1, "\r\n", 2);
             } else if (flags == 'f') {
                 len = strlen(line);
                 j = 0;
@@ -302,15 +310,15 @@ int main(int argc, char *args[])
 
                 for (i = start; end < 0 || i <= end; i++) {
                     while (line[j] != delim && j < len)
-                        write(STDOUT_FILENO, &line[j++], 1);
+                        write(1, &line[j++], 1);
                     if (line[j] == delim && (i < end || end < 0))
-                        write(STDOUT_FILENO, &line[j++], 1);
+                        write(1, &line[j++], 1);
 
                     if (j == len)
                         break;
                 }
                 if (line[j - 1] != '\n')
-                    write(STDOUT_FILENO, "\r\n", 2);
+                    write(1, "\r\n", 2);
             }
         }
     }
