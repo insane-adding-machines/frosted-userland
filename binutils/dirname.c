@@ -18,17 +18,17 @@
  *
  */
  
-#include "frosted_binutils.h"
+#include <stdio.h>
+#include <string.h>
+#include <getopt.h>
+#include <stdlib.h>
 
 int main(int argc, char *args[])
-    int argc = 0, i, c;
-    extern int optind;
+{
+    int i, c;
     char delim = '\n';
     char *head, *tail;
     char **flags;
-    argc = nargs( args);
-
-    setlocale (LC_ALL, "");
 
     if ( argc < 2 || args[1] == NULL){
         fprintf(stderr, "usage: dirname [OPTION] NAME...\n");

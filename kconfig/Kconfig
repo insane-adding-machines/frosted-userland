@@ -44,6 +44,8 @@ config APP_FALSE
     bool "false"
 config APP_LN
     bool "ln"
+config APP_DIRNAME
+    bool "dirname"
 config APP_MKDIR
     bool "mkdir"
 config APP_MOUNT
@@ -84,7 +86,6 @@ config APP_SEM
     bool "Semaphore test(sem)"
 config APP_DATE
     bool "date"
-
 endmenu
 
 menu "Networking utils"

@@ -35,6 +35,7 @@ APPS-$(APP_PTHREADS)+=pthreads
 APPS-later:=dirname tee
 APPS-$(APP_SEM)+=sem
 APPS-$(APP_DATE)+=date
+APPS-$(APP_DIRNAME)+=dirname
 BIN:=$(patsubst %,../out/%,$(APPS-y))
 OBJ:=$(patsubst %,%.o,$(APPS-y))
 
