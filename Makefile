@@ -21,6 +21,7 @@ endif
 
 #Applications selection
 DIR-y+=lib binutils hw-utils netutils games
+DIR-$(APP_PYTHON)+=micropython
 
 
 # COMPILER FLAGS -- Target CPU
@@ -80,6 +81,14 @@ sh: FORCE
 	mkdir -p out
 	cp $@/* out/
 
+micropython: FORCE
+	mkdir -p out
+	mkdir -p gdb
+	make -C micropython/mpy-cross
+	make -C micropython/frosted
+	cp micropython/frosted/micropython out/python
+	cp micropython/frosted/micropython.gdb gdb
+
 
 FORCE:
 
@@ -87,9 +96,11 @@ menuconfig:
 	@$(MAKE) -C kconfig/ menuconfig -f Makefile.frosted
 
 clean:
-	$(foreach d,$(DIR-y),make -C $(d) clean;)
+	$(foreach d,$(DIR-y),make -C $(d) clean &>/dev/null || true;) 
 	@rm -f *.img
 	@rm -f *.o
 	@rm -rf gdb out
 	@make -C xipfs clean
+	make -C micropython/mpy-cross clean
+	@make -C micropython/frosted clean
 	@rm -f xipfstool

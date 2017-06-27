@@ -10,3 +10,6 @@
 [submodule "frosted-headers"]
 	path = frosted-headers
 	url = https://github.com/insane-adding-machines/frosted-headers.git
+[submodule "micropython"]
+	path = micropython
+	url = https://github.com/insane-adding-machines/micropython

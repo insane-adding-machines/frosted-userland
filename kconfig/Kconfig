@@ -108,6 +108,12 @@ config APP_STARWARS
     bool "starwars"
 endmenu
 
+menu "Interpreters"
+config APP_PYTHON
+    bool "python interpreter (micropython)"
+endmenu
+
+
 menu "Hardware utils"
 config APP_BUSYLOOP
     bool "busyloop - CPU busy test"
