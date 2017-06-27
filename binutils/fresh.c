@@ -187,26 +187,33 @@ enum x_type {
     X_SH = 0,
     X_bFLT,
     X_ELF,
+    X_PY,
     X_UNK = 0x99,
 };
 
 static enum x_type get_x_type(char *arg)
 {
     int fd = open(arg, O_RDONLY);
-    char hdr[4] = {};
+    char hdr[30] = {};
     if (fd < 0) {
         return X_ERR;
     }
-    if (read(fd, hdr, 4) <= 0) {
+    if (read(fd, hdr, 30) <= 0) {
         close(fd);
         return X_ERR;
     }
     close(fd);
 
+    hdr[29] = '\0';
+
     if (strncmp(hdr, "bFLT", 4) == 0)
         return X_bFLT;
-    if (hdr[0] == '#' && hdr[1] == '!')
-        return X_SH;
+    if (hdr[0] == '#' && hdr[1] == '!') {
+        if (strstr(hdr, "python"))
+            return X_PY;
+        if (strstr(hdr, "sh"))
+            return X_SH;
+    }
     if (strncmp(hdr + 1, "ELF", 3) == 0)
         return X_ELF;
 
@@ -218,6 +225,7 @@ static int launchProg(char **args, int background)
     int err = -1;
     struct stat st;
     char bin_arg0[60] = "/bin/";
+    char interpreter[30] = "/bin/fresh";
     enum x_type xt;
     int pid;
 
@@ -254,18 +262,20 @@ static int launchProg(char **args, int background)
             }
             exit(255);
 
+        case X_PY:
+            strcpy(interpreter,"/bin/python");
+            /* fall through */
         case X_SH: {
-            char fresh_bin[] = "/bin/fresh";
             char *aux[LIMIT] = {NULL};
             int i;
-            aux[0] = fresh_bin;
+            aux[0] = interpreter;
             aux[1] = bin_arg0;
 
             i = 1;
             while (args[i] != NULL) {
                 aux[i + 1] = args[i++];
             }
-            err = execvp(fresh_bin, aux);
+            err = execvp(interpreter, aux);
             exit(err);
         }
 
