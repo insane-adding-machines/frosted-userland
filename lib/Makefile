@@ -10,9 +10,11 @@ all: $(LIBS-y)
 
 
 libssl.a: 
+	cp options.h wolfssl
 	make -C wolfssl -f ../Makefile.wolfssl
 
 libcrypto.a:
+	cp options.h wolfssl/wolfssl
 	make -C wolfssl -f ../Makefile.wolfssl crypto
 
 mongoose.o: mongoose/mongoose.c

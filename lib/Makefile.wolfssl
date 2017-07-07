@@ -2,10 +2,7 @@ PREFIX?=$(PWD)/build
 CROSS_COMPILE?=arm-frosted-eabi-
 CC:=$(CROSS_COMPILE)gcc
 
-# Fetch source files for wolfcrypt
-SRC_DIR=wolfcrypt/src
-
-# Translate to .o object files
+# object files
 OBJCRYPTO:= \
    wolfcrypt/src/aes.o      \
    wolfcrypt/src/arc4.o     \
@@ -65,7 +62,7 @@ OBJCRYPTO:= \
 
 ARCH?=stm32
 
-CFLAGS-y:=-I. $(EXTRA_CFLAGS) -Iwolfssl -Iwolfssl/wolfssl -Iwolfssl/wolfcrypt
+CFLAGS-y:=-I. $(EXTRA_CFLAGS) -Iwolfssl -Iwolfssl/wolfssl -Iwolfssl/wolfcrypt 
 CFLAGS-$(WOLFSSL_USE_FAST_MATH)+=-DUSE_FAST_MATH
 CFLAGS-$(WOLFSSL_RSA)+=-DRSA_DECODE_EXTRA
 CFLAGS-$(WOLFSSL_ECC)+=-DHAVE_ECC -DHAVE_ALL_CURVES -DHAVE_SUPPORTED_CURVES
@@ -79,11 +76,12 @@ ssl: ../libssl.a
 
 crypto: ../libcrypto.a
 
+
 src/ssl.o: src/ssl.c
 	$(CC) -c $(CFLAGS) $(CFLAGS-y) -o $@ $< -Iconfig $(EXTRA_CFLAGS) $(PLATFORM_CFLAGS) -I $(PREFIX)/include -DTFM_TIMING_RESISTANT -DNO_WRITEV -DNO_ERROR_STRINGS -DSMALL_SESSION_CACHE -DWOLFSSL_SMALL_STACK -DHAVE_TLS_EXTENSIONS -DNO_DSA -DNO_RABBIT -DNO_DES3 -DOPENSSL_EXTRA -DWOLFSSL_FROSTED -DNO_INLINE -I.
 
 %.o: %.c
-	$(CC) -c $(CFLAGS) $(CFLAGS-y) -o $@ $< -Iconfig $(EXTRA_CFLAGS) $(PLATFORM_CFLAGS) -I $(PREFIX)/include -DTFM_TIMING_RESISTANT -DNO_WRITEV -DNO_ERROR_STRINGS -DSMALL_SESSION_CACHE -DWOLFSSL_SMALL_STACK -DHAVE_TLS_EXTENSIONS -DNO_DSA -DNO_RABBIT -DNO_DES3 -DOPENSSL_EXTRA -DWOLFSSL_FROSTED -DNO_INLINE -I.
+	$(CC) -c $(CFLAGS) $(CFLAGS-y) -o $@ $< -Iconfig $(EXTRA_CFLAGS) $(PLATFORM_CFLAGS) -I $(PREFIX)/include -DTFM_TIMING_RESISTANT -DNO_WRITEV -DNO_ERROR_STRINGS -DSMALL_SESSION_CACHE -DWOLFSSL_SMALL_STACK -DHAVE_TLS_EXTENSIONS -DNO_DSA -DNO_RABBIT -DNO_DES3 -DOPENSSL_EXTRA -DWOLFSSL_FROSTED -DNO_INLINE -I. -DWOLFCRYPT_ONLY
 
 
 ../libssl.a: $(OBJSSL)
@@ -97,6 +95,7 @@ src/ssl.o: src/ssl.c
 ../libcrypto.a: $(OBJCRYPTO)
 	@mkdir -p ../include/wolfssl/wolfcrypt
 	@cp wolfssl/*.h  ../include/wolfssl
+	@cp options.h 	../include/wolfssl
 	@cp wolfssl/wolfcrypt/*.h  ../include/wolfssl/wolfcrypt
 	@cp -r wolfssl/openssl/ ../include/
 	@$(CROSS_COMPILE)ar cr $@ $(OBJCRYPTO)

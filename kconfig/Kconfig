@@ -102,8 +102,11 @@ config APP_NETCAT
 config APP_HTTPD
     bool "httpd"
     depends on LIB_MONGOOSE
+config APP_SSHD
+    bool "sshd"
+    depends on LIB_WOLFSSL
 config APP_NTPC
-    bool "NTPC"
+    bool "ntpc"
 config APP_STARWARS
     bool "starwars"
 endmenu

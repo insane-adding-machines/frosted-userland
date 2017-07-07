@@ -13,3 +13,6 @@
 [submodule "micropython"]
 	path = micropython
 	url = https://github.com/insane-adding-machines/micropython
+[submodule "netutils/wolfssh"]
+	path = netutils/wolfssh
+	url = https://github.com/wolfSSL/wolfssh.git
