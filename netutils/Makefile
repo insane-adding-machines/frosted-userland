@@ -11,7 +11,7 @@ APPS-$(APP_STARWARS)+=starwars
 APPS-$(APP_NTPC)+=ntpc
 
 LIBS-$(LIB_MONGOOSE)+=../lib/libmongoose.a
-LIBS-$(LIB_WOLFSSL)+=../lib/libwolfssl.a
+LIBS-$(LIB_WOLFSSL)+=../lib/libssl.a
 
 BIN:=$(patsubst %,../out/%,$(APPS-y))
 OBJ:=$(patsubst %,%.o,$(APPS-y))

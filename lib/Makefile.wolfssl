@@ -2,35 +2,107 @@ PREFIX?=$(PWD)/build
 CROSS_COMPILE?=arm-frosted-eabi-
 CC:=$(CROSS_COMPILE)gcc
 
-ARCH?=stm32
-
-# Fetch source files
-SRC_DIR=src wolfcrypt/src
-CXX_FILES := $(foreach sdir,$(SRC_DIR),$(wildcard $(sdir)/*.c))
+# Fetch source files for wolfcrypt
+SRC_DIR=wolfcrypt/src
 
 # Translate to .o object files
-OBJS:= $(patsubst %.c,%.o,$(CXX_FILES))
+OBJCRYPTO:= \
+   wolfcrypt/src/aes.o      \
+   wolfcrypt/src/arc4.o     \
+   wolfcrypt/src/asm.o      \
+   wolfcrypt/src/asn.o      \
+   wolfcrypt/src/blake2b.o  \
+   wolfcrypt/src/camellia.o \
+   wolfcrypt/src/chacha20_poly1305.o \
+   wolfcrypt/src/chacha.o   \
+   wolfcrypt/src/cmac.o     \
+   wolfcrypt/src/coding.o   \
+   wolfcrypt/src/compress.o \
+   wolfcrypt/src/curve25519.o \
+   wolfcrypt/src/des3.o     \
+   wolfcrypt/src/dh.o       \
+   wolfcrypt/src/dsa.o      \
+   wolfcrypt/src/ecc.o      \
+   wolfcrypt/src/ecc_fp.o   \
+   wolfcrypt/src/ed25519.o  \
+   wolfcrypt/src/error.o    \
+   wolfcrypt/src/fe_low_mem.o \
+   wolfcrypt/src/fe_operations.o \
+   wolfcrypt/src/ge_low_mem.o  \
+   wolfcrypt/src/ge_operations.o \
+   wolfcrypt/src/hash.o     \
+   wolfcrypt/src/hc128.o    \
+   wolfcrypt/src/hmac.o     \
+   wolfcrypt/src/idea.o     \
+   wolfcrypt/src/integer.o  \
+   wolfcrypt/src/logging.o  \
+   wolfcrypt/src/md2.o      \
+   wolfcrypt/src/md4.o      \
+   wolfcrypt/src/md5.o      \
+   wolfcrypt/src/memory.o   \
+   wolfcrypt/src/misc.o     \
+   wolfcrypt/src/pkcs12.o   \
+   wolfcrypt/src/pkcs7.o    \
+   wolfcrypt/src/poly1305.o \
+   wolfcrypt/src/pwdbased.o \
+   wolfcrypt/src/rabbit.o   \
+   wolfcrypt/src/random.o   \
+   wolfcrypt/src/ripemd.o   \
+   wolfcrypt/src/rsa.o      \
+   wolfcrypt/src/sha256.o   \
+   wolfcrypt/src/sha3.o     \
+   wolfcrypt/src/sha512.o   \
+   wolfcrypt/src/sha.o      \
+   wolfcrypt/src/signature.o\
+   wolfcrypt/src/srp.o      \
+   wolfcrypt/src/tfm.o      \
+   wolfcrypt/src/wc_encrypt.o \
+   wolfcrypt/src/wc_port.o  \
+   wolfcrypt/src/wolfevent.o\
+   wolfcrypt/src/wolfmath.o 
 
-CFLAGS-y:=-I. $(EXTRA_CFLAGS) -Iwolfssl
+
+
+ARCH?=stm32
+
+CFLAGS-y:=-I. $(EXTRA_CFLAGS) -Iwolfssl -Iwolfssl/wolfssl -Iwolfssl/wolfcrypt
 CFLAGS-$(WOLFSSL_USE_FAST_MATH)+=-DUSE_FAST_MATH
 CFLAGS-$(WOLFSSL_RSA)+=-DRSA_DECODE_EXTRA
 CFLAGS-$(WOLFSSL_ECC)+=-DHAVE_ECC -DHAVE_ALL_CURVES -DHAVE_SUPPORTED_CURVES
 CFLAGS-$(FREERTOS)+=-DFREERTOS
 
-all: ../libwolfssl.a
+OBJSSL:=src/ssl.o
+
+all: ssl
+
+ssl: ../libssl.a
+
+crypto: ../libcrypto.a
+
+src/ssl.o: src/ssl.c
+	$(CC) -c $(CFLAGS) $(CFLAGS-y) -o $@ $< -Iconfig $(EXTRA_CFLAGS) $(PLATFORM_CFLAGS) -I $(PREFIX)/include -DTFM_TIMING_RESISTANT -DNO_WRITEV -DNO_ERROR_STRINGS -DSMALL_SESSION_CACHE -DWOLFSSL_SMALL_STACK -DHAVE_TLS_EXTENSIONS -DNO_DSA -DNO_RABBIT -DNO_DES3 -DOPENSSL_EXTRA -DWOLFSSL_FROSTED -DNO_INLINE -I.
 
 %.o: %.c
 	$(CC) -c $(CFLAGS) $(CFLAGS-y) -o $@ $< -Iconfig $(EXTRA_CFLAGS) $(PLATFORM_CFLAGS) -I $(PREFIX)/include -DTFM_TIMING_RESISTANT -DNO_WRITEV -DNO_ERROR_STRINGS -DSMALL_SESSION_CACHE -DWOLFSSL_SMALL_STACK -DHAVE_TLS_EXTENSIONS -DNO_DSA -DNO_RABBIT -DNO_DES3 -DOPENSSL_EXTRA -DWOLFSSL_FROSTED -DNO_INLINE -I.
 
 
-../libwolfssl.a: $(OBJS)
+../libssl.a: $(OBJSSL)
 	@mkdir -p ../include/wolfssl/wolfcrypt
 	@cp wolfssl/*.h  ../include/wolfssl
 	@cp wolfssl/wolfcrypt/*.h  ../include/wolfssl/wolfcrypt
 	@cp -r wolfssl/openssl/ ../include/
-	@$(CROSS_COMPILE)ar cr $@ $(OBJS)
+	@$(CROSS_COMPILE)ar cr $@ $(OBJSSL)
+	@$(CROSS_COMPILE)ranlib $@
+
+../libcrypto.a: $(OBJCRYPTO)
+	@mkdir -p ../include/wolfssl/wolfcrypt
+	@cp wolfssl/*.h  ../include/wolfssl
+	@cp wolfssl/wolfcrypt/*.h  ../include/wolfssl/wolfcrypt
+	@cp -r wolfssl/openssl/ ../include/
+	@$(CROSS_COMPILE)ar cr $@ $(OBJCRYPTO)
 	@$(CROSS_COMPILE)ranlib $@
     
 clean:
-	rm -f $(OBJS)
+	rm -f $(OBJSSL)
+	rm -f $(OBJCRYPTO)
 
