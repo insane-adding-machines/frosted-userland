@@ -93,6 +93,8 @@ config APP_IFCONFIG
     bool "ifconfig"
 config APP_ROUTE
     bool "route"
+config APP_PING
+    bool "ping"
 config APP_HOST
     bool "host"
 config APP_TELNETD
