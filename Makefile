@@ -25,12 +25,7 @@ DIR-$(APP_PYTHON)+=micropython
 
 
 # COMPILER FLAGS -- Target CPU
-CFLAGS+=-mthumb -mlittle-endian -mthumb-interwork -ffunction-sections
-ifeq ($(ARCH),)
-	CFLAGS+=-mcpu=cortex-m3
-else
-	CFLAGS+=-mcpu=$(ARCH)
-endif
+CFLAGS+=-mthumb -mlittle-endian -mthumb-interwork -ffunction-sections -mcpu=cortex-m3
 CFLAGS+=-DCORE_M3 -D__frosted__
 # COMPILER FLAGS -- No gcc libraries
 CFLAGS+=-nostartfiles
