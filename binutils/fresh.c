@@ -529,6 +529,15 @@ int commandHandler(char *args[], int argc)
             (strcmp(args[j], "&") == 0)) {
             break;
         }
+        if (!strncmp(args[j], "$", 1)) {
+                char *value = getenv((args[j] + 1));
+                char *ptr = malloc((strlen(value) + 1) * sizeof (char));
+                if (ptr) {
+                    free(args[j]);
+                    args[j] = ptr;
+                    strncpy(args[j], value, strlen(value) + 1);
+                }
+            }
         args_aux[j] = args[j];
         j++;
     }
