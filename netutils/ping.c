@@ -14,20 +14,29 @@
 
 #define DEFAULT_LEN (64)
 
+struct icmp_hdr {
+    uint8_t type;
+    uint8_t code;
+    uint16_t chksum;
+    uint16_t id;
+    uint16_t seq;
+};
+
 static uint8_t payload[DEFAULT_LEN];
 
-static uint32_t time_ms(void)
+static void tvsub(register struct timeval *out, register struct timeval *in)
 {
-    struct timeval tv;
-    uint32_t ret;
-    gettimeofday(&tv, NULL);
-    ret = (tv.tv_sec * 1000) + (tv.tv_usec / 1000);
-    return ret;
+    if ((out->tv_usec -= in->tv_usec) < 0) {
+        --out->tv_sec;
+        out->tv_usec += 1000000;
+    }
+    out->tv_sec -= in->tv_sec;
 }
 
 int ping(struct sockaddr_in *dst, int count, int len)
 {
     struct icmphdr *icmp_hdr = (struct icmphdr *)payload;
+    struct timeval tv, *tp;
     int i;
     int sequence = 0;
     int sock = socket(AF_INET,SOCK_DGRAM,IPPROTO_ICMP);
@@ -47,16 +56,17 @@ int ping(struct sockaddr_in *dst, int count, int len)
 
     i = 0;
     while((count == 0) || (i < count)) {
-        memset(icmp_hdr, 0, sizeof(struct icmphdr));
+        memset(payload, 0, DEFAULT_LEN);
         icmp_hdr->type = ICMP_ECHO;
         icmp_hdr->un.echo.id = 1234;
-    
+
         for(i = sizeof(struct icmphdr); i < sizeof(struct icmphdr) + len; i++) {
             payload[i] = i & 0xFF;
         }
         icmp_hdr->un.echo.sequence = sequence++;
-        echo_time = time_ms();
-        if(sendto(sock, payload, len, 0, (struct sockaddr *)dst, sizeof(struct sockaddr_in)) < 0) 
+        gettimeofday((struct timeval *)(payload + sizeof (struct icmp_hdr)),
+            (struct timezone *)NULL);
+        if(sendto(sock, payload, len, 0, (struct sockaddr *)dst, sizeof(struct sockaddr_in)) < 0)
         {
             perror("send");
             sleep(1);
@@ -74,10 +84,13 @@ int ping(struct sockaddr_in *dst, int count, int len)
                     perror("recvfrom");
                     return -1;
                 }
-                now = time_ms();
+                gettimeofday(&tv, (struct timezone *)NULL);
+                tp = (struct timeval *)(payload + sizeof (struct icmp_hdr));
+                tvsub(&tv, tp);
+                uint32_t triptime = tv.tv_sec * 1000 + (tv.tv_usec / 1000);
                 ip = inet_ntoa(reply_from.sin_addr);
-                printf("%d bytes from %s: icmp seq=%d time=%d ms\r\n", r, ip, icmp_hdr->un.echo.sequence, now - echo_time);
-                usleep(1000000 - (1000 * (now - echo_time)));
+                printf("%d bytes from %s: icmp seq=%d time=%d ms\r\n", r, ip, icmp_hdr->un.echo.sequence, triptime);
+                usleep(1000000 - (1000 * (triptime)));
             }
         }
     }
