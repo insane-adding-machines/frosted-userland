@@ -542,6 +542,23 @@ int commandHandler(char *args[], int argc)
         j++;
     }
 
+    /* Add variables to our environment */
+    if (argc == 1) {
+        char *command = args[0];
+        char *token = strchr(command, '=');
+        if (token) {
+            size_t keylen = token - command;
+            char *key = malloc((keylen + 1) * sizeof (char));
+            strncpy(key, command, keylen);
+            *(key + keylen) = 0x0;
+            token++;
+            if (setenv(key, token, 1)) {
+                return -errno;
+            }
+            return 0;
+        }
+    }
+
     // 'exit' command quits the shell
     if (strcmp(args[0], "exit") == 0)
         exit(0);
