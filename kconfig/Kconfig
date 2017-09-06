@@ -138,6 +138,8 @@ config APP_LATENCY
     bool "process latency measurement"
 config APP_ACC
     bool "Accelerometer tool (acc)"
+config APP_LCD
+    bool "LCD 2-lines display (lcd)"
 endmenu
 
 menu "Games"

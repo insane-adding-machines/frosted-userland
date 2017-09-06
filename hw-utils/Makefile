@@ -12,6 +12,7 @@ APPS-$(APP_GPIOCTL)+=gpioctl
 APPS-$(APP_LATENCY)+=latency
 APPS-$(APP_ACC)+=acc
 APPS-$(APP_FBCTL)+=fbctl
+APPS-$(APP_LCD)+=lcd
 BIN:=$(patsubst %,../out/%,$(APPS-y))
 OBJ:=$(patsubst %,%.o,$(APPS-y))
 
