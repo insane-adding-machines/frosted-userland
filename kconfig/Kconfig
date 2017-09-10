@@ -86,6 +86,8 @@ config APP_SEM
     bool "Semaphore test(sem)"
 config APP_DATE
     bool "date"
+config APP_FILE
+    bool "file"
 endmenu
 
 menu "Networking utils"
