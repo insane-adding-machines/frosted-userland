@@ -28,6 +28,7 @@
 #include <sys/types.h>
 #include <sys/stat.h>
 #include <arpa/inet.h>
+#include <sys/syslimits.h>
 
 #define FILE_SIZE   1024
 
@@ -288,7 +289,7 @@ int icebox_file(int argc, char *argv[])
         printf("%s: ", argv[i]);
 
         struct stat s;
-        stat(argv[i], &s);
+        lstat(argv[i], &s);
 
         if (S_ISREG(s.st_mode)) {
             ex_ext(argv[i]);
@@ -308,7 +309,10 @@ int icebox_file(int argc, char *argv[])
 
         } else if (S_ISLNK(s.st_mode)) {
             printf("symbolic link");
-
+            char buf[PATH_MAX];
+            memset(buf, 0, PATH_MAX);
+            readlink(argv[1], buf, PATH_MAX);
+            printf(" to %s", buf);
         } else if (S_ISSOCK(s.st_mode)) {
             printf("socket");
         }
