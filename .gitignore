@@ -30,7 +30,6 @@
 
 # Auto-generated files
 binutils/icebox.c
-binutils/Makefile
 
 # Debug files
 *.dSYM/
