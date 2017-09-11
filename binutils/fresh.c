@@ -257,9 +257,7 @@ static int launchProg(char **args, int background)
         switch (xt) {
         case X_bFLT:
             // If we launch non-existing commands we end the process
-            if (execvp(bin_arg0, args) == err) {
-                printf("Command not found");
-            }
+            execvp(bin_arg0, args);
             exit(255);
 
         case X_PY:
@@ -357,10 +355,8 @@ void fileIO(char *args[], char *inputFile, char *outputFile, int option)
 
         // setenv("parent",getcwd(currentDirectory, 128),1);
 
-        if (execvp(args[0], args) == err) {
-            printf("err");
-            kill(getpid(), SIGTERM);
-        }
+        execvp(args[0], args);
+        exit(1);
     }
 
     while (child_pid != pid) {
@@ -475,9 +471,8 @@ void pipeHandler(char *args[])
                 }
             }
 
-            if (execvp(command[0], command) == err) {
-                kill(getpid(), SIGTERM);
-            }
+            execvp(command[0], command);
+            exit(1);
         }
 
         // CLOSING DESCRIPTORS ON PARENT
@@ -956,7 +951,11 @@ static int fresh_exec(char *arg0, char **argv)
 }
 
 /* Main */
+#ifdef APP_FRESH_STANDALONE
 int main(int argc, char *argv[])
+#else
+int icebox_fresh(int argc, char *argv[])
+#endif
 {
     char line[MAXLINE]; // buffer for the user input
     int ret;

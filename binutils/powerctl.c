@@ -33,7 +33,7 @@ static char Relay0[]="relay0";
 static char Relay1[]="relay1";
 
 
-void usage(char *argv0) {
+static void usage(char *argv0) {
     fprintf(stderr, "Usage: %s [ -s serial | -t tcp_port ]\r\n", argv0);
     exit(1);
 }
@@ -178,7 +178,11 @@ static void power_cycle(void)
     relay_on(Relay1);
 }
 
+#ifdef APP_POWERCTL_STANDALONE
 int main(int argc, char *argv[])
+#else
+int icebox_powerctl(int argc, char *argv[])
+#endif
 {
     int mx, fbcon, cmd = STDIN_FILENO;
     int i;

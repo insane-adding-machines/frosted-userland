@@ -341,7 +341,7 @@ void init_right_tree(void)
 						    COL_COLOR, NULL);
 	renderer = gtk_cell_renderer_text_new();
 	gtk_tree_view_insert_column_with_attributes(view, -1,
-						    "M", renderer,
+						    "I", renderer,
 						    "text", COL_MOD,
 						    "foreground-gdk",
 						    COL_COLOR, NULL);
@@ -1149,8 +1149,8 @@ static gchar **fill_row(struct menu *menu)
 			row[COL_BTNINC] = GINT_TO_POINTER(FALSE);
 			break;
 		case mod:
-			row[COL_MOD] = g_strdup("M");
-			row[COL_VALUE] = g_strdup("M");
+			row[COL_MOD] = g_strdup("I");
+			row[COL_VALUE] = g_strdup("I");
 			row[COL_BTNINC] = GINT_TO_POINTER(TRUE);
 			break;
 		case yes:

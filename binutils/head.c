@@ -52,7 +52,7 @@ struct ht {
 };
 
 /* Parse our arguments */
-int parse_opts(int argc, char *args[], struct ht *ht)
+static int parse_opts(int argc, char *args[], struct ht *ht)
 {
 	int count = 0;
 	int c;
@@ -163,21 +163,25 @@ int ouroboros(int fd, struct ht *ht)
 }
 
 /* main: parse args, loop over FILES, count and print results */
-int main(int argc, char *args[])
+#ifdef APP_HEAD_STANDALONE
+int main(int argc, char *argv[])
+#else
+int icebox_head(int argc, char** argv)
+#endif
 {
 	int i = 1;
 	int fd;
 	struct ht ht = {0, 0, 0, 0, 0};
 
-	i += parse_opts(argc, args, &ht);
+	i += parse_opts(argc, argv, &ht);
 	ht.side = START;
 	/* if no options specified, fallback to default */
 	set_default(&ht);
 
-	while (args[i]) {
-		fd = open(args[i], O_RDONLY);
+	while (argv[i]) {
+		fd = open(argv[i], O_RDONLY);
 		if (fd < 0) {
-			fprintf(stderr, "File %s not found.\r\n", args[i]);
+			fprintf(stderr, "File %s not found.\r\n", argv[i]);
 			i++;
 			continue;
 		}
@@ -185,7 +189,7 @@ int main(int argc, char *args[])
 		word_count(fd, &wc);
 
 		close(fd);
-		fd = open(args[i], O_RDONLY);
+		fd = open(argv[i], O_RDONLY);
 
 		set_offset(&ht, &wc);
 

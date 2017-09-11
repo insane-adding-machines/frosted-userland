@@ -33,7 +33,11 @@
 
 char mag[] = " KMGT";
 
+#ifdef APP_LS_STANDALONE
 int main(int argc, char *args[])
+#else
+int icebox_ls(int argc, char *args[])
+#endif
 {
     char *fname;
     char *fname_start;
@@ -94,17 +98,21 @@ int main(int argc, char *args[])
         while (fname[0] == '/')
             fname++;
 
-        if (stat(fname, &st) == 0) {
+        if (lstat(fname, &st) == 0) {
             if ((!strncmp(fname, ".", 1) || !strncmp(fname, "..", 2)) && !(flags & ALLFLAG)) {
                 continue;
             }
             printf(fname);
             if (flags & LONGFLAG) {
-                printf( "\t");
+                printf(" ");
+                printf(" ");
+                for (i = strlen(fname); i < 30; i++)
+                    printf(" ");
                 if (S_ISDIR(st.st_mode)) {
                     type = 'd';
                 } else if (S_ISLNK(st.st_mode)) {
                     type = 'l';
+                    ch_size[0] = '\0';
                 } else {
                     unsigned long size = st.st_size;;
                     int order = 0;
@@ -117,12 +125,12 @@ int main(int argc, char *args[])
                         magn = mag[order];
                     }
 
-                    snprintf(ch_size, 9, "%lu%c ", size, magn);
+                    snprintf(ch_size, 9, "%lu%c", size, magn);
                     type = 'f';
                 }
 
                 printf( "%c", type);
-                printf( "    ");
+                printf( " ");
                 printf( ch_size);
             }
             printf( "\r\n");

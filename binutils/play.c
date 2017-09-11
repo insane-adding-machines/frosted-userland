@@ -29,7 +29,11 @@
 #include <sys/stat.h>
 #define PLAY_SIZE 4096
 
+#ifdef APP_PLAY_STANDALONE
 int main(int argc, char *argv[])
+#else
+int icebox_play(int argc, char *argv[])
+#endif
 {
     int dsp;
     int fd;

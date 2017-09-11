@@ -22,14 +22,18 @@
 #include <stdlib.h>
 #include <signal.h>
 
-void usage(char *name)
+static void usage(char *name)
 {
     printf("Usage: %s [-signo] pid\r\n", name);
     exit(1);
 
 }
 
+#ifdef APP_KILL_STANDALONE
 int main(int argc, char *args[])
+#else
+int icebox_kill(int argc, char *args[])
+#endif
 {
     int pid;
     int signo = SIGTERM;

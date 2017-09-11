@@ -29,15 +29,18 @@
 #define BUFSIZE 256
 #define MAXFILES 13
 
+#ifdef APP_TEE_STANDALONE
 int main(int argc, char *args[])
+#else
+int icebox_tee(int argc, char *args[])
+#endif
 {
     extern int opterr, optind, optopt;
-    int c, i, argc = 0, written, j = 0,  b = 0;
+    int c, i, written, j = 0,  b = 0;
     char line[BUFSIZE];
     int slot, fdfn[MAXFILES + 1][2] ;
     ssize_t n, count;
     int mode = O_WRONLY | O_CREAT | O_TRUNC;
-    argc = nargs( args );
     setlocale(LC_ALL, "");
     opterr = 0;
     optind = 0;

@@ -25,7 +25,11 @@
 #include <sys/stat.h>
 #include <fcntl.h>
 
+#ifdef APP_TOUCH_STANDALONE
 int main(int argc, char *args[])
+#else
+int icebox_touch(int argc, char *args[])
+#endif
 {
     char *file = args[1];
     int fd;

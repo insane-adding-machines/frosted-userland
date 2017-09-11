@@ -12,6 +12,7 @@ endmenu
 
 menu "Applications"
 
+
 menu "Base binary utils"
 config APP_INIT
 bool "init: main task"
@@ -21,73 +22,81 @@ config APP_IDLING
 bool "idling: flashing leds"
 default y
 
+config ICEBOX
+bool "icebox - singe-binary built-in application"
+option modules
+
 config APP_FRESH
-bool "fresh: Frosted shell"
+tristate "fresh: Frosted shell"
 default y
 
+
 config APP_CAT
-    bool "cat"
+    tristate "cat"
 
 config APP_ECHO
-    bool "echo"
+    tristate "echo"
+    default m
 config APP_LS
-    bool "ls"
+    tristate "ls"
 config APP_TOUCH
-    bool "touch"
+    tristate "touch"
 config APP_RM
-    bool "rm"
+    tristate "rm"
 config APP_KILL
-    bool "kill"
+    tristate "kill"
 config APP_TRUE
-    bool "true"
+    tristate "true"
 config APP_FALSE
-    bool "false"
+    tristate "false"
 config APP_LN
-    bool "ln"
+    tristate "ln"
 config APP_DIRNAME
-    bool "dirname"
+    tristate "dirname"
 config APP_MKDIR
-    bool "mkdir"
+    tristate "mkdir"
 config APP_MOUNT
-    bool "mount"
+    tristate "mount"
+config APP_PS
+    tristate "ps"
 config APP_PLAY
-    bool "play"
+    tristate "play"
 config APP_WC
-    bool "wc"
+    tristate "wc"
 config APP_HEAD
-    bool "head"
+    tristate "head"
 config APP_TAIL
-    bool "tail"
+    tristate "tail"
 config APP_YES
-    bool "yes"
+    tristate "yes"
 config APP_SLEEP
-    bool "sleep"
+    tristate "sleep"
 config APP_UPTIME
-    bool "uptime"
+    tristate "uptime"
 config APP_KLOGD
-    bool "klogd"
+    tristate "klogd"
 config APP_GDBSERVER
     bool "gdbserver"
 config APP_REBOOT
-    bool "reboot"
+    tristate "reboot"
 config APP_RENICE
-    bool "renice"
+    tristate "renice"
 config APP_CUT
-    bool "cut"
+    tristate "cut"
 config APP_GREP
-    bool "grep"
+    tristate "grep"
 config APP_KILO
     bool "kilo (text editor)"
 config APP_POWERCTL
-    bool "Remote power control (powerctl)"
+    tristate "Remote power control (powerctl)"
 config APP_PTHREADS
     bool "Pthreads test (pthreads)"
 config APP_SEM
     bool "Semaphore test(sem)"
 config APP_DATE
-    bool "date"
+    tristate "date"
 config APP_FILE
-    bool "file"
+    tristate "file"
 endmenu
 
 menu "Networking utils"

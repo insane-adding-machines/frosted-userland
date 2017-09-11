@@ -24,7 +24,11 @@
 #include <unistd.h>
 #include <fcntl.h>
 
+#ifdef APP_SLEEP_STANDALONE
 int main(int argc, char *args[])
+#else
+int icebox_sleep(int argc, char *args[])
+#endif
 {
 	if ((argc < 2) || (argc > 2)) {
 		fprintf(stderr, "Usage: sleep TIME\r\n");

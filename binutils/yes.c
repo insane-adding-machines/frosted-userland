@@ -25,7 +25,11 @@
 #include <unistd.h>
 #include <fcntl.h>
 
+#ifdef APP_YES_STANDALONE
 int main(int argc, char *args[])
+#else
+int icebox_yes(int argc, char *args[])
+#endif
 {
 	while (1 < 2) {
 		if (argc > 1) {

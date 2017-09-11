@@ -34,7 +34,11 @@ void usr1_hdlr(int signo)
     received_signal = signo;
 }
 
+#ifdef APP_IDLING_STANDALONE
 int main(int argc, char *argv[])
+#else
+int icebox_idling(int argc, char** argv)
+#endif
 {
     int pid;
     int led[4];

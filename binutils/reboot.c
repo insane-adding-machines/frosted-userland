@@ -23,7 +23,11 @@
 #include <sys/reboot.h>
 #include <unistd.h>
 
+#ifdef APP_REBOOT_STANDALONE
 int main(int argc, char *args[])
+#else
+int icebox_reboot(int argc, char *args[])
+#endif
 {
     fprintf(stderr, "Rebooting frosted NOW!\r\n");
     fflush(stderr);

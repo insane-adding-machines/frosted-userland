@@ -23,7 +23,11 @@
  #include <sys/time.h>
  #include <time.h>
 
- int main(int argc, char *args[])
+#ifdef APP_UPTIME_STANDALONE
+int main(int argc, char *args[])
+#else
+int icebox_uptime(int argc, char *args[])
+#endif
  {
 	 struct timespec ts;
 	 time_t now, hours, mins;

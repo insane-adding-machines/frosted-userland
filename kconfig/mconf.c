@@ -34,11 +34,11 @@ static const char mconf_readme[] = N_(
 "  < > can be built in, modularized or removed\n"
 "  { } can be built in or modularized (selected by other feature)\n"
 "  - - are selected by other feature,\n"
-"while *, M or whitespace inside braces means to build in, build as\n"
-"a module or to exclude the feature respectively.\n"
+"while *, I or whitespace inside braces means to build in, build as\n"
+"an icebox component or to exclude the feature respectively.\n"
 "\n"
 "To change any of these features, highlight it with the cursor\n"
-"keys and press <Y> to build it in, <M> to make it a module or\n"
+"keys and press <Y> to build it in, <I> to make it part of icebox\n"
 "<N> to remove it.  You may also press the <Space Bar> to cycle\n"
 "through the available options (i.e. Y->N->M->Y).\n"
 "\n"
@@ -176,9 +176,9 @@ menu_instructions[] = N_(
 	"Arrow keys navigate the menu.  "
 	"<Enter> selects submenus ---> (or empty submenus ----).  "
 	"Highlighted letters are hotkeys.  "
-	"Pressing <Y> includes, <N> excludes, <M> modularizes features.  "
+	"Pressing <Y> includes, <N> excludes, <I> include in icebox.  "
 	"Press <Esc><Esc> to exit, <?> for Help, </> for Search.  "
-	"Legend: [*] built-in  [ ] excluded  <M> module  < > module capable"),
+	"Legend: [*] built-in  [ ] excluded  <I> icebox  < > icebox capable"),
 radiolist_instructions[] = N_(
 	"Use the arrow keys to navigate this window or "
 	"press the hotkey of the item you wish to select "
@@ -545,7 +545,7 @@ static void build_conf(struct menu *menu)
 			case S_TRISTATE:
 				switch (val) {
 				case yes: ch = '*'; break;
-				case mod: ch = 'M'; break;
+				case mod: ch = 'I'; break;
 				default:  ch = ' '; break;
 				}
 				item_make("<%c>", ch);
@@ -598,7 +598,7 @@ static void build_conf(struct menu *menu)
 			case S_TRISTATE:
 				switch (val) {
 				case yes: ch = '*'; break;
-				case mod: ch = 'M'; break;
+				case mod: ch = 'I'; break;
 				default:  ch = ' '; break;
 				}
 				if (sym_is_changable(sym)) {

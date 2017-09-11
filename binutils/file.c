@@ -274,7 +274,11 @@ void ex_ext(char *name)
     }
 }
 
+#ifdef APP_FILE_STANDALONE
 int main(int argc, char *argv[])
+#else
+int icebox_file(int argc, char *argv[])
+#endif
 {
     if (argc < 2)
         exit(-EINVAL);

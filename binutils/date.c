@@ -24,7 +24,11 @@
 #include <time.h>
 
 
-int main(int argc, char **argv)
+#ifdef APP_DATE_STANDALONE
+int main(int argc, char *args[])
+#else
+int icebox_date(int argc, char *args[])
+#endif
 {
     struct timeval tv;
     gettimeofday(&tv, NULL);

@@ -17,6 +17,23 @@ void usage(void)
     exit(1);
 }
 
+static int add_link(int img, char *name)
+{
+    struct xipfs_fhdr hdr;
+    uint8_t b;
+    uint8_t pad = 0xFF;
+    int count = 0;
+    memset(&hdr, 0, sizeof(struct xipfs_fhdr));
+    hdr.magic = XIPFS_MAGIC_ICELINK;
+    strncpy(hdr.name, basename(name), 55);
+    hdr.len = 0;
+    if (write(img, &hdr, sizeof(struct xipfs_fhdr)) != sizeof(struct xipfs_fhdr)) {
+        perror("write");
+        exit(3);
+    }
+    return 0;
+}
+
 static int add_bin(int img, int fd, char *name)
 {
     struct xipfs_fhdr hdr;
@@ -24,13 +41,15 @@ static int add_bin(int img, int fd, char *name)
     uint8_t b;
     uint8_t pad = 0xFF;
     int count = 0;
+    uint32_t pad_len = 0;
     memset(&hdr, 0, sizeof(struct xipfs_fhdr));
     hdr.magic = XIPFS_MAGIC;
     strncpy(hdr.name, basename(name), 55);
     fstat(fd, &st);
     hdr.len = st.st_size;
-    while ((hdr.len % 4) != 0)
-        hdr.len++;
+    pad_len = hdr.len;
+    while ((pad_len % 4) != 0)
+        pad_len++;
     
     if (write(img, &hdr, sizeof(struct xipfs_fhdr)) != sizeof(struct xipfs_fhdr)) {
         perror("write");
@@ -41,7 +60,7 @@ static int add_bin(int img, int fd, char *name)
         write(img, &b, 1);
         count++;
     }
-    while (count < hdr.len) {
+    while (count < pad_len) {
         write(img, &pad, 1);
         count++;
     }
@@ -77,6 +96,16 @@ int main(int argc, char *argv[])
     }
     
     for (i = 2; i < argc; i++) {
+        struct stat st;
+        if (lstat(argv[i], &st) != 0) {
+            perror(argv[i]);
+            exit(3);
+        }
+        if (S_ISLNK(st.st_mode)) {
+            continue;
+        }
+
+
         fd = open(argv[i], O_RDONLY);
         if (fd < 0) {
             perror(argv[i]);
@@ -84,6 +113,16 @@ int main(int argc, char *argv[])
         }
         count += add_bin(img, fd, argv[i]);
         close(fd);
+    }
+    for (i = 2; i < argc; i++) {
+        struct stat st;
+        if (lstat(argv[i], &st) != 0) {
+            perror(argv[i]);
+            exit(3);
+        }
+        if (S_ISLNK(st.st_mode)) {
+            count += add_link(img, argv[i]);
+        }
     }
     fat.fs_size = count;
     lseek(img, 0, SEEK_SET);

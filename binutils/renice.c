@@ -32,7 +32,11 @@ void usage(char *name)
 
 }
 
+#ifdef APP_RENICE_STANDALONE
 int main(int argc, char *args[])
+#else
+int icebox_renice(int argc, char *args[])
+#endif
 {
     int pid;
     int prio;

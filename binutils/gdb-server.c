@@ -69,7 +69,8 @@ void TrapHandler(int signo)
 
 
 int serve(void);
-int main(int argc, char** argv) {
+int main(int argc, char *argv[])
+{
     int ret;
     uint32_t text_base;
     uint32_t text_size;

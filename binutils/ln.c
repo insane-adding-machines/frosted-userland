@@ -22,7 +22,11 @@
 #include <stdlib.h>
 #include <unistd.h>
 
+#ifdef APP_LN_STANDALONE
 int main(int argc, char *args[])
+#else
+int icebox_ln(int argc, char *args[])
+#endif
 {
     char *file = args[1];
     char *symlink = args[2];

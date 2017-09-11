@@ -23,7 +23,11 @@
 #include <getopt.h>
 #include <stdlib.h>
 
+#ifdef APP_DIRNAME_STANDALONE
 int main(int argc, char *args[])
+#else
+int icebox_dirname(int argc, char *args[])
+#endif
 {
     int i, c;
     char delim = '\n';

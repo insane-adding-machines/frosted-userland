@@ -40,7 +40,7 @@ struct wc {
 };
 
 /* Parse our arguments */
-int parse_opts(int argc, char *args[], int *flags)
+static int parse_opts(int argc, char *args[], int *flags)
 {
 	int count = 0;
 	int c;
@@ -120,7 +120,11 @@ int wc_print(char *file, struct wc *wc, int flags)
 }
 
 /* main: parse args, loop over FILES, count and print results */
+#ifdef APP_WC_STANDALONE
 int main(int argc, char *args[])
+#else
+int icebox_wc(int argc, char *args[])
+#endif
 {
 	int i = 1;
 	int flags;

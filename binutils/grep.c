@@ -47,7 +47,7 @@ struct regstruct{
 };
 
 
-int inputline(char *input, int size)
+static int inputline(char *input, int size)
 {
     int len;
     while (1 < 2) {
@@ -102,7 +102,7 @@ int inputline(char *input, int size)
 /*returns   1 if it reaches a newline,
             0 if a delimiter is found,
             -1 if the file is finished*/
-int readuntil(int fd, char **line, char delim)
+static int readuntil(int fd, char **line, char delim)
 {
     int b, len;
     len = -1;
@@ -122,7 +122,7 @@ int readuntil(int fd, char **line, char delim)
 }
 
 
-int nextline(char *str, int from)
+static int nextline(char *str, int from)
 {
     int l, last;
     l = from;
@@ -132,7 +132,7 @@ int nextline(char *str, int from)
 }
 
 
-int striplen(char *str)
+static int striplen(char *str)
 {
     int l;
     l = strlen(str);
@@ -145,7 +145,7 @@ int striplen(char *str)
     return l;
 }
 
-void strtolow(char *str)
+static void strtolow(char *str)
 {
     char *p;
     for (p = str; *p != '\0'; p++)
@@ -154,7 +154,7 @@ void strtolow(char *str)
 
 
 /*search for exact occurrence of str1 in str2*/
-int occurrence(char *tofind, char *line, int flags)
+static int occurrence(char *tofind, char *line, int flags)
 {
     int i, j, l1, l2, c, start, end;
     char *str1, *str2;
@@ -198,8 +198,11 @@ int occurrence(char *tofind, char *line, int flags)
     return 1;
 }
 
-
+#ifdef APP_GREP_STANDALONE
 int main(int argc, char *args[])
+#else
+int icebox_grep(int argc, char* args[])
+#endif
 {
     char *line;
     char *fixedp[MAXFILES];

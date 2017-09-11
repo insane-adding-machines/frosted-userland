@@ -52,7 +52,7 @@ struct ht {
 };
 
 /* Parse our arguments */
-int parse_opts(int argc, char *args[], struct ht *ht)
+static int parse_opts(int argc, char *args[], struct ht *ht)
 {
 	int count = 0;
 	int c;
@@ -84,7 +84,7 @@ int parse_opts(int argc, char *args[], struct ht *ht)
 }
 
 /* Word Count a file */
-int word_count(int fd, struct wc *wc)
+int __attribute__((weak)) word_count(int fd, struct wc *wc)
 {
 	int r;
 	char c;
@@ -115,7 +115,7 @@ int word_count(int fd, struct wc *wc)
 }
 
 /* If nothing specified, set our default type */
-int set_default(struct ht *ht)
+static int set_default(struct ht *ht)
 {
 	if (!ht->type) {
 		ht->type = LINES;
@@ -126,7 +126,7 @@ int set_default(struct ht *ht)
 }
 
 /* Set start/end of head/tail */
-int set_offset(struct ht *ht, struct wc *wc)
+static int set_offset(struct ht *ht, struct wc *wc)
 {
 	if (ht->side) {
 		if (ht->type == BYTES) {
@@ -144,7 +144,7 @@ int set_offset(struct ht *ht, struct wc *wc)
 }
 
 /* Print part of a file */
-int ouroboros(int fd, struct ht *ht)
+static int ouroboros(int fd, struct ht *ht)
 {
 	long count = 0;
 	int r;
@@ -163,7 +163,11 @@ int ouroboros(int fd, struct ht *ht)
 }
 
 /* main: parse args, loop over FILES, count and print results */
+#ifdef APP_TAIL_STANDALONE
 int main(int argc, char *args[])
+#else
+int icebox_tail(int argc, char *args[])
+#endif
 {
 	int i = 1;
 	int fd;

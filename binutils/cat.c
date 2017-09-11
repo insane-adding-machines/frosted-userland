@@ -25,7 +25,11 @@
 #include <sys/stat.h>
 #include <fcntl.h>
 
+#ifdef APP_CAT_STANDALONE
 int main(int argc, char *args[])
+#else
+int icebox_cat(int argc, char *args[])
+#endif
 {
     int fd;
     int i = 1;

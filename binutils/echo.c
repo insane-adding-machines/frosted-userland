@@ -25,7 +25,11 @@
 #include <sys/stat.h>
 #include <fcntl.h>
 
+#ifdef APP_ECHO_STANDALONE
 int main(int argc, char *args[])
+#else
+int icebox_echo(int argc, char *args[])
+#endif
 {
     int i = 1;
     while (args[i]) {

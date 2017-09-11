@@ -27,7 +27,11 @@
 
 #define TASKS_FILE "/sys/tasks"
 
+#ifdef APP_PS_STANDALONE
 int main(int argc, char *args[])
+#else
+int icebox_ps(int argc, char *args[])
+#endif
 {
     int fd;
     fd = open(TASKS_FILE, O_RDONLY);

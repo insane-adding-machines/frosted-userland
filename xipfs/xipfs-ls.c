@@ -18,10 +18,14 @@ static int xipfs_ls(const uint8_t *blob)
     offset = sizeof(struct xipfs_fat);
     for (i = 0; i < fat->fs_files; i++) {
         f = (const struct xipfs_fhdr *) (blob + offset);
-        if (f->magic != XIPFS_MAGIC)
-            return -1;
-        printf("%s (%d bytes)\n", f->name, f->len);
-        offset += f->len + sizeof(struct xipfs_fhdr);
+        if (f->magic == XIPFS_MAGIC) {
+            printf("%s (%d bytes)\n", f->name, f->len);
+            offset += f->len + sizeof(struct xipfs_fhdr);
+        } 
+        if (f->magic == XIPFS_MAGIC_ICELINK) {
+            printf("%s (link to icebox)\n", f->name);
+            offset += sizeof(struct xipfs_fhdr);
+        }
     }
     return 0;
 }
@@ -42,8 +46,6 @@ int main(int argc, char *argv[])
         fprintf(stderr, "please specify a xipfs filesystem file\n");
         exit(1);
     }
-
-
 
     if (stat(argv[1], &st) < 0) {
         perror("stat");

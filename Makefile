@@ -23,7 +23,6 @@ endif
 DIR-y+=lib binutils hw-utils netutils games
 DIR-$(APP_PYTHON)+=micropython
 
-
 # COMPILER FLAGS -- Target CPU
 CFLAGS+=-mthumb -mlittle-endian -mthumb-interwork -ffunction-sections -mcpu=cortex-m3
 CFLAGS+=-DCORE_M3 -D__frosted__
@@ -34,7 +33,6 @@ CFLAGS+=-fPIC -mlong-calls -fno-common -msingle-pic-base -mno-pic-data-is-text-r
 # Debugging
 CFLAGS+=-ggdb
 CFLAGS+=-I../lib/include -I../lib/wolfssl
-
 CFLAGS-$(LIB_WOLFSSL)+=-DENABLE_SSL -DMG_ENABLE_SSL -DWOLFSSL_FROSTED
 CFLAGS+=$(CFLAGS-y)
 
@@ -48,13 +46,16 @@ xipfstool: xipfs
 	make -C $^
 	mv $^/xipfstool .
 
-apps.img: $(APPS-y) $(DIR-y) sh xipfstool
+apps.img: $(APPS-y) $(DIR-y) sh xipfstool lnk
 	mv out/*.gdb gdb/ 2>/dev/null || true
 	./xipfstool $@ $(APPS-y) out/*
 
 binutils: FORCE
 	mkdir -p out
 	mkdir -p gdb
+	rm -rf lnk
+	mkdir -p lnk
+	cd binutils && ./gen_makefile.py
 	make -C $@ LDFLAGS="$(LDFLAGS)" CFLAGS="$(CFLAGS)" CC=$(CC)
 
 lib: FORCE
@@ -79,7 +80,11 @@ games: FORCE
 
 sh: FORCE
 	mkdir -p out
-	cp $@/* out/
+	cp -a $@/* out/ || true
+
+lnk: FORCE
+	mkdir -p out
+	cp -a $@/* out/ || true
 
 micropython: FORCE
 	mkdir -p out
@@ -99,7 +104,7 @@ clean:
 	$(foreach d,$(DIR-y),make -C $(d) clean &>/dev/null || true;) 
 	@rm -f *.img
 	@rm -f *.o
-	@rm -rf gdb out
+	@rm -rf gdb out lnk ice
 	@make -C xipfs clean
 	make -C micropython/mpy-cross clean
 	@make -C micropython/frosted clean

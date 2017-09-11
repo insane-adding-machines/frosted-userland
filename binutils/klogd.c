@@ -25,7 +25,12 @@
 #include <stdlib.h>
 #include <fcntl.h>
 #include <sys/wait.h>
-int main()
+
+#ifdef APP_KLOGD_STANDALONE
+int main(void)
+#else
+int icebox_klogd(int argc, char *argv[])
+#endif
 {
     int klog = open("/dev/klog", O_RDONLY);
     if (klog >= 0){

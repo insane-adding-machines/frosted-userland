@@ -28,8 +28,17 @@
 *.x86_64
 *.hex
 
-# Auto-generated files
+# Generated files
 binutils/icebox.c
+apps.img
+tags
+xipfs/xipfs-ls
+xipfstool
+
+# binaries directories
+out
+gdb
+lnk
 
 # Debug files
 *.dSYM/
