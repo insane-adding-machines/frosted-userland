@@ -46,7 +46,7 @@ int icebox_ls(int argc, char *args[])
     struct stat st;
     char type;
     int i;
-    char ch_size[8] = "";
+    char ch_size[70] = "";
     unsigned int flags;
     int c;
     extern int optind, optopt;
@@ -111,8 +111,12 @@ int icebox_ls(int argc, char *args[])
                 if (S_ISDIR(st.st_mode)) {
                     type = 'd';
                 } else if (S_ISLNK(st.st_mode)) {
+                    char tgt[60];
                     type = 'l';
-                    ch_size[0] = '\0';
+                    if (readlink(fname, tgt, 60) < 0)
+                        sprintf(ch_size, "-->BROKEN LNK<--");
+                    else
+                        sprintf(ch_size, "-->%s", tgt);
                 } else {
                     unsigned long size = st.st_size;;
                     int order = 0;
