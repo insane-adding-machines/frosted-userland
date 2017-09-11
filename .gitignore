@@ -28,6 +28,10 @@
 *.x86_64
 *.hex
 
+# Auto-generated files
+binutils/icebox.c
+binutils/Makefile
+
 # Debug files
 *.dSYM/
 .depend
