@@ -285,12 +285,12 @@ int icebox_file(int argc, char *argv[])
 
     int i;
     for (i = 1; i < argc; i++) {
-        printf("%s: ", argv[i]);
-
         struct stat s;
-        stat(argv[i], &s);
-
-        if (S_ISREG(s.st_mode)) {
+        printf("%s: ", argv[i]);
+        if (lstat(argv[i], &s) < 0) {
+            printf("No such file");
+        }
+        else if (S_ISREG(s.st_mode)) {
             ex_ext(argv[i]);
             ex_regfile(argv[i]);
 
