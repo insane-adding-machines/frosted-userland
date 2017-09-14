@@ -776,8 +776,8 @@ char *readline_tty(char *input, int size)
                 }
             }
 
-            if ((got[0] == 0x0D)) {
-                input[len] = 0x0D;
+            if ((got[0] == 0x0D) || (got[0] == 0x0A)) {
+                input[len] = 0x0A;
                 input[len + 1] = '\0';
                 printf("\r\n");
                 fflush(stdout);
@@ -849,7 +849,7 @@ char *readline_notty(char *input, int len)
 {
     int ret = read(STDIN_FILENO, input, len - 1);
     if (ret > 0) {
-        input[ret - 1] = 0x0D;
+        input[ret - 1] = 0x0A;
         input[ret] = 0x00;
         return input;
     }
