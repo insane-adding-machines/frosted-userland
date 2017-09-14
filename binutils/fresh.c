@@ -578,8 +578,12 @@ int commandHandler(char *args[], int argc)
         }
     }
     // 'cd' command to change directory
-    else if (strcmp(args[0], "cd") == 0)
-        changeDirectory(args);
+    else if (strcmp(args[0], "cd") == 0) {
+        if (changeDirectory(args) < 0) {
+            setenv("?", "1", 1);
+        }
+    }
+
     // 'setenv' command to set environment variables
     else if (strcmp(args[0], "setenv") == 0) {
         setenv(args[1], args[2], 1);
