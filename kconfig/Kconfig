@@ -89,10 +89,6 @@ config APP_KILO
     bool "kilo (text editor)"
 config APP_POWERCTL
     tristate "Remote power control (powerctl)"
-config APP_PTHREADS
-    bool "Pthreads test (pthreads)"
-config APP_SEM
-    bool "Semaphore test(sem)"
 config APP_DATE
     tristate "date"
 config APP_FILE
@@ -137,10 +133,6 @@ config APP_MORSE
     bool "Morse led blinker"
 config APP_RANDOM
     bool "Random number generator"
-config APP_SENSOR
-    bool "Test for sensors (obsolete)"
-config APP_FBTEST
-    bool "Test for framebuffer"
 config APP_FBCTL
     bool "fbctl (screen on/off utility)"
 config APP_GPIOCTL
@@ -164,5 +156,33 @@ config APP_GROOVY
     bool "groovy - bytebeat positional generator"
 endmenu
 
+menu "Test suites"
 
+    menuconfig SWTESTS
+    bool "Software test suite"
+    default n
+
+    if SWTESTS
+        config APP_PTHREADS
+            bool "Pthreads test (pthreads)"
+            default y
+        config APP_SEM
+            bool "Semaphore test(sem)"
+            default y
+    endif
+
+    menuconfig HWTESTS
+    bool "Hardware test suite"
+    default n
+
+    if HWTESTS
+        config APP_SENSOR
+            bool "Test for sensors (obsolete)"
+            default n
+        config APP_FBTEST
+            bool "Test for framebuffer"
+            default n
+    endif
+
+endmenu
 endmenu

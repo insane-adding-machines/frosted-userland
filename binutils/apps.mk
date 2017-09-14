@@ -22,11 +22,9 @@ play: play.o ICE
 powerctl: powerctl.o ICE
 prodcons: prodcons.o
 ps: ps.o ICE
-pthreads: pthreads.o
 reboot: reboot.o ICE
 renice: renice.o ICE
 rm: rm.o ICE
-sem: sem.o
 sleep: sleep.o ICE
 tail: tail.o ICE
 tee: tee.o ICE

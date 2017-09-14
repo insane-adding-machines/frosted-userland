@@ -20,7 +20,7 @@ endif
 
 
 #Applications selection
-DIR-y+=lib binutils hw-utils netutils games
+DIR-y+=lib binutils hw-utils netutils games tests
 DIR-$(APP_PYTHON)+=micropython
 
 # COMPILER FLAGS -- Target CPU
@@ -93,6 +93,11 @@ micropython: FORCE
 	make -C micropython/frosted
 	cp micropython/frosted/micropython out/python
 	cp micropython/frosted/micropython.gdb gdb
+
+tests: FORCE
+	mkdir -p out
+	mkdir -p gdb
+	make -C $@ LDFLAGS="$(LDFLAGS)" CFLAGS="$(CFLAGS)" CC=$(CC)
 
 
 FORCE:
