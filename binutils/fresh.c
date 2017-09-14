@@ -578,8 +578,12 @@ int commandHandler(char *args[], int argc)
         }
     }
     // 'cd' command to change directory
-    else if (strcmp(args[0], "cd") == 0)
-        changeDirectory(args);
+    else if (strcmp(args[0], "cd") == 0) {
+        if (changeDirectory(args) < 0) {
+            setenv("?", "1", 1);
+        }
+    }
+
     // 'setenv' command to set environment variables
     else if (strcmp(args[0], "setenv") == 0) {
         setenv(args[1], args[2], 1);
@@ -772,8 +776,8 @@ char *readline_tty(char *input, int size)
                 }
             }
 
-            if ((got[0] == 0x0D)) {
-                input[len] = 0x0D;
+            if ((got[0] == 0x0D) || (got[0] == 0x0A)) {
+                input[len] = 0x0A;
                 input[len + 1] = '\0';
                 printf("\r\n");
                 fflush(stdout);
@@ -845,7 +849,7 @@ char *readline_notty(char *input, int len)
 {
     int ret = read(STDIN_FILENO, input, len - 1);
     if (ret > 0) {
-        input[ret - 1] = 0x0D;
+        input[ret - 1] = 0x0A;
         input[ret] = 0x00;
         return input;
     }
