@@ -198,7 +198,7 @@ static int occurrence(char *tofind, char *line, int flags)
     return 1;
 }
 
-#ifdef APP_GREP_STANDALONE
+#ifndef APP_GREP_MODULE
 int main(int argc, char *args[])
 #else
 int icebox_grep(int argc, char* args[])

@@ -33,7 +33,7 @@
 
 char mag[] = " KMGT";
 
-#ifdef APP_LS_STANDALONE
+#ifndef APP_LS_MODULE
 int main(int argc, char *args[])
 #else
 int icebox_ls(int argc, char *args[])

@@ -25,7 +25,7 @@
 #include <unistd.h>
 #include <fcntl.h>
 
-#ifdef APP_YES_STANDALONE
+#ifndef APP_YES_MODULE
 int main(int argc, char *args[])
 #else
 int icebox_yes(int argc, char *args[])

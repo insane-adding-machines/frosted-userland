@@ -29,7 +29,7 @@ static void usage(char *name)
 
 }
 
-#ifdef APP_KILL_STANDALONE
+#ifndef APP_KILL_MODULE
 int main(int argc, char *args[])
 #else
 int icebox_kill(int argc, char *args[])

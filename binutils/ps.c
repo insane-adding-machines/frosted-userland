@@ -27,7 +27,7 @@
 
 #define TASKS_FILE "/sys/tasks"
 
-#ifdef APP_PS_STANDALONE
+#ifndef APP_PS_MODULE
 int main(int argc, char *args[])
 #else
 int icebox_ps(int argc, char *args[])

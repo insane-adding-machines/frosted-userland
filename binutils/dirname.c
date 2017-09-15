@@ -23,7 +23,7 @@
 #include <getopt.h>
 #include <stdlib.h>
 
-#ifdef APP_DIRNAME_STANDALONE
+#ifndef APP_DIRNAME_MODULE
 int main(int argc, char *args[])
 #else
 int icebox_dirname(int argc, char *args[])

@@ -22,7 +22,7 @@
 #include <stdlib.h>
 #include <unistd.h>
 
-#ifdef APP_LN_STANDALONE
+#ifndef APP_LN_MODULE
 int main(int argc, char *args[])
 #else
 int icebox_ln(int argc, char *args[])

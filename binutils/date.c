@@ -24,7 +24,7 @@
 #include <time.h>
 
 
-#ifdef APP_DATE_STANDALONE
+#ifndef APP_DATE_MODULE
 int main(int argc, char *args[])
 #else
 int icebox_date(int argc, char *args[])

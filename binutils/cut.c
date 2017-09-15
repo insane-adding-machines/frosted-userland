@@ -135,7 +135,7 @@ int readuntil(int fd, char **line, char delim)
         return 1;
 }
 
-#ifdef APP_CUT_STANDALONE
+#ifndef APP_CUT_MODULE
 int main(int argc, char *args[])
 #else
 int icebox_cut(int argc, char *args[])

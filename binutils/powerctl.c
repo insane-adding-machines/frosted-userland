@@ -178,7 +178,7 @@ static void power_cycle(void)
     relay_on(Relay1);
 }
 
-#ifdef APP_POWERCTL_STANDALONE
+#ifndef APP_POWERCTL_MODULE
 int main(int argc, char *argv[])
 #else
 int icebox_powerctl(int argc, char *argv[])

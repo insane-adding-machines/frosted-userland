@@ -120,7 +120,7 @@ int wc_print(char *file, struct wc *wc, int flags)
 }
 
 /* main: parse args, loop over FILES, count and print results */
-#ifdef APP_WC_STANDALONE
+#ifndef APP_WC_MODULE
 int main(int argc, char *args[])
 #else
 int icebox_wc(int argc, char *args[])

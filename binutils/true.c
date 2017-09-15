@@ -20,7 +20,7 @@
 
 #include <stdlib.h>
 
-#ifdef APP_TRUE_STANDALONE
+#ifndef APP_TRUE_MODULE
 int main(int argc, char *args[])
 #else
 int icebox_true(int argc, char *args[])

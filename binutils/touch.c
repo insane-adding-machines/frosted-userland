@@ -25,7 +25,7 @@
 #include <sys/stat.h>
 #include <fcntl.h>
 
-#ifdef APP_TOUCH_STANDALONE
+#ifndef APP_TOUCH_MODULE
 int main(int argc, char *args[])
 #else
 int icebox_touch(int argc, char *args[])

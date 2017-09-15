@@ -23,7 +23,7 @@
  #include <sys/time.h>
  #include <time.h>
 
-#ifdef APP_UPTIME_STANDALONE
+#ifndef APP_UPTIME_MODULE
 int main(int argc, char *args[])
 #else
 int icebox_uptime(int argc, char *args[])

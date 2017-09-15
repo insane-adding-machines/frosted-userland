@@ -163,7 +163,7 @@ int ouroboros(int fd, struct ht *ht)
 }
 
 /* main: parse args, loop over FILES, count and print results */
-#ifdef APP_HEAD_STANDALONE
+#ifndef APP_HEAD_MODULE
 int main(int argc, char *argv[])
 #else
 int icebox_head(int argc, char** argv)

@@ -25,7 +25,7 @@
 #include <sys/stat.h>
 #include <fcntl.h>
 
-#ifdef APP_ECHO_STANDALONE
+#ifndef APP_ECHO_MODULE
 int main(int argc, char *args[])
 #else
 int icebox_echo(int argc, char *args[])

@@ -58,7 +58,7 @@ while True:
     m.write("CFLAGS-$(APP_"+NAME+")+=-DAPP_"+NAME+"_STANDALONE\n")
     m.write("CFLAGS-ICEBOX-$(APP_"+NAME+")+=-DAPP_"+NAME+"_MODULE\n")
     m.write("\n")
-    
+
     if "ICE" in l:
         ib.write('\n')
         ib.write('#ifdef APP_'+NAME+'_MODULE\n')
@@ -91,7 +91,7 @@ m.write("\tln -s $^ $@\n")
 
 m.write("ice/%.o: %.c\n")
 m.write("\tmkdir -p ice\n")
-m.write("\tarm-frosted-eabi-gcc -c -o $@ $^ $(CFLAGS) $(CFLAGS-y)\n")
+m.write("\tarm-frosted-eabi-gcc -c -o $@ $^ $(CFLAGS) $(CFLAGS-ICEBOX-m)\n")
 m.write("\n")
 m.write("%.o: %.c\n")
 m.write("\tarm-frosted-eabi-gcc -c -o $@ $^ $(CFLAGS) $(CFLAGS-y)\n")

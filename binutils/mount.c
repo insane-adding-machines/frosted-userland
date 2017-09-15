@@ -31,7 +31,7 @@
  int mount(const char *source, const char *target,
                           const char *filesystemtype, unsigned long mountflags,
                                            const void *data);
-#ifdef APP_MOUNT_STANDALONE
+#ifndef APP_MOUNT_MODULE
 int main(int argc, char *argv[])
 #else
 int icebox_mount(int argc, char *argv[])

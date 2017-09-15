@@ -22,7 +22,7 @@
 #include <stdlib.h>
 #include <unistd.h>
 
-#ifdef APP_RM_STANDALONE
+#ifndef APP_RM_MODULE
 int main(int argc, char *args[])
 #else
 int icebox_rm(int argc, char *args[])

@@ -955,7 +955,7 @@ static int fresh_exec(char *arg0, char **argv)
 }
 
 /* Main */
-#ifdef APP_FRESH_STANDALONE
+#ifndef APP_FRESH_MODULE
 int main(int argc, char *argv[])
 #else
 int icebox_fresh(int argc, char *argv[])

@@ -275,7 +275,7 @@ void ex_ext(char *name)
     }
 }
 
-#ifdef APP_FILE_STANDALONE
+#ifndef APP_FILE_MODULE
 int main(int argc, char *argv[])
 #else
 int icebox_file(int argc, char *argv[])

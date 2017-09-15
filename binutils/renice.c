@@ -32,7 +32,7 @@ void usage(char *name)
 
 }
 
-#ifdef APP_RENICE_STANDALONE
+#ifndef APP_RENICE_MODULE
 int main(int argc, char *args[])
 #else
 int icebox_renice(int argc, char *args[])

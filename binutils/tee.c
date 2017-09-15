@@ -29,7 +29,7 @@
 #define BUFSIZE 256
 #define MAXFILES 13
 
-#ifdef APP_TEE_STANDALONE
+#ifndef APP_TEE_MODULE
 int main(int argc, char *args[])
 #else
 int icebox_tee(int argc, char *args[])

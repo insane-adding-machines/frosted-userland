@@ -25,7 +25,7 @@
 #include <sys/stat.h>
 #include <fcntl.h>
 
-#ifdef APP_MKDIR_STANDALONE
+#ifndef APP_MKDIR_MODULE
 int main(int argc, char *args[])
 #else
 int icebox_mkdir(int argc, char *args[])

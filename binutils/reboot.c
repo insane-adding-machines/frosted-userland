@@ -23,7 +23,7 @@
 #include <sys/reboot.h>
 #include <unistd.h>
 
-#ifdef APP_REBOOT_STANDALONE
+#ifndef APP_REBOOT_MODULE
 int main(int argc, char *args[])
 #else
 int icebox_reboot(int argc, char *args[])

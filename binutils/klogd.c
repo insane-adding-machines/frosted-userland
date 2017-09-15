@@ -26,7 +26,7 @@
 #include <fcntl.h>
 #include <sys/wait.h>
 
-#ifdef APP_KLOGD_STANDALONE
+#ifndef APP_KLOGD_MODULE
 int main(void)
 #else
 int icebox_klogd(int argc, char *argv[])

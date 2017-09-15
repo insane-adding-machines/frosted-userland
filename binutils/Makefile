@@ -170,7 +170,7 @@ icebox.o: icebox.c
 	ln -s $^ $@
 ice/%.o: %.c
 	mkdir -p ice
-	arm-frosted-eabi-gcc -c -o $@ $^ $(CFLAGS) $(CFLAGS-y)
+	arm-frosted-eabi-gcc -c -o $@ $^ $(CFLAGS) $(CFLAGS-ICEBOX-m)
 
 %.o: %.c
 	arm-frosted-eabi-gcc -c -o $@ $^ $(CFLAGS) $(CFLAGS-y)

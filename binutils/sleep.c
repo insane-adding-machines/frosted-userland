@@ -24,7 +24,7 @@
 #include <unistd.h>
 #include <fcntl.h>
 
-#ifdef APP_SLEEP_STANDALONE
+#ifndef APP_SLEEP_MODULE
 int main(int argc, char *args[])
 #else
 int icebox_sleep(int argc, char *args[])
