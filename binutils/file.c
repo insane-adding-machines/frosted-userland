@@ -282,7 +282,7 @@ int icebox_file(int argc, char *argv[])
 #endif
 {
     if (argc < 2)
-        exit(-EINVAL);
+        exit(EINVAL);
 
     int i;
     for (i = 1; i < argc; i++) {
@@ -290,6 +290,7 @@ int icebox_file(int argc, char *argv[])
         printf("%s: ", argv[i]);
         if (lstat(argv[i], &s) < 0) {
             printf("No such file");
+            exit(ENOENT);
         }
         else if (S_ISREG(s.st_mode)) {
             ex_ext(argv[i]);
@@ -317,7 +318,7 @@ int icebox_file(int argc, char *argv[])
             printf("socket");
         }
 
-        printf("\n");
+        printf("\r\n");
     }
 
     // if you're happy and you know it,
