@@ -1,0 +1,27 @@
+#!/bin/sh
+# Caution, must be kept compatible with dash used by some Linux distros.
+
+UNAME=`uname -s | tr '[A-Z]' '[a-z]'`
+#NORMALGCC=`which nspire-gcc`
+NORMALGCC=`which arm-frosted-eabi-gcc`
+DIRNAME=`dirname "$NORMALGCC"`
+# DIRNAME may not be in the toolchain directory if this script was symlinked.
+# try to find the symlink target
+which readlink >/dev/null 2>&1 && readlink "$NORMALGCC" >/dev/null 2>&1 && {
+    SYMLINK=`readlink "$NORMALGCC"`
+
+    # On MacOS X, the readlink command hasn't the same behavior than the others operating systems based on Unix.
+    if [ "$UNAME" == "darwin" ]; then
+    	DIRNAME=`dirname "$SYMLINK"`
+    else
+    	DIRNAME="$SYMLINK"/..
+    fi
+}
+
+if [ "$UNAME" = "cygwin" ]; then
+	DIRNAME=`cygpath --path --windows "$DIRNAME"`
+fi
+
+GCC=`(which arm-elf-gcc arm-frosted-eabi-gcc arm-linux-gnueabi-gcc | head -1) 2>/dev/null`
+"$GCC" -fPIC -msingle-pic-base -mno-pic-data-is-text-relative -static -mlong-calls -mthumb -mlittle-endian -mthumb-interwork -ffunction-sections -mcpu=cortex-m3 -fno-common -nostartfiles -DCORE_M3 -D__frosted__  -I "$DIRNAME/../include" "$@"
+
