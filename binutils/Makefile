@@ -176,7 +176,7 @@ ice/%.o: %.c
 	arm-frosted-eabi-gcc -c -o $@ $^ $(CFLAGS) $(CFLAGS-y)
 
 ../out/%: %.o
-	arm-frosted-eabi-gcc -o $@ $^ $(CFLAGS) $(CFLAGS-y) $(LDFLAGS)
+	arm-frosted-eabi-gcc -o $@ $^ $(CFLAGS) $(CFLAGS-y) $(LDFLAGS) -Wl,-Map=$@.Map
 
 clean:
 	@rm -f icebox.o

@@ -29,7 +29,8 @@ CFLAGS+=-DCORE_M3 -D__frosted__
 # COMPILER FLAGS -- No gcc libraries
 CFLAGS+=-nostartfiles
 # COMPILER FLAGS -- GOT/PIC
-CFLAGS+=-fPIC -mlong-calls -fno-common -msingle-pic-base -mno-pic-data-is-text-relative -Wstack-usage=1024
+#CFLAGS+=-fPIC -mlong-calls -fno-common -msingle-pic-base -mno-pic-data-is-text-relative -Wstack-usage=1024
+CFLAGS+=-fPIC -mlong-calls -fno-common -mno-single-pic-base -mno-pic-data-is-text-relative -Wstack-usage=1024
 # Debugging
 CFLAGS+=-ggdb
 CFLAGS+=-I../lib/include -I../lib/wolfssl
@@ -48,6 +49,9 @@ xipfstool: xipfs
 
 apps.img: $(APPS-y) $(DIR-y) sh xipfstool lnk
 	mv out/*.gdb gdb/ 2>/dev/null || true
+	mv out/*.Map gdb/ 2>/dev/null || true
+	cp ./shared-lib/demo_app/test.bflt out/.
+	cp ./shared-lib/demo_lib/lib3.so out/.
 	./xipfstool $@ $(APPS-y) out/*
 
 binutils: FORCE

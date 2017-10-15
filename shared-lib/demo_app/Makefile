@@ -1,11 +1,11 @@
 
-GCC = ./frosted-bflt-gcc
-LD = ./frosted-bflt-ld
+GCC = ../frosted-bflt-gcc
+LD = ../frosted-bflt-ld
 AR = arm-frosted-eabi-ar
 NM = arm-frosted-eabi-nm
 OBJCOPY = arm-frosted-eabi-objcopy
 
-GCCFLAGS = -Wall -W
+GCCFLAGS = -Wall -W -ggdb
 LDFLAGS = -Wl,-Map=$(EXE).Map
 
 EXE := test.bflt

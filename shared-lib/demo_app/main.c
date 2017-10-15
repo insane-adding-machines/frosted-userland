@@ -1,8 +1,6 @@
-/* Any copyright is dedicated to the Public Domain.
- * http://creativecommons.org/publicdomain/zero/1.0/ */
-
 #include <stdio.h>
 #include <string.h>
+#include <stdint.h>
 
 #define global_var_string "Hello from global!"
 #define perform_cmp(var, expected) printf(#var " = %p, expected = %p  [%s]\n", (void*)(var), (void*)(expected), (var == expected ? "PASS" : ((fail = 1), "FAIL")))
@@ -60,10 +58,10 @@ int main(int argc, char *argv[]) {
     }
     if (bss_fail) printf("[FAIL]\n"); else printf("[PASS]\n");
 
-    extern int library_call(); // __attribute((weak));
+    extern int library_call();
     typeof(library_call) *func = ((typeof(library_call)*)((void*)&library_call));
-    printf("Address of library_call = %p [%s]\n", (void*)func, (uint32_t)library_call < 0x10000000 ? "FAIL" : "PASS?");
-    if ((uint32_t)library_call > 0x10000000) printf("Calling library function [%s]\n", library_call() ? "FAIL" : "PASS");
+    printf("Address of library_call = %p [%s]\n", (void*)func, (uint32_t)library_call > 0x21000000 ? fail = 1, "FAIL" : "PASS?");
+    if ((uint32_t)library_call < 0x21000000) printf("Calling library function [%s]\n", library_call() ? "FAIL" : "PASS");
 
     if (!fail) {
         printf("Unit test successful\n");

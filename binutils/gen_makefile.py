@@ -97,7 +97,7 @@ m.write("%.o: %.c\n")
 m.write("\tarm-frosted-eabi-gcc -c -o $@ $^ $(CFLAGS) $(CFLAGS-y)\n")
 m.write("\n")
 m.write("../out/%: %.o\n")
-m.write("\tarm-frosted-eabi-gcc -o $@ $^ $(CFLAGS) $(CFLAGS-y) $(LDFLAGS)\n");
+m.write("\tarm-frosted-eabi-gcc -o $@ $^ $(CFLAGS) $(CFLAGS-y) $(LDFLAGS) -Wl,-Map=$@.Map\n");
 m.write("\n")
 m.write("clean:\n")
 m.write("\t@rm -f icebox.o\n")

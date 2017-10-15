@@ -7,15 +7,16 @@ AR = arm-frosted-eabi-ar
 NM = arm-frosted-eabi-nm
 OBJCOPY = arm-frosted-eabi-objcopy
 
-GCCFLAGS = -Wall -W
+GCCFLAGS = -Wall -W -ggdb
 GCCFLAGS+=-mthumb -mlittle-endian -mthumb-interwork -ffunction-sections -mcpu=cortex-m3
 GCCFLAGS+=-DCORE_M3 -D__frosted__
 # COMPILER FLAGS -- No gcc libraries
 GCCFLAGS+=-nostartfiles
 # COMPILER FLAGS -- GOT/PIC
-GCCFLAGS+=-fPIC -mlong-calls -fno-common -msingle-pic-base -mno-pic-data-is-text-relative -Wstack-usage=1024
+GCCFLAGS+=-fPIC -mlong-calls -fno-common -mno-pic-data-is-text-relative -Wstack-usage=1024
+# -msingle-pic-base 
 
-LDFLAGS = -nostartfiles -static -fPIC -mlong-calls -fno-common -Wl,-elf2flt -lgloss
+LDFLAGS = -nostartfiles -static -fPIC -mlong-calls -mno-pic-data-is-text-relative -fno-common -Wl,-elf2flt -lgloss
 
 # Select an ID for your library here
 LIBID = 3
