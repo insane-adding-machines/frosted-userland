@@ -4,6 +4,7 @@ LD = ../frosted-bflt-ld
 AR = arm-frosted-eabi-ar
 NM = arm-frosted-eabi-nm
 OBJCOPY = arm-frosted-eabi-objcopy
+SIZE = arm-frosted-eabi-size
 
 GCCFLAGS = -Wall -W -ggdb
 LDFLAGS = -Wl,-Map=$(EXE).Map
@@ -18,12 +19,12 @@ WRAPFLAGS :=
 
 vpath lib%.so $(LIBPATH)
 vpath lib%.so.gdb $(LIBPATH)
-#vpath lib%_wraps.o $(LIBPATH)
+vpath lib%_wraps.o $(LIBPATH)
 
 # Everything below here probably doesn't need to be touched
 
-#all: wrapper_flags $(EXE)
-all: $(EXE)
+all: wrapper_flags $(EXE)
+#all: $(EXE)
 
 %.o: %.c
 	$(GCC) $(GCCFLAGS) -c $<
@@ -31,12 +32,13 @@ all: $(EXE)
 lib%.so.gdb:
 	$(error Missing symbol file $@, build the library first)
 
-#lib%_wraps.o:
-#	$(error Missing wrap file $@)
+lib%_wraps.o:
+	$(error Missing wrap file $@)
 
 # Generate list of exported symbols from shared libraries and convert them to linker flags
 wrapper_flags: $(LIBS:.so=.so.gdb)
-	$(eval WRAPFLAGS := $(shell $(NM) -g $(^) | awk '/.+ .+ .+/ {printf "-Wl,--wrap,%s ", $$3}' ))
+	$(eval WRAPFLAGS := $(shell $(NM) -g $(^) | sed 's/__wrap_//' | awk '/.+ .+ .+/ {printf "-Wl,--wrap,%s ", $$3}' ))
+	@echo WRAPFLAGS: $(WRAPFLAGS)
 
 # Group all shared library symbols into one file
 $(LIBLINKOBJ): $(LIBS:%.so=%.so.gdb)
@@ -46,6 +48,9 @@ $(LIBLINKOBJ): $(LIBS:%.so=%.so.gdb)
 #$(EXE): $(LIBLINKOBJ) $(OBJS) $(LIBS:.so=_wraps.o)
 $(EXE): $(LIBLINKOBJ) $(OBJS)
 	$(LD) $^ -o $@ $(WRAPFLAGS) $(LDFLAGS)
+	$(SIZE) $(EXE).gdb
 
 clean:
 	rm -f *.o $(EXE) $(EXE).Map $(EXE).gdb
+
+.PHONY: wrapper_flags
