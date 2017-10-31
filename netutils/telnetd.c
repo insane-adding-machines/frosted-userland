@@ -38,8 +38,8 @@
 # define STDERR_FILENO 2
 #endif
 
-const char FRESH_BIN[] = "/bin/fresh";
-const char *fresh_args[2] = {FRESH_BIN, NULL};
+char FRESH_BIN[] = "/bin/fresh";
+char * const fresh_args[2] = {FRESH_BIN, NULL};
 
 int main(int argc, char *argv[])
 {

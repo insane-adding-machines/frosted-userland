@@ -32,8 +32,8 @@ CFLAGS+=-nostartfiles
 CFLAGS+=-fPIC -mlong-calls -fno-common -msingle-pic-base -mno-pic-data-is-text-relative -Wstack-usage=1024
 # Debugging
 CFLAGS+=-ggdb
-CFLAGS+=-I../lib/include -I../lib/wolfssl
-CFLAGS-$(LIB_WOLFSSL)+=-DENABLE_SSL -DMG_ENABLE_SSL -DWOLFSSL_FROSTED
+CFLAGS+=-I../lib/include -I../lib/wolfssl -I../lib
+CFLAGS-$(LIB_WOLFSSL)+=-DENABLE_SSL -DMG_ENABLE_SSL
 CFLAGS+=$(CFLAGS-y)
 
 # LINKER FLAGS

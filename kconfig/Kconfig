@@ -108,9 +108,9 @@ config APP_TELNETD
     bool "telnetd"
 config APP_NETCAT
     bool "netcat"
-config APP_HTTPD
-    bool "httpd"
-    depends on LIB_MONGOOSE
+#config APP_HTTPD
+#    bool "httpd"
+#    depends on LIB_WOLFSSL
 config APP_SSHD
     bool "sshd"
     depends on LIB_WOLFSSL

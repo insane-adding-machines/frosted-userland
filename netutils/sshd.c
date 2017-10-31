@@ -32,6 +32,7 @@
 #include <pthread.h>
 #include <fcntl.h>
 #include <errno.h>
+/* Frosted random number generator via /dev/random */
 #include <wolfssl/options.h>
 #include <wolfssl/wolfcrypt/sha256.h>
 #include <wolfssl/wolfcrypt/coding.h>
@@ -40,26 +41,15 @@
     #include <signal.h>
 #endif
 
-
-/* Frosted random number generator via /dev/random */
-#define CUSTOM_RAND_GENERATE_BLOCK myRngFunc
-int myRngFunc(byte* output, word32 sz)
-{
-    int fd = open("/dev/random", O_RDONLY);
-    int r;
-    if (fd < 0) 
-        return -errno;
-
-    r = read(fd, output, sz);
-    if (r != sz)
-       return 0;
-
-    close(fd);
-    return 0; 
-}
+#define SCRATCH_BUFFER_SIZE     1200
+static uint8_t proc_buf[SCRATCH_BUFFER_SIZE];
+char FRESH_BIN[] = "/bin/fresh";
+char * const fresh_args[2] = {FRESH_BIN, NULL};
 
 
-static const char echoserverBanner[] = "wolfSSH Example Echo Server\n";
+
+
+static const char echoserverBanner[] = "frosted SSH daemon (powered by WolfSSL)\n";
 
 typedef int SOCKET_T;
 #ifdef TEST_IPV6
@@ -71,8 +61,7 @@ typedef int SOCKET_T;
     #define AF_INET_V           AF_INET
     static const char*          wolfsshIP = "127.0.0.1";
 #endif
-#define SERVER_PORT_NUMBER      22222
-#define SCRATCH_BUFFER_SIZE     1200
+#define SERVER_PORT_NUMBER      22
 
 #if defined(__MACH__) || defined(USE_WINDOWS_API)
     #ifndef _SOCKLEN_T
@@ -397,74 +386,30 @@ static int dump_stats(thread_ctx_t* ctx)
     return wolfSSH_stream_send(ctx->ssh, (uint8_t*)stats, statsSz);
 }
 
-static THREAD_RETURN CYASSL_THREAD server_worker(void* vArgs)
+static void server_worker(WOLFSSH *ssh, int afd)
 {
-    thread_ctx_t* threadCtx = (thread_ctx_t*)vArgs;
+    int r;
 
-    if (wolfSSH_accept(threadCtx->ssh) == WS_SUCCESS) {
-        uint8_t* buf = NULL;
-        uint8_t* tmpBuf;
-        int bufSz, backlogSz = 0, rxSz, txSz, stop = 0, txSum;
-
-        do {
-            bufSz = EXAMPLE_BUFFER_SZ + backlogSz;
-
-            tmpBuf = realloc(buf, bufSz);
-            if (tmpBuf == NULL)
-                stop = 1;
-            else
-                buf = tmpBuf;
-
-            if (!stop) {
-                rxSz = wolfSSH_stream_read(threadCtx->ssh,
-                                           buf + backlogSz,
-                                           EXAMPLE_BUFFER_SZ);
-                if (rxSz > 0) {
-                    backlogSz += rxSz;
-                    txSum = 0;
-                    txSz = 0;
-
-                    while (backlogSz != txSum && txSz >= 0 && !stop) {
-                        txSz = wolfSSH_stream_send(threadCtx->ssh,
-                                                   buf + txSum,
-                                                   backlogSz - txSum);
-
-                        if (txSz > 0) {
-                            uint8_t c;
-                            const uint8_t matches[] = { 0x03, 0x04, 0x05, 0x00 };
-
-                            c = find_char(matches, buf + txSum, txSz);
-                            switch (c) {
-                                case 0x03:
-                                    stop = 1;
-                                    break;
-                                case 0x05:
-                                    if (dump_stats(threadCtx) <= 0)
-                                        stop = 1;
-                                default:
-                                    txSum += txSz;
-                            }
-                        }
-                        else if (txSz != WS_REKEYING)
-                            stop = 1;
-                    }
-
-                    if (txSum < backlogSz)
-                        memmove(buf, buf + txSum, backlogSz - txSum);
-                    backlogSz -= txSum;
-                }
-                else
-                    stop = 1;
+    if (wolfSSH_accept(ssh) == WS_SUCCESS) {
+        int pid = vfork();
+        if (pid == 0) {
+            if (afd != STDIN_FILENO) {
+                close(STDIN_FILENO);
+                dup(afd);
             }
-        } while (!stop);
-
-        free(buf);
+            if (afd != STDOUT_FILENO) {
+                close(STDOUT_FILENO);
+                dup(afd);
+            }
+            if (afd != STDERR_FILENO) {
+                close(STDERR_FILENO);
+                dup(afd);
+            }
+            execv(FRESH_BIN, fresh_args);
+        }
+        close(afd);
+        wolfSSH_free(ssh);
     }
-    close(threadCtx->fd);
-    wolfSSH_free(threadCtx->ssh);
-    free(threadCtx);
-
-    return 0;
 }
 
 
@@ -581,19 +526,28 @@ static const char samplePasswordBuffer[] =
 
 
 static const char samplePublicKeyBuffer[] =
-    "ssh-rsa AAAAB3NzaC1yc2EAAAADAQABAAABAQC9P3ZFowOsONXHD5MwWiCciXytBRZGho"
-    "MNiisWSgUs5HdHcACuHYPi2W6Z1PBFmBWT9odOrGRjoZXJfDDoPi+j8SSfDGsc/hsCmc3G"
-    "p2yEhUZUEkDhtOXyqjns1ickC9Gh4u80aSVtwHRnJZh9xPhSq5tLOhId4eP61s+a5pwjTj"
-    "nEhBaIPUJO2C/M0pFnnbZxKgJlX7t1Doy7h5eXxviymOIvaCZKU+x5OopfzM/wFkey0EPW"
-    "NmzI5y/+pzU5afsdeEWdiQDIQc80H6Pz8fsoFPvYSG+s4/wz0duu7yeeV1Ypoho65Zr+pE"
-    "nIf7dO0B8EblgWt+ud+JI8wrAhfE4x hansel\n"
     "ssh-rsa AAAAB3NzaC1yc2EAAAADAQABAAABAQCqDwRVTRVk/wjPhoo66+Mztrc31KsxDZ"
     "+kAV0139PHQ+wsueNpba6jNn5o6mUTEOrxrz0LMsDJOBM7CmG0983kF4gRIihECpQ0rcjO"
     "P6BSfbVTE9mfIK5IsUiZGd8SoE9kSV2pJ2FvZeBQENoAxEFk0zZL9tchPS+OCUGbK4SDjz"
     "uNZl/30Mczs73N3MBzi6J1oPo7sFlqzB6ecBjK2Kpjus4Y1rYFphJnUxtKvB0s+hoaadru"
     "biE57dK6BrH5iZwVLTQKux31uCJLPhiktI3iLbdlGZEctJkTasfVSsUizwVIyRjhVKmbdI"
-    "RGwkU38D043AR1h0mUoGCPIKuqcFMf gretel\n";
+    "RGwkU38D043AR1h0mUoGCPIKuqcFMf gretel\n"
+    "ecdsa-sha2-nistp256 AAAAE2VjZHNhLXNoYTItbmlzdHAyNTYAAAAIbmlzdHAyNTYAAABBBASA+7y0AFm4rwGraiKIZjJHPL/meyQ55Qdfz2bvn7VhvMDMP/tlVln830lJwl0RZx+5x8/DnUYoLhD0e1wUYI4= dan@holocron\n";
 
+unsigned char server_key_ecc_der[] = {
+  0x30, 0x77, 0x02, 0x01, 0x01, 0x04, 0x20, 0x61, 0x09, 0x99, 0x0b, 0x79,
+  0xd2, 0x5f, 0x28, 0x5a, 0x0f, 0x5d, 0x15, 0xcc, 0xa1, 0x56, 0x54, 0xf9,
+  0x2b, 0x39, 0x87, 0x21, 0x2d, 0xa7, 0x7d, 0x85, 0x7b, 0xb8, 0x7f, 0x38,
+  0xc6, 0x6d, 0xd5, 0xa0, 0x0a, 0x06, 0x08, 0x2a, 0x86, 0x48, 0xce, 0x3d,
+  0x03, 0x01, 0x07, 0xa1, 0x44, 0x03, 0x42, 0x00, 0x04, 0x81, 0x13, 0xff,
+  0xa4, 0x2b, 0xb7, 0x9c, 0x45, 0x74, 0x7a, 0x83, 0x4c, 0x61, 0xf3, 0x3f,
+  0xad, 0x26, 0xcf, 0x22, 0xcd, 0xa9, 0xa3, 0xbc, 0xa5, 0x61, 0xb4, 0x7c,
+  0xe6, 0x62, 0xd4, 0xc2, 0xf7, 0x55, 0x43, 0x9a, 0x31, 0xfb, 0x80, 0x11,
+  0x20, 0xb5, 0x12, 0x4b, 0x24, 0xf5, 0x78, 0xd7, 0xfd, 0x22, 0xef, 0x46,
+  0x35, 0xf0, 0x05, 0x58, 0x6b, 0x5f, 0x63, 0xc8, 0xda, 0x1b, 0xc4, 0xf5,
+  0x69
+};
+unsigned int server_key_ecc_der_len = 121;
 
 static int LoadPasswordBuffer(uint8_t* buf, uint32_t bufSz, PwMapList* list)
 {
@@ -816,29 +770,27 @@ int main(int argc, char** argv)
     wolfSSH_CTX_SetBanner(ctx, echoserverBanner);
 
     {
-        uint8_t buf[SCRATCH_BUFFER_SIZE];
         uint32_t bufSz;
 
-        bufSz = load_file( "/bin/key.der", buf, SCRATCH_BUFFER_SIZE);
-        if (bufSz == 0) {
-            fprintf(stderr, "Couldn't load key file.\n");
-            exit(EXIT_FAILURE);
-        }
-        if (wolfSSH_CTX_UsePrivateKey_buffer(ctx, buf, bufSz,
-                                             WOLFSSH_FORMAT_ASN1) < 0) {
+        //bufSz = load_file( "/bin/key.der", buf, SCRATCH_BUFFER_SIZE);
+        //if (bufSz == 0) {
+        //    fprintf(stderr, "Couldn't load key file.\n");
+        //    exit(EXIT_FAILURE);
+        //}
+        if (wolfSSH_CTX_UsePrivateKey_buffer(ctx, server_key_ecc_der, server_key_ecc_der_len , WOLFSSH_FORMAT_ASN1) < 0) {
             fprintf(stderr, "Couldn't use key buffer.\n");
             exit(EXIT_FAILURE);
         }
 
         bufSz = (uint32_t)strlen((char*)samplePasswordBuffer);
-        memcpy(buf, samplePasswordBuffer, bufSz);
-        buf[bufSz] = 0;
-        LoadPasswordBuffer(buf, bufSz, &pwMapList);
+        memcpy(proc_buf, samplePasswordBuffer, bufSz);
+        proc_buf[bufSz] = 0;
+        LoadPasswordBuffer(proc_buf, bufSz, &pwMapList);
 
         bufSz = (uint32_t)strlen((char*)samplePublicKeyBuffer);
-        memcpy(buf, samplePublicKeyBuffer, bufSz);
-        buf[bufSz] = 0;
-        LoadPublicKeyBuffer(buf, bufSz, &pwMapList);
+        memcpy(proc_buf, samplePublicKeyBuffer, bufSz);
+        proc_buf[bufSz] = 0;
+        LoadPublicKeyBuffer(proc_buf, bufSz, &pwMapList);
     }
 
     tcp_bind(&listenFd, SERVER_PORT_NUMBER, 1);
@@ -879,9 +831,8 @@ int main(int argc, char** argv)
 
         wolfSSH_set_fd(ssh, clientFd);
 
-        threadCtx->ssh = ssh;
-        threadCtx->fd = clientFd;
-        threadCtx->id = threadCount++;
+        server_worker(ssh, clientFd);
+#if 0
 
         pthread_create(&thread, 0, server_worker, threadCtx);
 
@@ -889,6 +840,7 @@ int main(int argc, char** argv)
             pthread_detach(thread);
         else
             pthread_join(thread, NULL);
+#endif
 
     } while (multipleConnections);
 
