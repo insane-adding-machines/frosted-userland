@@ -46,3 +46,4 @@ lnk
 kconfig/.depend
 .config
 kconfig/.config
+kconfig/.config.old
