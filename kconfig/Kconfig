@@ -169,6 +169,9 @@ menu "Test suites"
         config APP_SEM
             bool "Semaphore test(sem)"
             default y
+        config APP_FSTEST
+            bool "Filesystem test(fstest)"
+            default y
     endif
 
     menuconfig HWTESTS

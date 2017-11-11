@@ -1,7 +1,7 @@
 -include ../../kconfig/.config
 CFLAGS?=
 CC?=arm-frosted-eabi-cc
-APPS-y:=
+APPS-y:= fstest
 
 APPS-$(APP_PTHREADS)+=pthreads
 APPS-$(APP_SEM)+=sem
