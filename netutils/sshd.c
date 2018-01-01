@@ -391,6 +391,9 @@ static void server_worker(WOLFSSH *ssh, int afd)
     int r;
 
     if (wolfSSH_accept(ssh) == WS_SUCCESS) {
+        printf("SSH handshake successful.\r\n");
+        while(1)
+            sleep(1);
         int pid = vfork();
         if (pid == 0) {
             if (afd != STDIN_FILENO) {
@@ -524,15 +527,11 @@ static const char samplePasswordBuffer[] =
     "jill:upthehill\n"
     "jack:fetchapail\n";
 
+//static const char samplePublicKeyBuffer[] = "ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAIO6nc16wVleuiKHLB1aYcXrDHrwdKoyvXgqGBokGIDZL dan@holocron\n";
 
-static const char samplePublicKeyBuffer[] =
-    "ssh-rsa AAAAB3NzaC1yc2EAAAADAQABAAABAQCqDwRVTRVk/wjPhoo66+Mztrc31KsxDZ"
-    "+kAV0139PHQ+wsueNpba6jNn5o6mUTEOrxrz0LMsDJOBM7CmG0983kF4gRIihECpQ0rcjO"
-    "P6BSfbVTE9mfIK5IsUiZGd8SoE9kSV2pJ2FvZeBQENoAxEFk0zZL9tchPS+OCUGbK4SDjz"
-    "uNZl/30Mczs73N3MBzi6J1oPo7sFlqzB6ecBjK2Kpjus4Y1rYFphJnUxtKvB0s+hoaadru"
-    "biE57dK6BrH5iZwVLTQKux31uCJLPhiktI3iLbdlGZEctJkTasfVSsUizwVIyRjhVKmbdI"
-    "RGwkU38D043AR1h0mUoGCPIKuqcFMf gretel\n"
-    "ecdsa-sha2-nistp256 AAAAE2VjZHNhLXNoYTItbmlzdHAyNTYAAAAIbmlzdHAyNTYAAABBBASA+7y0AFm4rwGraiKIZjJHPL/meyQ55Qdfz2bvn7VhvMDMP/tlVln830lJwl0RZx+5x8/DnUYoLhD0e1wUYI4= dan@holocron\n";
+//static const char samplePublicKeyBuffer[] = "ecdsa-sha2-nistp256 AAAAE2VjZHNhLXNoYTItbmlzdHAyNTYAAAAIbmlzdHAyNTYAAABBBK04HI5ez7ahWkAkMo2OeVzZfD4CPi/dUzEt3zzcGUZ6BKZX4i7XyK18qnJ5b8+ZiTYyKG4G6xwt2vGuULNGs8o= gretel@holocron\n";
+
+static const char samplePublicKeyBuffer[] = "ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAIO6DoT0yWxxpMoCTsxG8ah7rJ2hKlCxK5xKw1wb/wHgf gretel@holocron\n";
 
 unsigned char server_key_ecc_der[] = {
   0x30, 0x77, 0x02, 0x01, 0x01, 0x04, 0x20, 0x61, 0x09, 0x99, 0x0b, 0x79,
@@ -758,12 +757,14 @@ int main(int argc, char** argv)
         fprintf(stderr, "Couldn't initialize wolfSSH.\n");
         exit(EXIT_FAILURE);
     }
+    printf("WolfSSH initialized\r\n");
 
     ctx = wolfSSH_CTX_new(WOLFSSH_ENDPOINT_SERVER, NULL);
     if (ctx == NULL) {
         fprintf(stderr, "Couldn't allocate SSH CTX data.\n");
         exit(EXIT_FAILURE);
     }
+    printf("SSL context initialized\r\n");
 
     memset(&pwMapList, 0, sizeof(pwMapList));
     wolfSSH_SetUserAuth(ctx, wsUserAuth);
@@ -781,16 +782,19 @@ int main(int argc, char** argv)
             fprintf(stderr, "Couldn't use key buffer.\n");
             exit(EXIT_FAILURE);
         }
+        printf("Private key loaded\r\n");
 
         bufSz = (uint32_t)strlen((char*)samplePasswordBuffer);
         memcpy(proc_buf, samplePasswordBuffer, bufSz);
         proc_buf[bufSz] = 0;
         LoadPasswordBuffer(proc_buf, bufSz, &pwMapList);
+        printf("Passwords loaded\r\n");
 
         bufSz = (uint32_t)strlen((char*)samplePublicKeyBuffer);
         memcpy(proc_buf, samplePublicKeyBuffer, bufSz);
         proc_buf[bufSz] = 0;
         LoadPublicKeyBuffer(proc_buf, bufSz, &pwMapList);
+        printf("Public keys database loaded\r\n");
     }
 
     tcp_bind(&listenFd, SERVER_PORT_NUMBER, 1);
@@ -811,23 +815,28 @@ int main(int argc, char** argv)
             fprintf(stderr, "Couldn't allocate thread context data.\n");
             exit(EXIT_FAILURE);
         }
+        printf("SSL client context initialized\r\n");
 
         ssh = wolfSSH_new(ctx);
         if (ssh == NULL) {
             fprintf(stderr, "Couldn't allocate SSH data.\n");
             exit(EXIT_FAILURE);
         }
+        printf("SSH client initialized\r\n");
         wolfSSH_SetUserAuthCtx(ssh, &pwMapList);
         /* Use the session object for its own highwater callback ctx */
         if (defaultHighwater > 0) {
             wolfSSH_SetHighwaterCtx(ssh, (void*)ssh);
             wolfSSH_SetHighwater(ssh, defaultHighwater);
         }
+        printf("Accepting connections on port 22\r\n");
 
         clientFd = accept(listenFd, (struct sockaddr*)&clientAddr,
                                                                  &clientAddrSz);
         if (clientFd == -1)
             err_sys("tcp accept failed");
+
+        printf("Accepted TCP connection\r\n");
 
         wolfSSH_set_fd(ssh, clientFd);
 
