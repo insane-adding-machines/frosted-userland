@@ -148,6 +148,10 @@ APPS-$(APP_YES)+=yes
 CFLAGS-$(APP_YES)+=-DAPP_YES_STANDALONE
 CFLAGS-ICEBOX-$(APP_YES)+=-DAPP_YES_MODULE
 
+APPS-$(APP_STERM)+=sterm
+CFLAGS-$(APP_STERM)+=-DAPP_STERM_STANDALONE
+CFLAGS-ICEBOX-$(APP_STERM)+=-DAPP_STERM_MODULE
+
 BIN:=$(patsubst %,../out/%,$(APPS-y))
 LNK:=$(patsubst %,../lnk/%,$(APPS-m))
 OBJ:=$(patsubst %,%.o,$(APPS-y))

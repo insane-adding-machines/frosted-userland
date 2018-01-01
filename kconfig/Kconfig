@@ -93,6 +93,8 @@ config APP_DATE
     tristate "date"
 config APP_FILE
     tristate "file"
+config APP_STERM
+    tristate "sterm"
 endmenu
 
 menu "Networking utils"

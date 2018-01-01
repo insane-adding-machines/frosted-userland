@@ -33,3 +33,4 @@ true: true.o ICE
 uptime: uptime.o ICE
 wc: wc.o ICE
 yes: yes.o ICE
+sterm: sterm.o
