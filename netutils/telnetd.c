@@ -25,18 +25,6 @@
 #include <stdio.h>
 #include <fcntl.h>
 #include <unistd.h>
-#ifndef htonl
-#define htonl(x) __builtin_bswap32(x)
-#define ntohl(x) __builtin_bswap32(x)
-#define htons(x) __builtin_bswap16(x)
-#define ntohs(x) __builtin_bswap16(x)
-#endif
-
-#ifndef STDIN_FILENO
-# define STDIN_FILENO 0
-# define STDOUT_FILENO 1
-# define STDERR_FILENO 2
-#endif
 
 char FRESH_BIN[] = "/bin/fresh";
 char * const fresh_args[2] = {FRESH_BIN, NULL};
