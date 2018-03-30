@@ -76,15 +76,15 @@ void shell_init(char *file)
         close(1);
         close(2);
         do {
-            stdin_fileno = open(file, O_RDONLY, 0);
+            stdin_fileno = open(file, O_RDWR, 0);
         } while (stdin_fileno < 0);
 
         do {
-            stdout_fileno = open(file, O_WRONLY, 0);
+            stdout_fileno = dup(stdin_fileno);
         } while (stdout_fileno < 0);
 
         do {
-            stderr_fileno = open(file, O_WRONLY, 0);
+            stderr_fileno = dup(stdin_fileno);
         } while (stderr_fileno < 0);
     }
 
@@ -300,7 +300,7 @@ static int launchProg(char **args, int background)
         char exit_status_str[16];
 
         while (child_pid != pid) {
-            sleep(1); /* Will be interrupted by sigchld. */
+            sleep(120); /* Will be interrupted by sigchld. */
         }
         sprintf(exit_status_str, "%d", child_status);
         setenv("?", exit_status_str, 1);
