@@ -95,6 +95,8 @@ config APP_FILE
     tristate "file"
 config APP_STERM
     tristate "sterm"
+config APP_PWRCTL
+    tristate "pwrctl - suspend and sleep"
 endmenu
 
 menu "Networking utils"

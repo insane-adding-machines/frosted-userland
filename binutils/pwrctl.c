@@ -20,19 +20,24 @@
 
 #include <stdlib.h>
 #include <stdio.h>
-#include <sys/reboot.h>
-#include <sys/ioctl.h>
 #include <unistd.h>
+#include <sys/ioctl.h>
 
-#ifndef APP_REBOOT_MODULE
-int main(int argc, char *args[])
+#ifndef APP_PWRCTL_MODULE
+int main(int argc, char *argv[])
 #else
-int icebox_reboot(int argc, char *args[])
+int icebox_pwrctl(int argc, char *argv[])
 #endif
 {
-    fprintf(stderr, "Rebooting frosted NOW!\r\n");
-    fflush(stderr);
-    usleep(500000);
-    reboot(SYS_FROSTED_FADEOFF);
-    exit(0); /* Never reached */
+    if (argc < 3) {
+        fprintf(stderr, "Usage: %s suspend|standby interval\r\n", argv[0]);
+        exit(1);
+    }
+    if (strcmp(argv[1], "suspend") == 0) {
+        suspend(SYS_FROSTED_FADEOFF, atoi(argv[2]));
+    }
+    if (strcmp(argv[1], "standby") == 0) {
+        standby(SYS_FROSTED_FADEOFF, atoi(argv[2]));
+    }
+    exit(0); /* Never reached in case of stanbdby */
 }
