@@ -34,10 +34,10 @@ int icebox_pwrctl(int argc, char *argv[])
         exit(1);
     }
     if (strcmp(argv[1], "suspend") == 0) {
-        suspend(SYS_FROSTED_FADEOFF, atoi(argv[2]));
+        suspend(atoi(argv[2]));
     }
     if (strcmp(argv[1], "standby") == 0) {
-        standby(SYS_FROSTED_FADEOFF, atoi(argv[2]));
+        standby(atoi(argv[2]));
     }
     exit(0); /* Never reached in case of stanbdby */
 }

@@ -33,6 +33,6 @@ int icebox_reboot(int argc, char *args[])
     fprintf(stderr, "Rebooting frosted NOW!\r\n");
     fflush(stderr);
     usleep(500000);
-    reboot(SYS_FROSTED_FADEOFF);
+    reboot();
     exit(0); /* Never reached */
 }
